@@ -1,8 +1,8 @@
-![Logo](img/sc-logo.png)
+![Logo](https://github.com/swedenconnect/technical-framework/blob/master/img/sweden-connect.png)
 
 # pkcs11-support
 
-[![License](https://github.com/swedenconnect/technical-framework/blob/master/img/sweden-connect.png) 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Java library for using PKCS#11 and HSM:s
 
