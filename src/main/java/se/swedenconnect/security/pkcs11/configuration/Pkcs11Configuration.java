@@ -34,7 +34,48 @@ public interface Pkcs11Configuration {
    * </p>
    * 
    * @return configuration data for a PKCS#11 provider
+   * @throws InvalidPkcs11ConfigurationException
+   *           if the configuration is not valid
    */
-  String getConfigurationData();
+  String getConfigurationData() throws InvalidPkcs11ConfigurationException;
+  
+  /**
+   * Returns the path to the PKCS#11 library on the host to use for the provider.
+   * 
+   * @return path to PKCS#11 library
+   */
+  String getLibrary();
+
+  /**
+   * Returns the name of the HSM slot.
+   * 
+   * @return the name of the HSM slot
+   */
+  String getName();
+
+  /**
+   * Returns the slot number/id to use.
+   * <p>
+   * If {@code null} is returned, the device will use the slot entry identified by the active
+   * {@link #getSlotListIndex()}.
+   * </p>
+   * 
+   * @return slot number/id, or null
+   */
+  String getSlot();
+
+  /**
+   * Returns the slot list index to use.
+   * <p>
+   * If no slot list index is assigned ({@code null} is returned), the following logic applies:
+   * </p>
+   * <ul>
+   * <li>If {@code slot} ({@link #getSlot()}) is {@code null}, the default slot list index 0 will be used.</li>
+   * <li>If {@code slot} ({@link #getSlot()}) is non-null, the slot identified by this slot number will be used.</li>
+   * </ul>
+   * 
+   * @return the slot list index, or null
+   */
+  Integer getSlotListIndex();
 
 }

@@ -1,0 +1,6 @@
+# Sample file no 2
+name = Foo
+library = /opt/foo/lib/libpkcs11.so
+slot = 29
+
+slotListIndex = 29

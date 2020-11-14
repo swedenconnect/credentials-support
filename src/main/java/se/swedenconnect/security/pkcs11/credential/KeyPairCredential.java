@@ -13,33 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.security.pkcs11.configuration;
+package se.swedenconnect.security.pkcs11.credential;
+
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
- * A PKCS#11 configuration object that uses an external PKCS#11 external configuration file.
  * 
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class Pkcs11FileConfiguration implements Pkcs11Configuration {
+public interface KeyPairCredential {
 
-  /** The complete path to the configuration file. */
-  private final String configurationFile;
-
-  /**
-   * Constructor.
-   * 
-   * @param configurationFile
-   *          complete path to the PKCS#11 configuration file
-   */
-  public Pkcs11FileConfiguration(final String configurationFile) {
-    this.configurationFile = configurationFile;
+  KeyPair getKeyPair();
+  
+  PublicKey getPublicKey();
+  
+  PrivateKey getPrivateKey();
+  
+  default void reload() throws SecurityException {    
   }
-
-  /** {@inheritDoc} */
-  @Override
-  public String getConfigurationData() {
-    return this.configurationFile;
-  }
-
+  
 }

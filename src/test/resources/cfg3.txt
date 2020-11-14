@@ -1,0 +1,6 @@
+# Sample file no 1
+name = Foo
+library=/opt/foo/lib/libpkcs11.so
+
+# Should be an integer
+slotListIndex = ABC
