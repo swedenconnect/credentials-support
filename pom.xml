@@ -6,12 +6,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>se.swedenconnect.security</groupId>
-  <artifactId>pkcs11-support</artifactId>
+  <artifactId>credentials-support</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
-  <name>Sweden Connect :: PKCS11 extension library</name>
-  <description>Support for PKCS11 based keys and HSM:s</description>
-  <url>https://github.com/swedenconnect/pkcs11-support</url>
+  <name>Sweden Connect :: PKI credentials support library</name>
+  <description>Support for credentials (including PKCS11 based keys and HSM:s=</description>
+  <url>https://github.com/swedenconnect/credentials-support</url>
 
   <licenses>
     <license>
@@ -22,21 +22,21 @@
   </licenses>
 
   <scm>
-    <connection>scm:https://github.com/swedenconnect/pkcs11-support.git</connection>
-    <developerConnection>scm:https://github.com/swedenconnect/pkcs11-support.git</developerConnection>
-    <url>https://github.com/swedenconnect/pkcs11-support/tree/master</url>
+    <connection>scm:https://github.com/swedenconnect/credentials-support.git</connection>
+    <developerConnection>scm:https://github.com/swedenconnect/credentials-support.git</developerConnection>
+    <url>https://github.com/swedenconnect/credentials-support/tree/master</url>
   </scm>
 
   <developers>
     <developer>
-      <name>Stefan Santesson</name>
-      <email>stefan@idsec.se</email>
+      <name>Martin Lindström</name>
+      <email>martin@idsec.se</email>
       <organization>IDsec Solutions AB</organization>
       <organizationUrl>http://www.idsec.se</organizationUrl>
     </developer>
     <developer>
-      <name>Martin Lindström</name>
-      <email>martin@idsec.se</email>
+      <name>Stefan Santesson</name>
+      <email>stefan@idsec.se</email>
       <organization>IDsec Solutions AB</organization>
       <organizationUrl>http://www.idsec.se</organizationUrl>
     </developer>
@@ -86,7 +86,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
-      <version>1.65</version>
+      <version>[1.63,)</version>
       <scope>compile</scope>
     </dependency>
     
