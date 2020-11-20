@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.security.pkcs11.configuration;
+package se.swedenconnect.security.credential.pkcs11.configuration;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,7 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * The default PKCS#11 configuration class for configuring PKCS#11 providers.
+ * Base class for PKCS#11 configuration.
  * <p>
  * The configuration file can be set up in two ways;
  * <ol>
@@ -43,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
-public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
+public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration {
 
   /** The complete path to the configuration file. */
   private String configurationFile;
@@ -66,7 +66,7 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
   /**
    * Default constructor.
    */
-  public DefaultPkcs11FileConfiguration() {
+  public AbstractPkcs11Configuration() {
   }
 
   /**
@@ -74,16 +74,16 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
    * 
    * @param configurationFile
    *          complete path to the PKCS#11 configuration file
-   * @throws InvalidPkcs11ConfigurationException
+   * @throws Pkcs11ConfigurationException
    *           if the supplied configuration file does not exist
    */
-  public DefaultPkcs11FileConfiguration(final String configurationFile) throws InvalidPkcs11ConfigurationException {
+  public AbstractPkcs11Configuration(final String configurationFile) throws Pkcs11ConfigurationException {
     this.configurationFile = validateConfigurationFile(configurationFile);
   }
 
   /**
    * A constructor setting the library, name, slot and slotListIndex individually. See also
-   * {@link #DefaultPkcs11FileConfiguration(String)}.
+   * {@link #AbstractPkcs11Configuration(String)}.
    * 
    * @param library
    *          the PKCS#11 library path
@@ -94,7 +94,7 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
    * @param slotListIndex
    *          the slot index (may be null)
    */
-  public DefaultPkcs11FileConfiguration(final String library, final String name, final String slot, final Integer slotListIndex) {
+  public AbstractPkcs11Configuration(final String library, final String name, final String slot, final Integer slotListIndex) {
     this.library = StringUtils.trim(library);
     this.name = StringUtils.trim(name);
     this.slot = StringUtils.trim(slot);
@@ -102,40 +102,6 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
       throw new IllegalArgumentException("slotListIndex must be 0 or greater");
     }
     this.slotListIndex = slotListIndex;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public String getConfigurationData() throws InvalidPkcs11ConfigurationException {
-    this.afterPropertiesSet();
-
-    if (this.configurationFile != null) {
-      return this.configurationFile;
-    }
-
-    // Manual configuration ...
-    // See https://stackoverflow.com/questions/46521791/sunpkcs11-provider-in-java-9.
-    //
-    StringBuffer sb = new StringBuffer("--");
-
-    if (StringUtils.isBlank(this.library)) {
-      throw new IllegalArgumentException("library must be set");
-    }
-    sb.append("library = ").append(this.library).append(System.lineSeparator());
-
-    if (StringUtils.isBlank(this.name)) {
-      throw new IllegalArgumentException("name must be set");
-    }
-    sb.append("name = ").append(this.name).append(System.lineSeparator());
-
-    if (this.slot != null) {
-      sb.append("slot = ").append(this.slot).append(System.lineSeparator());
-    }
-    if (this.slotListIndex != null) {
-      sb.append("slotListIndex = ").append(this.slotListIndex).append(System.lineSeparator());
-    }
-
-    return sb.toString();
   }
 
   /**
@@ -149,37 +115,19 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
    *           for invalid configuration
    */
   @PostConstruct
-  public void afterPropertiesSet() throws InvalidPkcs11ConfigurationException {
+  public void afterPropertiesSet() throws Pkcs11ConfigurationException {
     if (this.configurationFile == null) {
       if (StringUtils.isBlank(this.name)) {
-        throw new InvalidPkcs11ConfigurationException("Invalid configuration - 'configurationFile' or 'name' must be set");
+        throw new Pkcs11ConfigurationException("Invalid configuration - 'configurationFile' or 'name' must be set");
       }
       if (StringUtils.isBlank(this.library)) {
-        throw new InvalidPkcs11ConfigurationException("Invalid configuration - 'configurationFile' or 'library' must be set");
-      }
-    }
-    else {
-      if (StringUtils.isNotBlank(this.name) && !this.configFileParsed) {
-        log.warn("Invalid configuration - 'configurationFile' and 'name' is set - Value of assigned 'name' will be ignored");
-      }
-      if (StringUtils.isNotBlank(this.library) && !this.configFileParsed) {
-        log.warn("Invalid configuration - 'configurationFile' and 'library' is set - Value of assigned 'library' will be ignored");
-      }
-      if (StringUtils.isNotBlank(this.slot) && !this.configFileParsed) {
-        log.warn("Invalid configuration - 'configurationFile' and 'slot' is set - Value of assigned 'slot' will be ignored");
-      }
-      if (this.slotListIndex != null && !this.configFileParsed) {
-        log.warn(
-          "Invalid configuration - 'configurationFile' and 'slotListIndex' is set - Value of assigned 'slotListIndex' will be ignored");
+        throw new Pkcs11ConfigurationException("Invalid configuration - 'configurationFile' or 'library' must be set");
       }
     }
   }
 
-  /**
-   * Gets the complete path to the external PKCS#11 configuration file.
-   * 
-   * @return the path to the external PKCS#11 configuration file or null if this is not set
-   */
+  /** {@inheritDoc} */
+  @Override
   public String getConfigurationFile() {
     return this.configurationFile;
   }
@@ -192,6 +140,27 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
    */
   public void setConfigurationFile(final String configurationFile) {
     this.configurationFile = configurationFile != null ? validateConfigurationFile(configurationFile) : null;
+
+    if (this.configurationFile != null) {
+      this.configFileParsed = false;
+      if (StringUtils.isNotBlank(this.name)) {
+        log.warn("Invalid configuration - 'configurationFile' and 'name' is set - Value of assigned 'name' will be ignored");
+        this.name = null;
+      }
+      if (StringUtils.isNotBlank(this.library)) {
+        log.warn("Invalid configuration - 'configurationFile' and 'library' is set - Value of assigned 'library' will be ignored");
+        this.library = null;
+      }
+      if (StringUtils.isNotBlank(this.slot)) {
+        log.warn("Invalid configuration - 'configurationFile' and 'slot' is set - Value of assigned 'slot' will be ignored");
+        this.slot = null;
+      }
+      if (this.slotListIndex != null) {
+        log.warn(
+          "Invalid configuration - 'configurationFile' and 'slotListIndex' is set - Value of assigned 'slotListIndex' will be ignored");
+        this.slotListIndex = null;
+      }
+    }
   }
 
   /** {@inheritDoc} */
@@ -205,12 +174,20 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
 
   /**
    * Assigns the path to the PKCS#11 library on the host to use for the provider.
+   * <p>
+   * Note: If the object has been configured with an external configuration file this call will have no effect.
+   * </p>
    * 
    * @param library
    *          path to PKCS#11 library
    */
   public void setLibrary(final String library) {
-    this.library = StringUtils.trim(library);
+    if (this.configurationFile == null) {
+      this.library = StringUtils.trim(library);
+    }
+    else {
+      log.warn("Attempt to assign 'library' is ignored - configurationFile has already been assigned");
+    }
   }
 
   /** {@inheritDoc} */
@@ -224,12 +201,20 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
 
   /**
    * Assigns the name of the HSM slot.
+   * <p>
+   * Note: If the object has been configured with an external configuration file this call will have no effect.
+   * </p>
    * 
    * @param name
    *          the name of the HSM slot
    */
   public void setName(final String name) {
-    this.name = StringUtils.trim(name);
+    if (this.configurationFile == null) {
+      this.name = StringUtils.trim(name);
+    }
+    else {
+      log.warn("Attempt to assign 'name' is ignored - configurationFile has already been assigned");
+    }
   }
 
   /** {@inheritDoc} */
@@ -243,12 +228,20 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
 
   /**
    * Assigns the slot number/id to use.
-   *
+   * <p>
+   * Note: If the object has been configured with an external configuration file this call will have no effect.
+   * </p>
+   * 
    * @param slot
    *          slot number/id
    */
   public void setSlot(final String slot) {
-    this.slot = slot;
+    if (this.configurationFile == null) {
+      this.slot = slot;
+    }
+    else {
+      log.warn("Attempt to assign 'slot' is ignored - configurationFile has already been assigned");
+    }
   }
 
   /** {@inheritDoc} */
@@ -262,15 +255,23 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
 
   /**
    * Assigns the slot list index to use.
+   * <p>
+   * Note: If the object has been configured with an external configuration file this call will have no effect.
+   * </p>
    * 
    * @param slotListIndex
    *          slot list index
    */
   public void setSlotListIndex(final Integer slotListIndex) {
-    if (slotListIndex != null && slotListIndex < 0) {
-      throw new IllegalArgumentException("slotListIndex must be 0 or greater");
+    if (this.configurationFile == null) {
+      if (slotListIndex != null && slotListIndex < 0) {
+        throw new IllegalArgumentException("slotListIndex must be 0 or greater");
+      }
+      this.slotListIndex = slotListIndex;
     }
-    this.slotListIndex = slotListIndex;
+    else {
+      log.warn("Attempt to assign 'slotListIndex' is ignored - configurationFile has already been assigned");
+    }
   }
 
   /**
@@ -279,19 +280,19 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
    * @param configurationFile
    *          the file to check
    * @return the absolute path of the file
-   * @throws InvalidPkcs11ConfigurationException
+   * @throws Pkcs11ConfigurationException
    *           if the file does not exist
    */
-  private static String validateConfigurationFile(final String configurationFile) throws InvalidPkcs11ConfigurationException {
+  private static String validateConfigurationFile(final String configurationFile) throws Pkcs11ConfigurationException {
     if (StringUtils.isBlank(configurationFile)) {
-      throw new InvalidPkcs11ConfigurationException("configurationFile must be set");
+      throw new Pkcs11ConfigurationException("configurationFile must be set");
     }
     final File file = new File(configurationFile);
     if (!file.exists()) {
-      throw new InvalidPkcs11ConfigurationException(String.format("%s does not exist", configurationFile));
+      throw new Pkcs11ConfigurationException(String.format("%s does not exist", configurationFile));
     }
     if (!file.isFile()) {
-      throw new InvalidPkcs11ConfigurationException(String.format("%s is not a file", configurationFile));
+      throw new Pkcs11ConfigurationException(String.format("%s is not a file", configurationFile));
     }
     return file.getAbsolutePath();
   }
@@ -299,11 +300,15 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
   /**
    * Parses the configuration file and assigns the name, library, slot and slotListIndex.
    * 
-   * @throws InvalidPkcs11ConfigurationException
+   * @throws Pkcs11ConfigurationException
    *           for bad configuration
    */
-  private void parseConfigurationFile() throws InvalidPkcs11ConfigurationException {
+  private void parseConfigurationFile() throws Pkcs11ConfigurationException {
     if (this.configFileParsed) {
+      return;
+    }
+    if (this.configurationFile == null) {
+      log.warn("No PKCS#11 configuration file available");
       return;
     }
     this.configFileParsed = true;
@@ -339,7 +344,7 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
       }
     }
     catch (Exception e) {
-      throw new InvalidPkcs11ConfigurationException("Failed to parse configuration file", e);
+      throw new Pkcs11ConfigurationException("Failed to parse configuration file", e);
     }
     finally {
       if (scanner != null) {
@@ -351,12 +356,12 @@ public class DefaultPkcs11FileConfiguration implements Pkcs11Configuration {
   /** {@inheritDoc} */
   @Override
   public String toString() {
-    try {
-      return String.format("configurationData=%s", this.getConfigurationData());
+    if (this.configurationFile != null) {
+      return this.configurationFile;
     }
-    catch (InvalidPkcs11ConfigurationException e) {
-      return String.format("configurationFile='%s', library='%s', name='%s', slot='%s', slotListIndex='%s'",
-        this.configurationFile, this.library, this.name, this.slot, this.slotListIndex);
+    else {
+      return String.format("library='%s', name='%s', slot='%s', slotListIndex='%s'",
+        this.library, this.name, this.slot, this.slotListIndex);
     }
   }
 

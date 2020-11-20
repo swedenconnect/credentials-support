@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.security.pkcs11.configuration;
+package se.swedenconnect.security.credential.pkcs11.configuration;
 
 /**
- * Exception class for reporting invalid PKCS#11 configuration.
+ * Exception class for reporting invalid PKCS#11 configuration or failures to instatiate a PKCS#11 provider.
  * 
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class InvalidPkcs11ConfigurationException extends RuntimeException {
+public class Pkcs11ConfigurationException extends SecurityException {
 
   /** For serialization. */
   private static final long serialVersionUID = -1028505897882269160L;
@@ -32,7 +32,7 @@ public class InvalidPkcs11ConfigurationException extends RuntimeException {
    * @param message
    *          the error message
    */
-  public InvalidPkcs11ConfigurationException(final String message) {
+  public Pkcs11ConfigurationException(final String message) {
     super(message);
   }
 
@@ -44,7 +44,7 @@ public class InvalidPkcs11ConfigurationException extends RuntimeException {
    * @param cause
    *          the cause of the error
    */
-  public InvalidPkcs11ConfigurationException(final String message, final Throwable cause) {
+  public Pkcs11ConfigurationException(final String message, final Throwable cause) {
     super(message, cause);
   }
 

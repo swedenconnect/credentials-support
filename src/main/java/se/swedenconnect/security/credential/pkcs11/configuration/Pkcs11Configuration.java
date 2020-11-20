@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.security.pkcs11.configuration;
+package se.swedenconnect.security.credential.pkcs11.configuration;
 
+import java.security.PrivateKey;
 import java.security.Provider;
+
+import se.swedenconnect.security.credential.KeyPairCredential;
+import se.swedenconnect.security.credential.pkcs11.Pkcs11ObjectProvider;
 
 /**
  * Interface representing a PKCS#11 configuration.
@@ -26,19 +30,51 @@ import java.security.Provider;
 public interface Pkcs11Configuration {
 
   /**
-   * Gets the configuration data for this configuration. The data returned is supplied in the
-   * {@link Provider#configure(String)} call that is made to configure the PKCS#11 security provider.
+   * Gets the Java security {@link Provider} to use when setting up a PKCS#11 credential.
+   * 
+   * @return a Provider instance
+   * @throws Pkcs11ConfigurationException
+   *           if the configuration is incorrect
+   */
+  Provider getProvider() throws Pkcs11ConfigurationException;
+
+  /**
+   * Gets the getter function object that should be used to obtain a private key from the PKCS#11 device.
    * <p>
-   * The returned string represents either a file name to an PKCS#11 configuration file or PKCS#11 configuration
-   * commands (in that case the string must be prefixed with {@code --}.
+   * How the private key is obtained from the device is dependent on the security provider used.
+   * </p>
+   * <p>
+   * Note: If both the private key <b>and</b> the certificate should be obtained from the device, use
+   * {@link #getKeyPairProvider()} instead.
    * </p>
    * 
-   * @return configuration data for a PKCS#11 provider
-   * @throws InvalidPkcs11ConfigurationException
-   *           if the configuration is not valid
+   * @return a Pkcs11ObjectProvider instance
    */
-  String getConfigurationData() throws InvalidPkcs11ConfigurationException;
-  
+  Pkcs11ObjectProvider<PrivateKey> getPrivateKeyProvider();
+
+  /**
+   * Gets the getter function object that should be used to obtain the private key and certificate from the PKCS#11
+   * device.
+   * <p>
+   * How the objects are obtained from the device is dependent on the security provider used.
+   * </p>
+   * <p>
+   * For some HSM-deployments the certificate is not kept on the device, only the private key. The
+   * {@link KeyPairCredential} object returned from the provider will then return {@code null} for a
+   * {@link KeyPairCredential#getCertificate()} call.
+   * </p>
+   * 
+   * @return a Pkcs11ObjectProvider instance
+   */
+  Pkcs11ObjectProvider<KeyPairCredential> getKeyPairProvider();
+
+  /**
+   * Gets the complete path to the configuration file.
+   * 
+   * @return the PKCS#11 configuration file
+   */
+  String getConfigurationFile();
+
   /**
    * Returns the path to the PKCS#11 library on the host to use for the provider.
    * 

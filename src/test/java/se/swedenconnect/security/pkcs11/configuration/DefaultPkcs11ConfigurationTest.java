@@ -19,18 +19,21 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
+import se.swedenconnect.security.credential.pkcs11.configuration.DefaultPkcs11Configuration;
+import se.swedenconnect.security.credential.pkcs11.configuration.Pkcs11ConfigurationException;
+
 /**
  * Test cases for DefaultPkcs11FileConfiguration.
  * 
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class DefaultPkcs11FileConfigurationTest {
+public class DefaultPkcs11ConfigurationTest {
 
   @Test
   public void testParseConfigurationFile() throws Exception {
     
-    DefaultPkcs11FileConfiguration config = new DefaultPkcs11FileConfiguration(
+    DefaultPkcs11Configuration config = new DefaultPkcs11Configuration(
       new ClassPathResource("cfg1.txt").getFile().getAbsolutePath());
     
     Assert.assertEquals("Foo", config.getName());
@@ -39,7 +42,7 @@ public class DefaultPkcs11FileConfigurationTest {
     Assert.assertNull(config.getSlotListIndex());
     
     // Should also work with a path relative to our location
-    config = new DefaultPkcs11FileConfiguration("src/test/resources/cfg2.txt");
+    config = new DefaultPkcs11Configuration("src/test/resources/cfg2.txt");
     
     Assert.assertEquals("Foo", config.getName());
     Assert.assertEquals("/opt/foo/lib/libpkcs11.so", config.getLibrary());
@@ -47,10 +50,10 @@ public class DefaultPkcs11FileConfigurationTest {
     Assert.assertEquals(Integer.valueOf(29), config.getSlotListIndex());
   }
   
-  @Test(expected = InvalidPkcs11ConfigurationException.class)
+  @Test(expected = Pkcs11ConfigurationException.class)
   public void testParseConfigurationFileError() throws Exception {
     
-    DefaultPkcs11FileConfiguration config = new DefaultPkcs11FileConfiguration(
+    DefaultPkcs11Configuration config = new DefaultPkcs11Configuration(
       new ClassPathResource("cfg3.txt").getFile().getAbsolutePath());
 
     config.getSlotListIndex();

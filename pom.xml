@@ -63,8 +63,13 @@
       <name>Maven Central</name>
       <url>https://repo1.maven.org/maven2/</url>
     </repository>
+    <repository>
+      <id>shibboleth</id>
+      <name>Shibboleth Maven Repo</name>
+      <url>https://build.shibboleth.net/nexus/content/repositories/releases</url>
+    </repository>
   </repositories>
-
+  
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
@@ -84,6 +89,48 @@
       <version>1.65</version>
       <scope>compile</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-security-api</artifactId>
+      <version>[4.0.0,)</version>
+      <type>jar</type>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    
+    <dependency>
+      <groupId>net.shibboleth.idp</groupId>
+      <artifactId>idp-profile-spring</artifactId>
+      <version>[4.0.0,)</version>
+      <type>jar</type>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>[5.0.0.RELEASE,)</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+      <version>[5.0.0.RELEASE,)</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>[5.0.0.RELEASE,)</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>    
     
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -135,14 +182,7 @@
       <scope>test</scope>
     </dependency>
 -->    
-    
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <version>[5.0.0.RELEASE,)</version>
-      <scope>test</scope>
-    </dependency>
-    
+        
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
