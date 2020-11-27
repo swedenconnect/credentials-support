@@ -26,7 +26,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import se.swedenconnect.security.credential.KeyPairCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
-import se.swedenconnect.security.credential.spring.KeyStoreFactoryBean;
+import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
 
 /**
  * Test cases for X509Credential.

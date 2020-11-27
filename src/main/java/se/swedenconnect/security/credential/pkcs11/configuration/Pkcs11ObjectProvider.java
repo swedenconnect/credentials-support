@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.security.credential.pkcs11;
+package se.swedenconnect.security.credential.pkcs11.configuration;
 
 import java.security.Provider;
 

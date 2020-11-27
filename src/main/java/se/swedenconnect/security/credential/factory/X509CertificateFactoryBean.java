@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.security.credential.spring;
+package se.swedenconnect.security.credential.factory;
 
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;

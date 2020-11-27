@@ -13,12 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.security.pkcs11.provider;
+package se.swedenconnect.security.credential.monitoring;
 
-public class Pkcs11ProviderFactory {
+/**
+ * Interface for a credential monitor bean.
+ * 
+ * @author Martin Lindström (martin@idsec.se)
+ * @author Stefan Santesson (stefan@idsec.se)
+ */
+@FunctionalInterface
+public interface CredentialMonitorBean {
 
-  public Pkcs11ProviderFactory() {
-    // TODO Auto-generated constructor stub
-  }
-
+  /**
+   * Performs testing, and possibly reloading, of the credentials that this monitor bean has been configured to monitor.
+   */
+  void test();
+  
 }

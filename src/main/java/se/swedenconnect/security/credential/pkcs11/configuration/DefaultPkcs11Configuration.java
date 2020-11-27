@@ -19,13 +19,11 @@ import java.security.InvalidParameterException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
-import java.security.PublicKey;
 import java.security.Security;
-import java.security.cert.X509Certificate;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.KeyPairCredential;
-import se.swedenconnect.security.credential.pkcs11.Pkcs11ObjectProvider;
+import se.swedenconnect.security.credential.KeyStoreCredential;
 
 /**
  * The default PKCS#11 configuration class. This implementation assumes that the SunPKCS11 security provider is used.
@@ -147,59 +145,13 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
   public Pkcs11ObjectProvider<KeyPairCredential> getKeyPairProvider() {
     return (provider, alias, pin) -> {
       try {
-        log.debug("Creating a PKCS11 KeyStore using provider '{}' ...", provider.getName());
-        KeyStore keyStore = KeyStore.getInstance("PKCS11", provider.getName());
-
-        log.debug("Loading KeyStore using supplied PIN ...");
-        keyStore.load(null, pin);
-
-        log.debug("Getting private key from entry '{}' ...", alias);
-        final PrivateKey pk = (PrivateKey) keyStore.getKey(alias, pin);
-        if (pk != null) {
-          log.debug("Private key was successfully obtained from device at alias '{}' using provider '{}'", alias, provider.getName());
-        }
-        else {
-          log.debug("No private key was found on device at alias '{}' using provider '{}'", alias, provider.getName());
-          return null;
-        }
-
-        log.debug("Getting certificate from entry '{}'", alias);
-        final X509Certificate certificate = (X509Certificate) keyStore.getCertificate(alias);
-        if (certificate != null) {
-          log.debug("Certificate was successfully ontained from device at alias '{}' using provider '{}'", alias, provider.getName());
-        }
-        else {
-          log.debug("No certificate key was found on device at alias '{}' using provider '{}'", alias, provider.getName());
-        }
-
-        // Return the private key and certificate as a KeyPairCredential ...
-        //
-        return new KeyPairCredential() {
-
-          @Override
-          public PublicKey getPublicKey() {
-            return certificate != null ? certificate.getPublicKey() : null;
-          }
-
-          @Override
-          public PrivateKey getPrivateKey() {
-            return pk;
-          }
-
-          @Override
-          public X509Certificate getCertificate() {
-            return certificate;
-          }
-
-          @Override
-          public String getName() {
-            return provider.getName() + "-" + alias;
-          }
-        };
+        KeyStoreCredential cred = new KeyStoreCredential(null, "PKCS11", provider.getName(), pin, alias, pin);
+        cred.afterPropertiesSet();
+        return cred;
       }
       catch (Exception e) {
         throw new SecurityException(
-          String.format("Failed to load private key from provider '%s' - {}", provider.getName(), e.getMessage()), e);
+          String.format("Failed to load private key and certificate from provider '%s' - {}", provider.getName(), e.getMessage()), e);
       }
     };
   }

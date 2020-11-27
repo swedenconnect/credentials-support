@@ -17,9 +17,11 @@ package se.swedenconnect.security.credential;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.core.io.Resource;
 
 /**
  * A basic implementation of the {@link KeyPairCredential} interface.
@@ -27,19 +29,14 @@ import java.util.UUID;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class BasicCredential implements KeyPairCredential {
+public class BasicCredential extends AbstractKeyPairCredential {
 
-  /** The private key. */
-  private PrivateKey privateKey;
-
-  /** The certificate. */
-  private X509Certificate certificate;
-
-  /** The public key. */
-  private PublicKey publicKey;
-
-  /** The credential name. */
-  private String name;
+  /**
+   * Default constructor.
+   */
+  public BasicCredential() {
+    super();
+  }
 
   /**
    * Constructor setting the public and private keys.
@@ -50,8 +47,8 @@ public class BasicCredential implements KeyPairCredential {
    *          the private key
    */
   public BasicCredential(final PublicKey publicKey, final PrivateKey privateKey) {
-    this.publicKey = Optional.ofNullable(publicKey).orElseThrow(() -> new IllegalArgumentException("publicKey must not be null"));
-    this.privateKey = Optional.ofNullable(privateKey).orElseThrow(() -> new IllegalArgumentException("privateKey must not be null"));
+    this.setPublicKey(publicKey);
+    this.setPrivateKey(privateKey);
   }
 
   /**
@@ -63,53 +60,40 @@ public class BasicCredential implements KeyPairCredential {
    *          the private key
    */
   public BasicCredential(final X509Certificate certificate, final PrivateKey privateKey) {
-    this.certificate = Optional.ofNullable(certificate).orElseThrow(() -> new IllegalArgumentException("certificate must not be null"));
-    this.privateKey = Optional.ofNullable(privateKey).orElseThrow(() -> new IllegalArgumentException("privateKey must not be null"));
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public PublicKey getPublicKey() {
-    return this.certificate != null ? this.certificate.getPublicKey() : this.publicKey;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public X509Certificate getCertificate() {
-    return this.certificate;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public PrivateKey getPrivateKey() {
-    return this.privateKey;
+    this.setCertificate(certificate);
+    this.setPrivateKey(privateKey);
   }
 
   /**
-   * Gets the name. If not explicitly assigned, the subject DN of the certificate is used, and if no certificate is
-   * available an UUID is used.
-   */
-  @Override
-  public String getName() {
-    if (this.name == null) {
-      if (this.certificate != null) {
-        this.name = this.certificate.getSubjectX500Principal().getName();
-      }
-      else {
-        this.name = String.format("%s-%s", this.getPublicKey().getAlgorithm(), UUID.randomUUID());
-      }
-    }
-    return this.name;
-  }
-
-  /**
-   * Assigns the credential name.
+   * Constructor setting the certificate and private key.
    * 
-   * @param name
-   *          the name
+   * @param certificateResource
+   *          the resource holding a encoded certificate
+   * @param privateKey
+   *          the private key
+   * @throws CertificateException
+   *           if the certificate resource can not be decoded
    */
-  public void setName(final String name) {
-    this.name = name;
+  public BasicCredential(final Resource certificateResource, final PrivateKey privateKey) throws CertificateException {
+    this.setCertificate(certificateResource);
+    this.setPrivateKey(privateKey);
   }
 
+  /**
+   * Gets the subject DN of the certificate and if no certificate is available an UUID is used.
+   */
+  @Override
+  protected String getDefaultName() {
+    final X509Certificate cert = this.getCertificate();
+    if (cert != null) {
+      return cert.getSubjectX500Principal().getName();
+    }
+    final PublicKey key = this.getPublicKey();
+    if (key != null) {
+      return String.format("%s-%s", key.getAlgorithm(), UUID.randomUUID());
+    }
+    return "BasicCredential-" + UUID.randomUUID().toString();
+  }
+
+  
 }

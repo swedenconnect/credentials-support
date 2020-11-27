@@ -19,8 +19,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
-import javax.annotation.PostConstruct;
-
 import org.opensaml.security.x509.BasicX509Credential;
 
 import net.shibboleth.utilities.java.support.logic.Constraint;
@@ -85,14 +83,8 @@ public class X509Credential extends BasicX509Credential implements KeyPairCreden
     super.setEntityCertificate(credential.getCertificate());
   }
 
-  /**
-   * Validates that all required properties have been assigned. This method is automatically invoked if the class is
-   * used within a bean framework that supports the {@code PostConstruct} annotation (such as Spring).
-   * 
-   * @throws Exception
-   *           if certificate or private key has not been assigned
-   */
-  @PostConstruct
+  /** {@inheritDoc} */
+  @Override
   public void afterPropertiesSet() throws Exception {
     if (this.credential == null) {
       if (this.getCertificate() == null) {
@@ -101,6 +93,17 @@ public class X509Credential extends BasicX509Credential implements KeyPairCreden
       if (this.getPrivateKey() == null) {
         throw new IllegalArgumentException("Property 'privateKey' must be assigned");
       }
+    }
+    else {
+      this.credential.afterPropertiesSet();
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void destroy() throws Exception {
+    if (this.credential != null) {
+      this.credential.destroy();
     }
   }
 
@@ -163,6 +166,24 @@ public class X509Credential extends BasicX509Credential implements KeyPairCreden
     this.setEntityCertificate(certificate);
   }
 
+  /**
+   * Assigns a {@link KeyPairCredential} instance. This type of setting up the {@code X509Credential} is recommended
+   * since it gives the benefits of monitoring (and reloading) credentials as well as a simple way to use hardware based
+   * keys (via {@link Pkcs11Credential}).
+   * 
+   * @param credential
+   *          the credential to wrap in a OpenSAML credential
+   */
+  public void setCredential(final KeyPairCredential credential) {
+    this.credential = credential;
+    if (this.credential != null) {
+      if (this.name == null) {
+        this.name = this.credential.getName();
+      }
+      super.setEntityCertificate(credential.getCertificate());
+    }
+  }
+
   /** {@inheritDoc} */
   @Override
   public String getName() {
@@ -181,7 +202,7 @@ public class X509Credential extends BasicX509Credential implements KeyPairCreden
 
   /** {@inheritDoc} */
   @Override
-  public void reload() throws SecurityException {
+  public void reload() throws Exception {
     if (this.credential != null) {
       this.credential.reload();
     }

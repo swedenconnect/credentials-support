@@ -19,7 +19,6 @@ import java.security.PrivateKey;
 import java.security.Provider;
 
 import se.swedenconnect.security.credential.KeyPairCredential;
-import se.swedenconnect.security.credential.pkcs11.Pkcs11ObjectProvider;
 
 /**
  * Interface representing a PKCS#11 configuration.

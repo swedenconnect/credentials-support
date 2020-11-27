@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.security.credential.spring;
+package se.swedenconnect.security.credential.converters;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.security.KeyException;
+import java.security.PrivateKey;
 
+import org.opensaml.security.crypto.KeySupport;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -29,8 +29,12 @@ import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.io.Resource;
 
 /**
- * A {@link Converter} that gets the property value (e.g., {@code classpath:cert.crt}) and instantiates a
- * {@link X509Certificate} object.
+ * A {@link Converter} that gets the property value (e.g., {@code classpath:signing.key}) and instantiates a
+ * {@link PrivateKey} object.
+ * <p>
+ * Note: The converter only handles non-encrypted RSA/DSA private keys in DER, PEM, or PKCS#8 (encrypted or unencrypted)
+ * formats.
+ * </p>
  * <p>
  * To use this converter it has to be instantiated as a bean and then registered in the registry using
  * {@link ConverterRegistry#addConverter(Converter)}.
@@ -42,43 +46,30 @@ import org.springframework.core.io.Resource;
  * <pre>
  * &#64;Bean
  * &#64;ConfigurationPropertiesBinding
- * public PropertyToX509CertificateConverter propertyToX509CertificateConverter() {
- *   return new PropertyToX509CertificateConverter();
+ * public PropertyToPrivateKeyConverter propertyToPrivateKeyConverter() {
+ *   return new PropertyToPrivateKeyConverter();
  * }
  * </pre>
- * 
  * 
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class PropertyToX509CertificateConverter implements Converter<String, X509Certificate>, ApplicationContextAware {
+public class PropertyToPrivateKeyConverter implements Converter<String, PrivateKey>, ApplicationContextAware {
 
   /** The application context. */
   private ApplicationContext applicationContext;
 
-  /** Factory for creating certificates. */
-  private static CertificateFactory factory = null;
-
-  static {
-    try {
-      factory = CertificateFactory.getInstance("X.509");
-    }
-    catch (CertificateException e) {
-      throw new SecurityException(e);
-    }
-  }
-
   /** {@inheritDoc} */
   @Override
-  public X509Certificate convert(final String source) {
+  public PrivateKey convert(final String source) {
 
     final Resource resource = this.applicationContext.getResource(source);
 
     try (InputStream is = resource.getInputStream()) {
-      return (X509Certificate) factory.generateCertificate(is);
+      return KeySupport.decodePrivateKey(is, null);
     }
-    catch (CertificateException | IOException e) {
-      throw new IllegalArgumentException(String.format("Failed to convert %s to a X509Certificate", source));
+    catch (KeyException | IOException e) {
+      throw new IllegalArgumentException("Failed to instantiate private key object from " + source, e);
     }
   }
 
