@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2021 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@ package se.swedenconnect.security.credential.factory;
 
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.security.NoSuchProviderException;
 import java.security.Provider;
+import java.security.Security;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.core.io.Resource;
@@ -30,10 +33,9 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Factory bean for creating and unlocking a {@link KeyStore}.
  * <p>
- * For Shibboleth users:
- * <br>
- * Basically this class is the same as {@code net.shibboleth.ext.spring.factory.KeyStoreFactoryBean} residing in the
- * {@code net.shibboleth.ext:spring-extensions}. However, using this class you can also instantiate a PKCS#11
+ * For Shibboleth users: <br>
+ * Basically this class is the same as {@code net.shibboleth.ext.spring.factory.KeyStoreFactoryBean} from the
+ * {@code net.shibboleth.ext:spring-extensions} library. However, using this class you can also instantiate a PKCS#11
  * {@link KeyStore} which is not possible with the {@code net.shibboleth.ext.spring.factory.KeyStoreFactoryBean} since
  * it requires the {@code resource} property to be non-null.
  * </p>
@@ -43,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
-  
+
   /** The resource holding the keystore. */
   private Resource resource;
 
@@ -55,6 +57,9 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
 
   /** The name of the security provider to use when creating the KeyStore instance. */
   private String provider;
+
+  /** The PKCS#11 configuration file to use. */
+  private String pkcs11Configuration;
 
   /**
    * Default constructor.
@@ -96,8 +101,43 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
 
   /** {@inheritDoc} */
   @Override
-  protected KeyStore createInstance() throws Exception {
+  protected KeyStore createInstance() throws Exception {    
     try {
+      if (this.type == null) {
+        this.type = KeyStore.getDefaultType();
+        log.debug("KeyStore type not given, defaulting to '{}'", this.type);
+      }
+      
+      // If this is PKCS11, configure the provider ... 
+      //
+      if ("PKCS11".equalsIgnoreCase(this.type)) {
+        if (this.provider == null) {
+          log.debug("PKCS#11 configuration is assigned - assuming SunPKCS11 provider");
+          this.provider = "SunPKCS11";
+        }
+        Provider securityProvider = Security.getProvider(this.provider);
+        if (securityProvider == null) {
+          throw new NoSuchProviderException(String.format("Provider '%s' does not exist", this.provider));
+        }
+        if (!securityProvider.isConfigured()) {
+          if (this.pkcs11Configuration == null) {
+            throw new IllegalArgumentException("Missing pkcs11Configuration");
+          }
+          log.debug("Configuring security provider '{}' using '{}'", this.provider, this.pkcs11Configuration);
+          securityProvider = securityProvider.configure(this.pkcs11Configuration);
+          Security.addProvider(securityProvider);
+          this.provider = securityProvider.getName();
+          log.debug("After configuration of provider, the '{}' provider name will be used", this.provider);
+        }
+        else {
+          if (this.pkcs11Configuration != null) {
+            throw new IllegalArgumentException(String.format(
+              "Security provider '%s' has already been configured - pkcs11Configuration should be null", this.provider));
+          }
+          log.debug("Security provider '{}' has been statically configured", this.provider);
+        }
+      }
+      
       KeyStore keystore = this.provider != null
           ? KeyStore.getInstance(this.type, this.provider)
           : KeyStore.getInstance(this.type);
@@ -156,7 +196,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
    *          the password to set
    */
   public void setPassword(final char[] password) {
-    this.password = password;
+    this.password = Optional.ofNullable(password).map(p -> Arrays.copyOf(p, p.length)).orElse(null);
   }
 
   /**
@@ -199,6 +239,29 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
     this.provider = provider;
   }
 
+  /**
+   * Gets the complete path to the PKCS#11 configuration file to use to configure the provider in the cases the type is
+   * "PKCS11". If no configuration file is supplied the supplied provider ({@link #setProvider(String)}) must already
+   * have been configured for use with a specific PKCS#11 configuration.
+   * 
+   * @return a complete path to a PKCS#11 configuration file, or null
+   */
+  public String getPkcs11Configuration() {
+    return this.pkcs11Configuration;
+  }
+
+  /**
+   * Sets the complete path to the PKCS#11 configuration file to use to configure the provider in the cases the type is
+   * "PKCS11". If no configuration file is supplied the supplied provider ({@link #setProvider(String)}) must already
+   * have been configured for use with a specific PKCS#11 configuration.
+   * 
+   * @param pkcs11Configuration
+   *          a complete path to a PKCS#11 configuration file
+   */
+  public void setPkcs11Configuration(final String pkcs11Configuration) {
+    this.pkcs11Configuration = pkcs11Configuration;
+  }
+
   /** {@inheritDoc} */
   @Override
   public Class<?> getObjectType() {
@@ -208,20 +271,16 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
   /** {@inheritDoc} */
   @Override
   public void afterPropertiesSet() throws Exception {
-    super.afterPropertiesSet();
-
     if (!"PKCS11".equalsIgnoreCase(this.type)) {
       // We don't need a resource for the PKCS11 type ...
       Assert.notNull(this.resource, "The property 'resource' must be assigned");
     }
-    if (this.password == null) {
-      log.warn("No keystore password specified - assuming empty password");
-      this.password = new char[0];
-    }
+    Assert.notNull(this.password, "The property 'password' must be assigned");
     if (!StringUtils.hasText(this.type)) {
       this.type = KeyStore.getDefaultType();
       log.debug("Property 'type' was not assigned - defaulting to '{}'", this.type);
     }
+    super.afterPropertiesSet();
   }
 
   /** {@inheritDoc} */

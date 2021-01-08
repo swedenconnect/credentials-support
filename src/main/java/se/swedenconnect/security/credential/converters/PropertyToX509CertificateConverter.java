@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2021 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,18 +56,6 @@ public class PropertyToX509CertificateConverter implements Converter<String, X50
   /** The application context. */
   private ApplicationContext applicationContext;
 
-  /** Factory for creating certificates. */
-  private static CertificateFactory factory = null;
-
-  static {
-    try {
-      factory = CertificateFactory.getInstance("X.509");
-    }
-    catch (CertificateException e) {
-      throw new SecurityException(e);
-    }
-  }
-
   /** {@inheritDoc} */
   @Override
   public X509Certificate convert(final String source) {
@@ -75,7 +63,7 @@ public class PropertyToX509CertificateConverter implements Converter<String, X50
     final Resource resource = this.applicationContext.getResource(source);
 
     try (InputStream is = resource.getInputStream()) {
-      return (X509Certificate) factory.generateCertificate(is);
+      return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
     }
     catch (CertificateException | IOException e) {
       throw new IllegalArgumentException(String.format("Failed to convert %s to a X509Certificate", source));

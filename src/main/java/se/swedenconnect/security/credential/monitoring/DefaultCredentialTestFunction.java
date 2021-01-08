@@ -23,7 +23,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.security.credential.KeyPairCredential;
+import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
 /**
  * A default credential test function that tests a credential by getting a private key reference and signs test data
@@ -38,7 +39,7 @@ import se.swedenconnect.security.credential.KeyPairCredential;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
-public class DefaultCredentialTestFunction implements Function<KeyPairCredential, Exception> {
+public class DefaultCredentialTestFunction implements Function<ReloadablePkiCredential, Exception> {
 
   /** The name of the security provider to use. May be {@code null}. */
   private String provider;
@@ -57,7 +58,7 @@ public class DefaultCredentialTestFunction implements Function<KeyPairCredential
 
   /** {@inheritDoc} */
   @Override
-  public Exception apply(final KeyPairCredential credential) {
+  public Exception apply(final ReloadablePkiCredential credential) {
     try {
       final PrivateKey pk = credential.getPrivateKey();
       if (pk == null) {
@@ -86,7 +87,7 @@ public class DefaultCredentialTestFunction implements Function<KeyPairCredential
     }
     catch (Exception e) {
       log.debug("Test of credential '{}' failed - {}",
-        Optional.ofNullable(credential).map(KeyPairCredential::getName).orElse("null"), e.getMessage());
+        Optional.ofNullable(credential).map(PkiCredential::getName).orElse("null"), e.getMessage());
       return e;
     }
 

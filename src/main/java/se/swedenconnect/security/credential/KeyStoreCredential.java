@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2021 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 package se.swedenconnect.security.credential;
 
-import java.io.InputStream;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -31,13 +31,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunction;
+import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
 
 /**
- * A {@link KeyStore} backed implementation of the {@link KeyPairCredential} interface.
+ * A {@link KeyStore} backed implementation of the {@link PkiCredential} and {@link ReloadablePkiCredential} interfaces.
  * <p>
  * A {@code KeyStoreCredential} can be initialized in a number of ways:
- * <ul>
+ * <ol>
  * <li>By loading a {@link KeyStore} from a {@link Resource} and then getting the certificate and private key. This is
  * done either by using any of the constructors {@link #KeyStoreCredential(Resource, char[], String, char[])},
  * {@link #KeyStoreCredential(Resource, String, char[], String, char[])} or
@@ -46,26 +46,63 @@ import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunc
  * <li>By providing an already loaded {@link KeyStore} instance and giving the entry alias and key password. This is
  * done either by using the constructor {@link #KeyStoreCredential(KeyStore, String, char[])} or by assigning all
  * required properties using setter-methods.</li>
- * </ul>
+ * </ol>
+ * </p>
+ * <p>
+ * This class also supports handling of PKCS#11 credentials. This requires using a security provider that supports
+ * creating a {@link KeyStore} based on an underlying PKCS#11 implementation (for example the SunPKCS11 provider). There
+ * are three ways of creating a {@code KeyStoreCredential} for use with PKCS#11:
+ * <p>
+ * <b>Supplying an already existing PKCS#11 {@link KeyStore}<b> <br/>
+ * In some cases you may already have loaded a {@link KeyStore} using a security provider configured for PKCS#11. In
+ * these cases the initialization of the {@code KeyStoreCredential} is identical with option number 2 above. You simply
+ * create your {@code KeyStoreCredential} instance by giving the {@link KeyStore} instance, the entry alias and key
+ * password either via the {@link #KeyStoreCredential(KeyStore, String, char[])} or by assigning all required properties
+ * using setter-methods.
+ * </p>
+ * <p>
+ * <b>Supplying the provider name of a Security provider configured for your PKCS#11 device</b> <br/>
+ * Another possibility is to supply the provider name of a security provider configured for PKCS#11. This could
+ * typically look something like:
+ * 
+ * <pre>
+ * // Create a SunPKCS11 provider instance using our PKCS#11 configuration ...
+ * Provider provider = Security.getProvider("SunPKCS11");
+ * provider = provider.configure(pkcs11CfgFile);
+ * Security.addProvider(provider);
+ * 
+ * // Create a credential ...
+ * KeyStoreCredential credential = new KeyStoreCredential(null, "PKCS11", provider.getName(), tokenPw, alias, null);
+ * credential.init();
+ * </pre>
+ * </p>
+ * <p>
+ * <b>Supplying the PKCS#11 configuration file</b> <br />
+ * In the above example we created the SunPKCS11 provider instance manually. It is also to create a
+ * {@code KeyStoreCredential} instance by supplying the PKCS#11 configuration file.
+ * 
+ * <pre>
+ * KeyStoreCredential credential = new KeyStoreCredential(null, "PKCS11", "SunPKCS11", tokenPw, alias, null);
+ * credential.setPkcs11Configuration(pkcs11CfgFile);
+ * credential.init();
+ * </pre>
+ * </p>
+ * <p>
+ * <b>Note:</b> As an alternative of using {@code KeyStoreCredential} for PKCS#11 credentials see the
+ * {@link Pkcs11Credential} class.
  * </p>
  * 
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
-public class KeyStoreCredential extends AbstractKeyPairCredential {
+public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
-  /** The resource holding the KeyStore to load. */
-  private Resource resource;
+  /** Factory for creating a KeyStore. */
+  private KeyStoreFactoryBean keyStoreFactory = null;
 
   /** The password needed to unlock the KeyStore. */
   private char[] password;
-
-  /** The type of KeyStore to load ("JKS", "PKCS12", "PKCS11", ...). */
-  private String type;
-
-  /** The name of the security provider to use when loading the KeyStore. */
-  private String provider;
 
   /** The keystore. */
   private KeyStore keyStore;
@@ -75,7 +112,7 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
 
   /** the password to unlock the private key. */
   private char[] keyPassword;
-  
+
   /** Whether the credential has been loaded? */
   private boolean loaded = false;
 
@@ -136,8 +173,8 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
    *          the password needed to unlock the certificate and private key (if null, the same value as given for
    *          password is used)
    */
-  public KeyStoreCredential(final Resource resource, final String type, final char[] password,
-      final String alias, final char[] keyPassword) {
+  public KeyStoreCredential(final Resource resource, final String type,
+      final char[] password, final String alias, final char[] keyPassword) {
     this(resource, type, null, password, alias, keyPassword);
   }
 
@@ -197,60 +234,25 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
     if (this.loaded) {
       return;
     }
-    
+
     // Set the 'loaded' flag before we load. If the loading fails we don't want to keep loading and loading ...
     //
     this.loaded = true;
-    
-    if (this.keyPassword == null) {
+
+    if (this.keyStore == null) {
       // The keystore has not been assigned, load it ...
       //
-      if (this.type == null) {
-        this.type = KeyStore.getDefaultType();
+      if (this.keyStoreFactory == null) {
+        throw new IllegalArgumentException("Missing parameters for creating KeyStore");
       }
-      if (this.resource == null && "PKCS11".equalsIgnoreCase(this.type)) {
-        // Allow null resource for "PKCS11" type ...
-        throw new IllegalArgumentException("'resource' must not be null");
-      }
-      if (this.password == null) {
-        log.debug("No password assigned, assuming empty password ...");
-        this.password = new char[0];
-      }
-
-      if (this.provider != null) {
-        log.debug("Creating KeyStore of type '{}' using provider '{}' ...", this.type, this.provider);
-        this.keyStore = KeyStore.getInstance(this.type, this.provider);
-      }
-      else {
-        log.debug("Creating KeyStore of type '{}' ...", this.type);
-        this.keyStore = KeyStore.getInstance(this.type);
-      }
-      if (this.resource != null) {
-        try (InputStream is = this.resource.getInputStream()) {
-          this.keyStore.load(is, this.password);
-        }
-      }
-      else {
-        this.keyStore.load(null, this.password);
-      }
-      
-      // Install a default test function if this is a PKCS11 keystore and no test function 
-      // has been installed.
-      //
-      if ("PKCS11".equalsIgnoreCase(this.type) && this.getTestFunction() == null) {
-        final DefaultCredentialTestFunction testFunction = new DefaultCredentialTestFunction();
-        testFunction.setProvider(this.provider);
-        this.setTestFunction(testFunction);
-      }
-      
-      log.debug("KeyStore successfully loaded");
+      this.keyStoreFactory.afterPropertiesSet();
+      this.keyStore = this.keyStoreFactory.getObject();
     }
 
     // Load the private key and certificate ...
     //
-    if (super.getPrivateKey() == null) {
-      this.loadPrivateKey();
-    }
+    this.loadPrivateKey();
+
     if (super.getCertificate() == null) {
       Assert.hasText(this.alias, "Property 'alias' must be set");
       X509Certificate cert = (X509Certificate) this.keyStore.getCertificate(this.alias);
@@ -276,8 +278,7 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
         this.keyPassword = this.password;
       }
       else {
-        log.debug("No key password assigned, assuming empty password ...");
-        this.keyPassword = new char[0];
+        throw new IllegalArgumentException("No key password assigned");
       }
     }
     final Key key = this.keyStore.getKey(this.alias, this.keyPassword);
@@ -297,7 +298,10 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
    *          KeyStore resource
    */
   public void setResource(final Resource resource) {
-    this.resource = resource;
+    if (this.keyStoreFactory == null) {
+      this.keyStoreFactory = new KeyStoreFactoryBean();
+    }
+    this.keyStoreFactory.setResource(resource);
   }
 
   /**
@@ -308,9 +312,12 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
    *          the KeyStore type
    */
   public void setType(final String type) {
-    this.type = type;
+    if (this.keyStoreFactory == null) {
+      this.keyStoreFactory = new KeyStoreFactoryBean();
+    }
+    this.keyStoreFactory.setType(type);
   }
-  
+
   /**
    * Assigns the name of the security provider to use when loading the KeyStore. If no provider is assigned, the first
    * provider that can create a KeyStore according to the given type is used.
@@ -319,7 +326,27 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
    *          the provider name to use
    */
   public void setProvider(final String provider) {
-    this.provider = provider;
+    if (this.keyStoreFactory == null) {
+      this.keyStoreFactory = new KeyStoreFactoryBean();
+    }
+    this.keyStoreFactory.setProvider(provider);
+  }
+
+  /**
+   * Assigns the PKCS#11 configuration file to use.
+   * <p>
+   * The type ({@link #setType(String)}) must be "PKCS11" and the provider name must be set to the base signature
+   * provider to use (e.g. "SunPKCS11").
+   * </p>
+   * 
+   * @param pkcs11Configuration
+   *          the complete path to the PKCS#11 configuration file
+   */
+  public void setPkcs11Configuration(final String pkcs11Configuration) {
+    if (this.keyStoreFactory == null) {
+      this.keyStoreFactory = new KeyStoreFactoryBean();
+    }
+    this.keyStoreFactory.setPkcs11Configuration(pkcs11Configuration);
   }
 
   /**
@@ -329,6 +356,10 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
    *          the password
    */
   public void setPassword(final char[] password) {
+    if (this.keyStoreFactory == null) {
+      this.keyStoreFactory = new KeyStoreFactoryBean();
+    }
+    this.keyStoreFactory.setPassword(password);
     this.password = Optional.ofNullable(password).map(p -> Arrays.copyOf(p, p.length)).orElse(null);
   }
 
@@ -362,6 +393,13 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
     this.keyPassword = Optional.ofNullable(keyPassword).map(p -> Arrays.copyOf(p, p.length)).orElse(null);
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public PublicKey getPublicKey() {
+    final X509Certificate cert = this.getCertificate();
+    return cert != null ? cert.getPublicKey() : null;
+  }
+
   /**
    * Will throw an {@link IllegalArgumentException} since the public key will be read from the keystore.
    */
@@ -385,7 +423,7 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
     }
     return super.getCertificate();
   }
-
+  
   /** {@inheritDoc} */
   @Override
   public synchronized PrivateKey getPrivateKey() {
@@ -410,7 +448,9 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
     throw new IllegalArgumentException("Assigning the private key for a KeyStoreCredential is not allowed");
   }
 
-  /** {@inheritDoc} */
+  /**
+   * If the {@code KeyStoreCredential} is of PKCS#11 type, the method will reload the private key.
+   */
   @Override
   public synchronized void reload() throws Exception {
     //
@@ -420,7 +460,7 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
     if (this.keyStore == null) {
       throw new SecurityException("Error in reload - KeyStoreCredential has not been initialized yet");
     }
-    if ("PKCS11".equalsIgnoreCase(this.type)) {
+    if ("PKCS11".equalsIgnoreCase(this.keyStore.getType())) {
       try {
         log.trace("Reloading private key of credential '{}' ...", this.getName());
         this.keyStore.load(null, this.password);
@@ -438,6 +478,18 @@ public class KeyStoreCredential extends AbstractKeyPairCredential {
   @Override
   protected String getDefaultName() {
     if (this.alias != null) {
+      final String type = Optional.ofNullable(this.keyStore).map(KeyStore::getType).orElse(
+        Optional.ofNullable(this.keyStoreFactory).map(KeyStoreFactoryBean::getType).orElse(null));
+
+      if ("PKCS11".equalsIgnoreCase(type)) {
+        String provider = Optional.ofNullable(this.keyStore).map(KeyStore::getProvider).map(Provider::getName).orElse(null);
+        if (provider == null) {
+          provider = Optional.ofNullable(this.keyStoreFactory).map(KeyStoreFactoryBean::getProvider).orElse(null);
+        }
+        if (provider != null) {
+          return provider + "-" + this.alias;
+        }
+      }
       return this.alias;
     }
     else {

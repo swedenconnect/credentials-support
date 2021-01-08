@@ -27,19 +27,20 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.security.credential.KeyPairCredential;
+import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
 /**
  * The default implementation of the {@link CredentialMonitorBean} interface.
  * <p>
- * The bean can be configured to monitor one, or several, credentials. Note that the credentials being tested must have
- * a test function installed ({@link KeyPairCredential#getTestFunction()} must not be {@code null}.
+ * The bean can be configured to monitor one, or several, credentials. Note that the credentials being tested must
+ * implement the {@link ReloadablePkiCredential} interface and have a test function installed
+ * ({@link ReloadablePkiCredential#getTestFunction()} must not be {@code null}.
  * </p>
  * <p>
  * The reason for performing monitoring of credentials is to detect, and possibly fix, the cases where a credential
  * becomes non-functional. This may typically happen if a credential that resides on a hardware device is used. The
  * connection to the device may get lost, and may be fixed by a re-connect. Those types of credentials takes care of
- * their own reloading by implementing {@link KeyPairCredential#reload()}.
+ * their own reloading by implementing {@link ReloadablePkiCredential#reload()}.
  * </p>
  * <p>
  * Since testing a credential, especially those residing on hardware devices, may be a relatively costly operation, the
@@ -58,19 +59,19 @@ import se.swedenconnect.security.credential.KeyPairCredential;
 public class DefaultCredentialMonitorBean implements CredentialMonitorBean, InitializingBean {
 
   /** The credentials that should be monitored. */
-  private List<KeyPairCredential> credentials;
+  private List<ReloadablePkiCredential> credentials;
 
   /** A list of additional credentials that should be reloaded if a test fails. */
-  private List<KeyPairCredential> additionalForReload;
+  private List<ReloadablePkiCredential> additionalForReload;
 
   /** A callback function that is invoked if the test of a credential fails. */
-  private BiFunction<KeyPairCredential, Exception, Boolean> failureCallback = null;
+  private BiFunction<ReloadablePkiCredential, Exception, Boolean> failureCallback = null;
 
   /** A callback function that is invoked if the reloading of a failed credential was successful. */
-  private Consumer<KeyPairCredential> reloadSuccessCallback = null;
+  private Consumer<ReloadablePkiCredential> reloadSuccessCallback = null;
 
   /** A callback function that is invoked if the reloading of a failed credential fails. */
-  private BiConsumer<KeyPairCredential, Exception> reloadFailureCallback = null;
+  private BiConsumer<ReloadablePkiCredential, Exception> reloadFailureCallback = null;
 
   /**
    * Default constructor.
@@ -80,12 +81,12 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
 
   /**
    * Constructor setting up monitoring of a single credential. If the test for this credential fails a reload attempt
-   * will be made ({@link KeyPairCredential#reload()}).
+   * will be made ({@link ReloadablePkiCredential#reload()}).
    * 
    * @param credential
    *          the credential to monitor, and possible reload
    */
-  public DefaultCredentialMonitorBean(final KeyPairCredential credential) {
+  public DefaultCredentialMonitorBean(final ReloadablePkiCredential credential) {
     this(credential, null);
   }
 
@@ -100,7 +101,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * @param additionalForReload
    *          credentials to reload (in addition to the supplied credential)
    */
-  public DefaultCredentialMonitorBean(final KeyPairCredential credential, final List<KeyPairCredential> additionalForReload) {
+  public DefaultCredentialMonitorBean(final ReloadablePkiCredential credential, final List<ReloadablePkiCredential> additionalForReload) {
     if (credential != null) {
       this.credentials = Arrays.asList(credential);
     }
@@ -111,12 +112,12 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
 
   /**
    * Constructor setting up monitoring of the supplied credentials. If the test call for any credential fails, a reload
-   * attempt will be made ({@link KeyPairCredential#reload()}) for this credential.
+   * attempt will be made ({@link ReloadablePkiCredential#reload()}) for this credential.
    * 
    * @param credentials
    *          the credentials to monitor, and possible reload
    */
-  public DefaultCredentialMonitorBean(final List<KeyPairCredential> credentials) {
+  public DefaultCredentialMonitorBean(final List<ReloadablePkiCredential> credentials) {
     this.credentials = credentials;
   }
 
@@ -125,7 +126,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
   public void test() {
     boolean additionalReloaded = false;
 
-    for (KeyPairCredential cred : this.credentials) {
+    for (ReloadablePkiCredential cred : this.credentials) {
 
       final Supplier<Exception> testFunction = cred.getTestFunction();
       if (testFunction == null) {
@@ -169,7 +170,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * @param credential
    *          the credential to reload
    */
-  protected void reload(final KeyPairCredential credential) {
+  protected void reload(final ReloadablePkiCredential credential) {
     try {
       log.debug("Reloading credential '{}' ...", credential.getName());
       credential.reload();
@@ -221,7 +222,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * @param credential
    *          the credential to be monitored
    */
-  public void setCredential(final KeyPairCredential credential) {
+  public void setCredential(final ReloadablePkiCredential credential) {
     this.credentials = Optional.ofNullable(credential).map(c -> Arrays.asList(c)).orElse(null);
   }
 
@@ -231,7 +232,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * @param credentials
    *          the credentials to be monitored
    */
-  public void setCredentials(final List<KeyPairCredential> credentials) {
+  public void setCredentials(final List<ReloadablePkiCredential> credentials) {
     this.credentials = credentials;
   }
 
@@ -241,7 +242,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * @param additionalForReload
    *          additional credentials for reload
    */
-  public void setAdditionalForReload(final List<KeyPairCredential> additionalForReload) {
+  public void setAdditionalForReload(final List<ReloadablePkiCredential> additionalForReload) {
     this.additionalForReload = additionalForReload;
   }
 
@@ -257,7 +258,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * @param failureCallback
    *          callback function
    */
-  public void setFailureCallback(final BiFunction<KeyPairCredential, Exception, Boolean> failureCallback) {
+  public void setFailureCallback(final BiFunction<ReloadablePkiCredential, Exception, Boolean> failureCallback) {
     this.failureCallback = failureCallback;
   }
 
@@ -267,7 +268,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * @param reloadSuccessCallback
    *          callback function
    */
-  public void setReloadSuccessCallback(final Consumer<KeyPairCredential> reloadSuccessCallback) {
+  public void setReloadSuccessCallback(final Consumer<ReloadablePkiCredential> reloadSuccessCallback) {
     this.reloadSuccessCallback = reloadSuccessCallback;
   }
 
@@ -282,7 +283,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * @param reloadFailureCallback
    *          callback function
    */
-  public void setReloadFailureCallback(final BiConsumer<KeyPairCredential, Exception> reloadFailureCallback) {
+  public void setReloadFailureCallback(final BiConsumer<ReloadablePkiCredential, Exception> reloadFailureCallback) {
     this.reloadFailureCallback = reloadFailureCallback;
   }
 
@@ -290,7 +291,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
   @Override
   public void afterPropertiesSet() throws Exception {
     Assert.notEmpty(this.credentials, "No credentials to monitor supplied");
-    for (KeyPairCredential c : this.credentials) {
+    for (ReloadablePkiCredential c : this.credentials) {
       if (c.getTestFunction() == null) {
         log.warn("Configured credential '{}' has no test function associated - no montoring will be performed", c.getName());
       }

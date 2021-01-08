@@ -25,8 +25,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import se.swedenconnect.security.credential.KeyPairCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
+import se.swedenconnect.security.credential.ReloadablePkiCredential;
 import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
 
 /**
@@ -41,13 +41,13 @@ public class DefaultCredentialTestFunctionTest {
   private static final char[] password = "secret".toCharArray();
 
   /** RSA key */
-  private KeyPairCredential rsaCred;
+  private ReloadablePkiCredential rsaCred;
 
   /** DSA key */
-  private KeyPairCredential dsaCred;
+  private ReloadablePkiCredential dsaCred;
 
   /** EC key */
-  private KeyPairCredential ecCred;
+  private ReloadablePkiCredential ecCred;
 
   /**
    * Constructor.
@@ -76,7 +76,7 @@ public class DefaultCredentialTestFunctionTest {
    */
   @Test
   public void testCredentials() throws Exception {
-    final Function<KeyPairCredential, Exception> func = new DefaultCredentialTestFunction();
+    final Function<ReloadablePkiCredential, Exception> func = new DefaultCredentialTestFunction();
 
     Exception result = func.apply(this.rsaCred);
     Assert.assertNull("Test of RSA key was not successful", result);

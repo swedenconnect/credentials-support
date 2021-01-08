@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2021 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package se.swedenconnect.security.credential.factory;
 
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -39,18 +38,6 @@ public class X509CertificateFactoryBean extends AbstractFactoryBean<X509Certific
   /** The resource holding the certificate. */
   private Resource resource;
 
-  /** Factory for creating certificates. */
-  private static CertificateFactory factory = null;
-
-  static {
-    try {
-      factory = CertificateFactory.getInstance("X.509");
-    }
-    catch (CertificateException e) {
-      throw new SecurityException(e);
-    }
-  }
-
   /**
    * Default constructor.
    */
@@ -70,7 +57,7 @@ public class X509CertificateFactoryBean extends AbstractFactoryBean<X509Certific
   /** {@inheritDoc} */
   @Override
   protected X509Certificate createInstance() throws Exception {
-    return (X509Certificate) factory.generateCertificate(this.resource.getInputStream());
+    return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(this.resource.getInputStream());
   }
 
   /** {@inheritDoc} */
@@ -91,9 +78,9 @@ public class X509CertificateFactoryBean extends AbstractFactoryBean<X509Certific
 
   /** {@inheritDoc} */
   @Override
-  public void afterPropertiesSet() throws Exception {
-    super.afterPropertiesSet();
+  public void afterPropertiesSet() throws Exception {    
     Assert.notNull(this.resource, "Property 'resource' has not been assigned");
+    super.afterPropertiesSet();
   }
 
 }

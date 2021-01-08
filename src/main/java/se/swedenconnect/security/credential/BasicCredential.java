@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2021 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import java.util.UUID;
 import org.springframework.core.io.Resource;
 
 /**
- * A basic implementation of the {@link KeyPairCredential} interface.
+ * A basic implementation of the {@link PkiCredential} interface.
  * 
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class BasicCredential extends AbstractKeyPairCredential {
+public class BasicCredential extends AbstractPkiCredential {
 
   /**
    * Default constructor.
@@ -94,6 +94,5 @@ public class BasicCredential extends AbstractKeyPairCredential {
     }
     return "BasicCredential-" + UUID.randomUUID().toString();
   }
-
   
 }
