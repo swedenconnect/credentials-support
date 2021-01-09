@@ -16,9 +16,12 @@
 package se.swedenconnect.security.credential.factory;
 
 import java.security.KeyStore;
+import java.security.NoSuchProviderException;
 import java.security.Provider;
+import java.security.ProviderException;
 import java.security.Security;
 
+import org.bouncycastle.util.Arrays;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -67,11 +70,12 @@ public class KeyStoreFactoryBeanTest {
     factory.setPassword(PW);
     factory.setType("JKS");
     factory.setProvider("SUN");
+    factory.setSingleton(false);
     factory.afterPropertiesSet();
     
     // Test getters
     Assert.assertEquals("rsa1.jks", factory.getResource().getFilename());
-//    Assert.assertArrayEquals(PW, factory.getPassword());
+    Assert.assertArrayEquals(PW, factory.getPassword());
     Assert.assertEquals("JKS", factory.getType());
     Assert.assertEquals("SUN", factory.getProvider());
     
@@ -79,10 +83,40 @@ public class KeyStoreFactoryBeanTest {
     Assert.assertNotNull(ks);
     Assert.assertEquals(KeyStore.class, factory.getObjectType());
     
-    // The same with constructors ...
+    // If no type is set, the default type should be used ...
+    //
+    factory = new KeyStoreFactoryBean();
+    factory.setResource(new ClassPathResource("rsa1.jks"));
+    factory.setPassword(PW);
+    factory.afterPropertiesSet();
+    
+    // Test getters
+    Assert.assertEquals(KeyStore.getDefaultType(), factory.getType());    
+    ks = factory.getObject();
+    Assert.assertNotNull(ks);
+    Assert.assertEquals(KeyStore.getDefaultType(), ks.getType());
+    
+    // Should work with no call to afterProperties set (if not singleton) ...
+    factory = new KeyStoreFactoryBean();
+    factory.setResource(new ClassPathResource("rsa1.jks"));
+    factory.setPassword(PW);
+    factory.setSingleton(false);
+    
+    // Test getters
+    Assert.assertEquals(KeyStore.getDefaultType(), factory.getType());    
+    ks = factory.getObject();
+    Assert.assertNotNull(ks);
+    Assert.assertEquals(KeyStore.getDefaultType(), ks.getType());
+    
+    // Create with constructors ...
     factory = new KeyStoreFactoryBean(new ClassPathResource("rsa1.jks"), PW);
     factory.afterPropertiesSet();
     Assert.assertNotNull(factory.getObject());
+    
+    // If this is a singleton, the password should be cleared in afterPropertiesSet ...
+    char[] cleared = new char[PW.length];
+    Arrays.fill(cleared, (char) 0);
+    Assert.assertArrayEquals(cleared, factory.getPassword());
     
     factory = new KeyStoreFactoryBean(new ClassPathResource("rsa1.jks"), PW, "JKS");
     factory.afterPropertiesSet();
@@ -96,5 +130,110 @@ public class KeyStoreFactoryBeanTest {
     factory.afterPropertiesSet();
   }
   
+  @Test(expected = IllegalArgumentException.class)
+  public void testMissingParameters2() throws Exception {
+    KeyStoreFactoryBean factory = new KeyStoreFactoryBean(new ClassPathResource("rsa1.jks"), null);
+    factory.afterPropertiesSet();
+  }
+  
+  @Test
+  public void testDestroy() throws Exception {
+    KeyStoreFactoryBean factory = new KeyStoreFactoryBean(new ClassPathResource("rsa1.jks"), PW);
+    factory.setSingleton(false);
+    factory.afterPropertiesSet();
+    
+    factory.destroy();
+    char[] cleared = new char[PW.length];
+    Arrays.fill(cleared, (char) 0);
+    Assert.assertArrayEquals(cleared, factory.getPassword());
+    
+    factory = new KeyStoreFactoryBean(new ClassPathResource("rsa1.jks"), null);
+    factory.setSingleton(false);
+    factory.destroy();
+    Assert.assertNull(factory.getPassword());    
+  }
+  
+  @Test
+  public void testPkcs11() throws Exception {
+    final String cfgFile = (new ClassPathResource("cfg1.txt")).getFile().getAbsolutePath();
+    
+    KeyStoreFactoryBean factory = new KeyStoreFactoryBean();
+    factory.setPassword(PW);
+    factory.setType("PKCS11");
+    factory.setProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+    factory.setPkcs11Configuration(cfgFile);
+    factory.afterPropertiesSet();
+    
+    Assert.assertNull(factory.getResource());
+    Assert.assertEquals("PKCS11", factory.getType());
+    Assert.assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME + "-Foo", factory.getProvider());
+    Assert.assertEquals(cfgFile, factory.getPkcs11Configuration());
+    
+    KeyStore ks = factory.getObject();
+    Assert.assertNotNull(ks);
+    Assert.assertEquals("PKCS11", ks.getType());
+  }
+  
+  @Test
+  public void testPkcs11StaticallyConfigured() throws Exception {
+    Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+    Security.addProvider(MockSunPkcs11Provider.createStaticallyConfigured());
+    
+    KeyStoreFactoryBean factory = new KeyStoreFactoryBean();
+    factory.setPassword(PW);
+    factory.setType("PKCS11");
+    factory.setProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+    factory.afterPropertiesSet();
+    
+    Assert.assertNull(factory.getResource());
+    Assert.assertEquals("PKCS11", factory.getType());
+    Assert.assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME, factory.getProvider());
+    
+    KeyStore ks = factory.getObject();
+    Assert.assertNotNull(ks);
+    Assert.assertEquals("PKCS11", ks.getType());
+  }
+  
+  @Test(expected = IllegalArgumentException.class)
+  public void testPkcs11StaticallyConfiguredButHasConfig() throws Exception {
+    Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+    Security.addProvider(MockSunPkcs11Provider.createStaticallyConfigured());
+    
+    KeyStoreFactoryBean factory = new KeyStoreFactoryBean();
+    factory.setPassword(PW);
+    factory.setType("PKCS11");
+    factory.setProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+    factory.setPkcs11Configuration((new ClassPathResource("cfg1.txt")).getFile().getAbsolutePath());
+    factory.afterPropertiesSet();
+  }
+  
+  @Test(expected = NoSuchProviderException.class)
+  public void testNoSuchProvider() throws Exception {
+    KeyStoreFactoryBean factory = new KeyStoreFactoryBean();
+    factory.setPassword(PW);
+    factory.setType("PKCS11");
+    factory.setProvider("NotProvider");
+    factory.afterPropertiesSet();
+  }
+  
+  @Test(expected = IllegalArgumentException.class)
+  public void testMissingPkcs11Configuration() throws Exception {
+    KeyStoreFactoryBean factory = new KeyStoreFactoryBean();
+    factory.setPassword(PW);
+    factory.setType("PKCS11");
+    factory.setProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+    factory.afterPropertiesSet();
+  }
+  
+  // Won't work since we don't have a P11 device, but we exercise the code that defaults to
+  // the SunPKCS11 provider ...
+  @Test(expected = ProviderException.class)
+  public void testSunPkcs11Provider() throws Exception {
+    KeyStoreFactoryBean factory = new KeyStoreFactoryBean();
+    factory.setPassword(PW);
+    factory.setType("PKCS11");
+    factory.setPkcs11Configuration((new ClassPathResource("cfg1.txt")).getFile().getAbsolutePath());
+    factory.afterPropertiesSet();
+  }
 
 }
