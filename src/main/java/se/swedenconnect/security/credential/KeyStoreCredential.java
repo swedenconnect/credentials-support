@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
+import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunction;
 
 /**
  * A {@link KeyStore} backed implementation of the {@link PkiCredential} and {@link ReloadablePkiCredential} interfaces.
@@ -247,6 +248,14 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
       }
       this.keyStoreFactory.afterPropertiesSet();
       this.keyStore = this.keyStoreFactory.getObject();
+      
+      // For PKCS11, install a default test function (if none has been set) ...
+      //
+      if ("PKCS11".equals(this.keyStore.getType()) && this.getTestFunction() == null) {
+        final DefaultCredentialTestFunction testFunction = new DefaultCredentialTestFunction();
+        testFunction.setProvider(Optional.ofNullable(this.keyStore.getProvider()).map(Provider::getName).orElse(null));
+        this.setTestFunction(testFunction);
+      }
     }
 
     // Load the private key and certificate ...

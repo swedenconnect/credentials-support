@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2021 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,18 @@ import java.security.KeyException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.util.function.Function;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
 
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
+import se.swedenconnect.security.credential.monitoring.DefaultCredentialMonitorBeanTest.TestCredential;
 
 /**
  * Test cases for DefaultCredentialTestFunction.
@@ -141,5 +144,55 @@ public class DefaultCredentialTestFunctionTest {
     result = func.apply(this.rsaCred);
     Assert.assertNotNull("Expected KeyException result", result);
     Assert.assertTrue("Expected KeyException exception", KeyException.class.isInstance(result));
+    
+    func.setDsaSignatureAlgorithm("SHA256withRSA");
+    result = func.apply(this.dsaCred);
+    Assert.assertNotNull("Expected KeyException result", result);
+    Assert.assertTrue("Expected KeyException exception", KeyException.class.isInstance(result));
+    
+    func.setEcSignatureAlgorithm("SHA256withRSA");
+    result = func.apply(this.ecCred);
+    Assert.assertNotNull("Expected KeyException result", result);
+    Assert.assertTrue("Expected KeyException exception", KeyException.class.isInstance(result));
+  }
+  
+  @Test
+  public void testNoPrivateKey() throws Exception {
+    final DefaultCredentialTestFunction func = new DefaultCredentialTestFunction();    
+    final TestCredential cred = new TestCredential("test");
+    
+    Exception result = func.apply(cred);
+    Assert.assertEquals(KeyException.class, result.getClass());
+  }
+  
+  @Test
+  public void testUnknownKeyAlgorithm() throws Exception {
+    PrivateKey key = Mockito.mock(PrivateKey.class);
+    Mockito.when(key.getAlgorithm()).thenReturn("UNKNOWN_ALGO");
+    
+    ReloadablePkiCredential cred = Mockito.mock(ReloadablePkiCredential.class);
+    Mockito.when(cred.getPrivateKey()).thenReturn(key);
+    Mockito.when(cred.getName()).thenReturn("test");
+    
+    final DefaultCredentialTestFunction func = new DefaultCredentialTestFunction();
+    Exception result = func.apply(cred);
+    Assert.assertEquals(NoSuchAlgorithmException.class, result.getClass());
+  }
+  
+  @Test
+  public void testNullSettersAreIgnored() throws Exception {
+    final DefaultCredentialTestFunction func = new DefaultCredentialTestFunction();
+    func.setDsaSignatureAlgorithm(null);
+    func.setRsaSignatureAlgorithm(null);
+    func.setEcSignatureAlgorithm(null);
+    
+    Exception result = func.apply(this.rsaCred);
+    Assert.assertNull(result);
+
+    result = func.apply(this.dsaCred);
+    Assert.assertNull(result);
+
+    result = func.apply(this.ecCred);
+    Assert.assertNull(result);
   }
 }

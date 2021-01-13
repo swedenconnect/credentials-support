@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2021 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,13 +65,13 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
   private List<ReloadablePkiCredential> additionalForReload;
 
   /** A callback function that is invoked if the test of a credential fails. */
-  private BiFunction<ReloadablePkiCredential, Exception, Boolean> failureCallback = null;
+  private BiFunction<ReloadablePkiCredential, Exception, Boolean> failureCallback ;
 
   /** A callback function that is invoked if the reloading of a failed credential was successful. */
-  private Consumer<ReloadablePkiCredential> reloadSuccessCallback = null;
+  private Consumer<ReloadablePkiCredential> reloadSuccessCallback;
 
   /** A callback function that is invoked if the reloading of a failed credential fails. */
-  private BiConsumer<ReloadablePkiCredential, Exception> reloadFailureCallback = null;
+  private BiConsumer<ReloadablePkiCredential, Exception> reloadFailureCallback;
 
   /**
    * Default constructor.
@@ -144,7 +144,11 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
         if (this.failureCallback != null) {
           log.debug("Test of credential '{}' failed - {}", cred.getName(), testResult.getMessage(), testResult);
           reload = this.failureCallback.apply(cred, testResult);
-          if (reload != null && !reload.booleanValue()) {
+          if (reload == null) {
+            log.warn("Failure callback returned null - assuming FALSE");
+            reload = false;
+          }
+          if (!reload.booleanValue()) {
             log.debug("Callback invoked and returned false, meaning no reloading of credential '{}' will occur", cred.getName());
           }
         }
@@ -155,10 +159,12 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
 
         if (reload) {
           this.reload(cred);
-          if (this.additionalForReload != null && !additionalReloaded) {
-            this.additionalForReload.forEach((c) -> this.reload(c));
+          if (!additionalReloaded) {
+            if (this.additionalForReload != null) {
+              this.additionalForReload.forEach((c) -> this.reload(c));              
+            }
             additionalReloaded = true;
-          }
+          }          
         }
       }
     }

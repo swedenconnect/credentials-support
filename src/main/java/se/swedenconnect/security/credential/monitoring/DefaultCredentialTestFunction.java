@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2021 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package se.swedenconnect.security.credential.monitoring;
 
 import java.security.KeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Signature;
@@ -76,9 +77,10 @@ public class DefaultCredentialTestFunction implements Function<ReloadablePkiCred
         algorithm = this.ecSignatureAlgorithm;
       }
       else {
-        log.warn("Unknown private key algorithm ({}) - Cannot perform test of credential '{}'",
+        final String msg = String.format("Unknown private key algorithm (%s) - Cannot perform test of credential '%s'",
           pk.getAlgorithm(), credential.getName());
-        return null;
+        log.warn("{}", msg);
+        return new NoSuchAlgorithmException(msg);
       }
       final Signature signature = this.provider != null ? Signature.getInstance(algorithm, this.provider) : Signature.getInstance(algorithm);
       signature.initSign(pk);

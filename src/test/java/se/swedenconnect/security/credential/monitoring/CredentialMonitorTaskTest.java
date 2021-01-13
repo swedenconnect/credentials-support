@@ -15,34 +15,43 @@
  */
 package se.swedenconnect.security.credential.monitoring;
 
-import java.util.Optional;
+import org.junit.Assert;
+import org.junit.Test;
+
+import lombok.Getter;
 
 /**
- * Monitor task for credentials.
+ * Test cases for CredentialMonitorTask.
  * 
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class CredentialMonitorTask implements Runnable {
+public class CredentialMonitorTaskTest {
 
-  /** The actual monitoring bean. */
-  private final CredentialMonitorBean credentialMonitor;
-
-  /**
-   * Constructor setting up a monitoring task.
-   * 
-   * @param credentialMonitor
-   *          the credential monitoring bean
-   */
-  public CredentialMonitorTask(final CredentialMonitorBean credentialMonitor) {
-    this.credentialMonitor = Optional.ofNullable(credentialMonitor)
-      .orElseThrow(() -> new IllegalArgumentException("credentialMonitor must not be null"));
+  @Test(expected = IllegalArgumentException.class)
+  public void testNullBean() throws Exception {
+    new CredentialMonitorTask(null);
   }
+  
+  @Test
+  public void testRun() throws Exception {
+    TestBean bean = new TestBean();
+    CredentialMonitorTask task = new CredentialMonitorTask(bean);
+    task.run();
+    
+    Assert.assertEquals(1, bean.getTestCalled());
+  }
+  
+  public static class TestBean implements CredentialMonitorBean {
+    
+    @Getter
+    private int testCalled = 0;
 
-  /** {@inheritDoc} */
-  @Override
-  public void run() {
-    this.credentialMonitor.test();
+    @Override
+    public void test() {
+      this.testCalled++;
+    }
+    
   }
 
 }

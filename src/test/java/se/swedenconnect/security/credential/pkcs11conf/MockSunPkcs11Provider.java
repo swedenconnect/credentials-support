@@ -40,7 +40,7 @@ import java.util.Scanner;
 import org.springframework.core.io.Resource;
 
 /**
- * A mocked provider implementation that mocks a PKCS#11 provider but really is the same as the SUN provider (except for
+ * A mocked provider implementation that mocks a PKCS#11 provider but really is the same as the SUN and SunRsaSign providers (except for
  * supporting PKCS#11 keystores).
  * 
  * @author Martin Lindström (martin@idsec.se)
@@ -49,7 +49,7 @@ import org.springframework.core.io.Resource;
 public class MockSunPkcs11Provider extends Provider {
 
   public static final String PROVIDER_BASE_NAME = "MockSunPKCS11";
-
+  
   private boolean configured = false;
 
   private static final long serialVersionUID = -135457117436927350L;
@@ -72,6 +72,14 @@ public class MockSunPkcs11Provider extends Provider {
         continue;
       }
       this.put(k, sunProvider.get(k));
+    }
+    final Provider sunRsaSignProvider = Security.getProvider("SunRsaSign");
+    for (final Object k : sunRsaSignProvider.keySet()) {
+      final String key = String.class.cast(k);
+      if (key.startsWith("Provider.id")) {
+        continue;
+      }
+      this.put(k, sunRsaSignProvider.get(k));
     }
     this.put("KeyStore.PKCS11", MockKeyStoreSpi.class.getName());
   }
@@ -136,8 +144,8 @@ public class MockSunPkcs11Provider extends Provider {
   @Override
   public boolean isConfigured() {
     return this.configured;
-  }
-
+  }  
+  
   public static class MockedPkcs11ResourceHolder {
 
     private static final MockedPkcs11ResourceHolder INSTANCE = new MockedPkcs11ResourceHolder();
