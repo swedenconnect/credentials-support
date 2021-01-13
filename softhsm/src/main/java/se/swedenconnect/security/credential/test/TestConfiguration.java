@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2021 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,19 @@
 package se.swedenconnect.security.credential.test;
 
 import java.security.KeyStore;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import se.swedenconnect.security.credential.AbstractPkiCredential;
-import se.swedenconnect.security.credential.AbstractReloadablePkiCredential;
 import se.swedenconnect.security.credential.BasicCredential;
-import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.Pkcs11Credential;
-import se.swedenconnect.security.credential.ReloadablePkiCredential;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
-import se.swedenconnect.security.credential.monitoring.CredentialMonitorBean;
-import se.swedenconnect.security.credential.monitoring.DefaultCredentialMonitorBean;
-import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunction;
 import se.swedenconnect.security.credential.opensaml.OpenSamlCredential;
 
 /**
@@ -50,13 +38,7 @@ import se.swedenconnect.security.credential.opensaml.OpenSamlCredential;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Configuration
-@EnableScheduling
-@Slf4j
 public class TestConfiguration {
-
-  @Autowired
-  @Setter
-  private CredentialMonitorBean monitor;
 
   @Configuration
   @Profile("!softhsm")
@@ -109,31 +91,6 @@ public class TestConfiguration {
   @ConfigurationProperties("test.keystore")
   public KeyStoreFactoryBean keyStore() {
     return new KeyStoreFactoryBean();
-  }
-
-  @Bean
-  public CredentialMonitorBean monitorBean(final List<PkiCredential> credentials) {
-    
-    List<ReloadablePkiCredential> creds = credentials.stream()
-        .filter(ReloadablePkiCredential.class::isInstance)
-        .map(ReloadablePkiCredential.class::cast)
-        .collect(Collectors.toList());
-    
-    // We want to be able to test testing and re-loading of all types of credentials (even if we are not used HSM-based
-    // ones). So, let's install a test function for all credentials ...
-    //
-    for (ReloadablePkiCredential c : creds) {
-      if (c.getTestFunction() == null && AbstractPkiCredential.class.isInstance(c)) {
-        log.info("Installing test function for credential {}", c.getName());
-        ((AbstractReloadablePkiCredential) c).setTestFunction(new DefaultCredentialTestFunction());
-      }
-    }
-    return new DefaultCredentialMonitorBean(creds);
-  }
-
-  @Scheduled(fixedDelay = 10000)
-  public void scheduleMonitor() {
-    this.monitor.test();
   }
 
 }

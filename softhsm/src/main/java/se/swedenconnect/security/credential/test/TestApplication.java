@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2021 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,14 @@ import java.security.cert.X509Certificate;
 
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
 import org.springframework.context.annotation.Bean;
 
+import lombok.Setter;
 import se.swedenconnect.security.credential.converters.PropertyToPrivateKeyConverter;
 import se.swedenconnect.security.credential.converters.PropertyToX509CertificateConverter;
 
@@ -35,7 +38,11 @@ import se.swedenconnect.security.credential.converters.PropertyToX509Certificate
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @SpringBootApplication
-public class TestApplication {
+public class TestApplication implements CommandLineRunner {
+  
+  @Setter
+  @Autowired
+  private TestCredentialsService testCredentialsService;
 
   /**
    * Program main.
@@ -54,6 +61,14 @@ public class TestApplication {
     }
     
     SpringApplication.run(TestApplication.class, args);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void run(String... args) throws Exception {
+    System.out.println("RUNNING TESTS");
+    System.out.println("");
+    System.out.print(this.testCredentialsService.test());
   }
 
   /**
