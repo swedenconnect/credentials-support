@@ -38,6 +38,7 @@ import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunc
  * A {@link KeyStore} backed implementation of the {@link PkiCredential} and {@link ReloadablePkiCredential} interfaces.
  * <p>
  * A {@code KeyStoreCredential} can be initialized in a number of ways:
+ * </p>
  * <ol>
  * <li>By loading a {@link KeyStore} from a {@link Resource} and then getting the certificate and private key. This is
  * done either by using any of the constructors {@link #KeyStoreCredential(Resource, char[], String, char[])},
@@ -48,13 +49,13 @@ import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunc
  * done either by using the constructor {@link #KeyStoreCredential(KeyStore, String, char[])} or by assigning all
  * required properties using setter-methods.</li>
  * </ol>
- * </p>
  * <p>
  * This class also supports handling of PKCS#11 credentials. This requires using a security provider that supports
  * creating a {@link KeyStore} based on an underlying PKCS#11 implementation (for example the SunPKCS11 provider). There
  * are three ways of creating a {@code KeyStoreCredential} for use with PKCS#11:
+ * </p>
  * <p>
- * <b>Supplying an already existing PKCS#11 {@link KeyStore}<b> <br/>
+ * <b>Supplying an already existing PKCS#11 {@link KeyStore}</b> <br>
  * In some cases you may already have loaded a {@link KeyStore} using a security provider configured for PKCS#11. In
  * these cases the initialization of the {@code KeyStoreCredential} is identical with option number 2 above. You simply
  * create your {@code KeyStoreCredential} instance by giving the {@link KeyStore} instance, the entry alias and key
@@ -62,10 +63,10 @@ import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunc
  * using setter-methods.
  * </p>
  * <p>
- * <b>Supplying the provider name of a Security provider configured for your PKCS#11 device</b> <br/>
+ * <b>Supplying the provider name of a Security provider configured for your PKCS#11 device</b> <br>
  * Another possibility is to supply the provider name of a security provider configured for PKCS#11. This could
  * typically look something like:
- * 
+ * </p>
  * <pre>
  * // Create a SunPKCS11 provider instance using our PKCS#11 configuration ...
  * Provider provider = Security.getProvider("SunPKCS11");
@@ -76,18 +77,16 @@ import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunc
  * KeyStoreCredential credential = new KeyStoreCredential(null, "PKCS11", provider.getName(), tokenPw, alias, null);
  * credential.init();
  * </pre>
- * </p>
  * <p>
- * <b>Supplying the PKCS#11 configuration file</b> <br />
+ * <b>Supplying the PKCS#11 configuration file</b> <br>
  * In the above example we created the SunPKCS11 provider instance manually. It is also to create a
  * {@code KeyStoreCredential} instance by supplying the PKCS#11 configuration file.
- * 
+ * </p>
  * <pre>
  * KeyStoreCredential credential = new KeyStoreCredential(null, "PKCS11", "SunPKCS11", tokenPw, alias, null);
  * credential.setPkcs11Configuration(pkcs11CfgFile);
  * credential.init();
  * </pre>
- * </p>
  * <p>
  * <b>Note:</b> As an alternative of using {@code KeyStoreCredential} for PKCS#11 credentials see the
  * {@link Pkcs11Credential} class.

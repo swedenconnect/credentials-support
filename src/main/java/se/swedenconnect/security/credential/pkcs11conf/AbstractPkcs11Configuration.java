@@ -27,12 +27,14 @@ import lombok.extern.slf4j.Slf4j;
  * Base class for PKCS#11 configuration.
  * <p>
  * The configuration can be set up in two ways;
+ * </p>
  * <ol>
  * <li>By assigning the path to an external PKCS#11 configuration file ({@link #setConfigurationFile(String)} or
- * {@link #DefaultPkcs11FileConfiguration(String)}. This is the receommended choice.</li>
+ * {@link #AbstractPkcs11Configuration(String)}. This is the receommended choice.</li>
  * <li>By assigning each individual setting ({@link #setLibrary(String)}, {@link #setName(String)},
  * {@link #setSlot(String)}, {@link #setSlotListIndex(Integer)}). This is mainly for testing purposes.</li>
  * </ol>
+ * <p>
  * Note: If the external configuration file is set, individual settings of library, name, slot or slotListIndex will be
  * ignored.
  * </p>

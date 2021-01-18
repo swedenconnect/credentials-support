@@ -11,26 +11,28 @@ Java library for PKI credentials support, including PKCS#11 and HSM:s.
 ## Table of contents
 
 1. [**Overview**](#overview)
+    
+    1.1. [Maven](#maven)
 
 2. [**Credential types**](#credential-types)
 
-  2.1. [BasicCredential](#basiccredential)
+    2.1. [BasicCredential](#basiccredential)
   
-  2.2. [KeyStoreCredential](#keystorecredential)
+    2.2. [KeyStoreCredential](#keystorecredential)
   
-  2.3. [Pkcs11Credential](#pkcs11credential)
+    2.3. [Pkcs11Credential](#pkcs11credential)
   
-  2.4. [OpenSamlCredential](#opensamlcredential)
+    2.4. [OpenSamlCredential](#opensamlcredential)
 
 3. [**Spring Framework**](#spring-framework)
 
-  3.1. [Credentials as beans](#credentials-as-beans)
+    3.1. [Credentials as beans](#credentials-as-beans)
   
-  3.2. [Converters](#converters)
+    3.2. [Converters](#converters)
   
-  3.3. [Factories](#factories)
+    3.3. [Factories](#factories)
   
-  3.3.1. [For Shibboleth users](#for-shibboleth-users)
+    3.3.1. [For Shibboleth users](#for-shibboleth-users)
   
 4. [**Monitoring and reloading credentials**](#monitoring-and-reloading-credentials)
 
@@ -46,6 +48,21 @@ Java library for PKI credentials support, including PKCS#11 and HSM:s.
 The **credentials-support** library defines an uniform way of representing PKI credentials (private keys and X.509 certificates) by introducing the [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) interface.
 
 The library supports both basic credentials stored on file, or in a key store (JKS, PKCS#12), as well as PKCS#11 credentials residing on a Hardware Security Module.
+
+<a name="maven"></a>
+### 1.1. Maven
+
+The credentials-support project is published to Maven central.
+
+Include the following snippet in your Maven POM to add credentials-support as a dependency for your project.
+
+```
+<dependency>
+  <groupId>se.swedenconnect.security</groupId>
+  <artifactId>credentials-support</artifactId>
+  <version>${credentials-support.version}</version>
+</dependency>
+```
 
 <a name="credential-types"></a>
 ## 2. Credential types

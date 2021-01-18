@@ -87,7 +87,7 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
 
   /**
    * A constructor setting the library, name, slot and slotListIndex individually. See also
-   * {@link #DefaultPkcs11FileConfiguration(String)}.
+   * {@link #DefaultPkcs11Configuration(String)}.
    * 
    * @param library
    *          the PKCS#11 library path
