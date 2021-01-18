@@ -6,7 +6,7 @@
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
 
   <name>Sweden Connect :: PKI credentials support library</name>
   <description>Support for credentials (including PKCS11 based keys and HSM:s)</description>
@@ -281,8 +281,11 @@
               <serverId>ossrh</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>false</autoReleaseAfterClose>
-              <!-- Allows manual inspection of the staging repo before deploying it to the central repo. Use 'mvn nexus-staging:release -Prelease' to release and 
-                'mvn nexus-staging:drop' to abort. -->
+              <!-- 
+                Allows manual inspection of the staging repo before deploying it to the central repo. 
+                Use 'mvn nexus-staging:release -Prelease' to release and 
+                'mvn nexus-staging:drop' to abort. 
+              -->
             </configuration>
           </plugin>
 
@@ -304,7 +307,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.2.0</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -324,21 +327,28 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.0.0-M1</version>
+            <version>3.2.0</version>
             <executions>
               <execution>
                 <id>attach-javadoc</id>
                 <goals>
                   <goal>jar</goal>
                 </goals>
-                <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam> </configuration> -->
               </execution>
             </executions>
             <configuration>
-
               <doctitle>Sweden Connect - PKI credentials support library - ${project.version}</doctitle>
               <windowtitle>Sweden Connect - PKI credentials support library - ${project.version}</windowtitle>
               <detectJavaApiLink>true</detectJavaApiLink>
+              <additionalparam>-Xdoclint:all -Xdoclint:-missing</additionalparam>
+              <additionalOptions>-Xdoclint:all -Xdoclint:-missing</additionalOptions>
+              <additionalJOptions>
+                <additionalJOption>-Xdoclint:all</additionalJOption>
+                <additionalJOption>-Xdoclint:-missing</additionalJOption>
+              </additionalJOptions>
+              <links>
+                <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
+              </links>
             </configuration>
           </plugin>
 

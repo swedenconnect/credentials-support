@@ -14,23 +14,23 @@ Java library for PKI credentials support, including PKCS#11 and HSM:s.
 
 2. [**Credential types**](#credential-types)
 
-  2.1. [BasicCredential](#basiccredential)
+    2.1. [BasicCredential](#basiccredential)
   
-  2.2. [KeyStoreCredential](#keystorecredential)
+    2.2. [KeyStoreCredential](#keystorecredential)
   
-  2.3. [Pkcs11Credential](#pkcs11credential)
+    2.3. [Pkcs11Credential](#pkcs11credential)
   
-  2.4. [OpenSamlCredential](#opensamlcredential)
+    2.4. [OpenSamlCredential](#opensamlcredential)
 
 3. [**Spring Framework**](#spring-framework)
 
-  3.1. [Credentials as beans](#credentials-as-beans)
+    3.1. [Credentials as beans](#credentials-as-beans)
   
-  3.2. [Converters](#converters)
+    3.2. [Converters](#converters)
   
-  3.3. [Factories](#factories)
+    3.3. [Factories](#factories)
   
-  3.3.1. [For Shibboleth users](#for-shibboleth-users)
+    3.3.1. [For Shibboleth users](#for-shibboleth-users)
   
 4. [**Monitoring and reloading credentials**](#monitoring-and-reloading-credentials)
 

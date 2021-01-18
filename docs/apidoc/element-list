@@ -1,0 +1,6 @@
+se.swedenconnect.security.credential
+se.swedenconnect.security.credential.converters
+se.swedenconnect.security.credential.factory
+se.swedenconnect.security.credential.monitoring
+se.swedenconnect.security.credential.opensaml
+se.swedenconnect.security.credential.pkcs11conf
