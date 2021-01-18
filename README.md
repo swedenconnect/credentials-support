@@ -11,6 +11,8 @@ Java library for PKI credentials support, including PKCS#11 and HSM:s.
 ## Table of contents
 
 1. [**Overview**](#overview)
+    
+    1.1. [Maven](#maven)
 
 2. [**Credential types**](#credential-types)
 
@@ -46,6 +48,21 @@ Java library for PKI credentials support, including PKCS#11 and HSM:s.
 The **credentials-support** library defines an uniform way of representing PKI credentials (private keys and X.509 certificates) by introducing the [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) interface.
 
 The library supports both basic credentials stored on file, or in a key store (JKS, PKCS#12), as well as PKCS#11 credentials residing on a Hardware Security Module.
+
+<a name="maven"></a>
+### 1.1. Maven
+
+The credentials-support project is published to Maven central.
+
+Include the following snippet in your Maven POM to add credentials-support as a dependency for your project.
+
+```
+<dependency>
+  <groupId>se.swedenconnect.security</groupId>
+  <artifactId>credentials-support</artifactId>
+  <version>${credentials-support.version}</version>
+</dependency>
+```
 
 <a name="credential-types"></a>
 ## 2. Credential types
