@@ -92,7 +92,7 @@ public class OpenSamlCredential extends BasicX509Credential {
   /** {@inheritDoc} */
   @Override
   public void setPrivateKey(final PrivateKey privateKey) {
-    Constraint.isNull(this.credential, "Private key may not be installed when object is created using a KeyPairCredential");
+    Constraint.isNull(this.credential, "Private key may not be installed when object is created using a PkiCredential");
     super.setPrivateKey(privateKey);
   }
 
@@ -105,7 +105,7 @@ public class OpenSamlCredential extends BasicX509Credential {
   /** {@inheritDoc} */
   @Override
   public void setEntityCertificate(final X509Certificate entityCertificate) {
-    Constraint.isNull(this.credential, "Entity certificate may not be installed when object is created using a KeyPairCredential");
+    Constraint.isNull(this.credential, "Entity certificate may not be installed when object is created using a PkiCredential");
     if (entityCertificate != null) {
       super.setEntityCertificate(entityCertificate);
     }
