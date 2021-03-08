@@ -23,8 +23,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import se.swedenconnect.security.credential.pkcs11conf.Pkcs11Configuration;
-
 /**
  * Tests that the {@link Pkcs11Configuration} classes can be configured the Spring Boot-way.
  * 
