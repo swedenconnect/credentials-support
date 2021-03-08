@@ -208,6 +208,34 @@ Basically identical to [se.swedenconnect.security.credential.factory.X509Certifi
 
 So, the `X509CertificateFactoryBean` of the **credentials-support** library is really indented for those that don't use Shibboleth.
 
+#### 3.3.2. Generic PkiCredentialFactoryBean for SpringBoot users
+
+SpringBoot configuration is usually done by configuration properties. Therefore, we have supply the [PkiCredentialFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/factory/PkiCredentialFactoryBean.java) that can be used as a generic factory bean for creating a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) object.
+
+The following properties are supported:
+
+| Property | Description |
+| :--- | :--- |
+| `name` | The name of the credential. |
+| `certificate` | A resource holding the certificate part of the credential. Used in the cases when a [BasicCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/BasicCredential.java) is to be used, or when setting up an PKCS#11 credential that does not store the certificate on the device. |
+| `private-key` | A resource holding the private key part of the credential. Used in the cases when a [BasicCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/BasicCredential.java) is to be used. Note: Only non-encrypted PKCS#8 keys are supported. |
+| `resource` | A resource to the keystore containing the credential. |
+| `password` | The keystore password. |
+| `type` | The type of keystore (defaults to JKS). |
+| `provider` | The name of the Java Security Provider to be used when creating the keystore. See [KeyStoreCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/KeyStoreCredential.java). |
+| `pkcs11-configuration` | If PKCS#11 is to be used, this property points at the PKCS#11 configuration file (a complete path). |
+| `alias` | The keystore alias to the entry holding the key pair. |
+| `keyPassword` | The password to unlock the private key from the keystore. If a keystore is used and this property is not set, the value for `password` is used instead. |
+| `pin` | The same as keyPassword (used mainly for PKCS#11 credentials). |
+
+Based on which of the above properties that are assigned the factory will attempt to create the following classes (in order):
+
+- [BasicCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/BasicCredential.java) - If `certificate` and `private-key` are set.
+
+- [Pkcs11Credential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/Pkcs11Credential.java) - If `pkcs11-configuration`, `alias`, `pin` (or `keyPassword`) are set.
+
+- [KeyStoreCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/KeyStoreCredential.java) - If `resource`, `password` and `alias` are set.
+
 <a name="monitoring-and-reloading-credentials"></a>
 ## 4. Monitoring and reloading credentials
 
