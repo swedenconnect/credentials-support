@@ -33,6 +33,8 @@ Java library for PKI credentials support, including PKCS#11 and HSM:s.
     3.3. [Factories](#factories)
   
     3.3.1. [For Shibboleth users](#for-shibboleth-users)
+    
+    3.3.2. [Generic PkiCredentialFactoryBean for SpringBoot users](#generic-pkicredentialfactorybean-for-springboot-users)
   
 4. [**Monitoring and reloading credentials**](#monitoring-and-reloading-credentials)
 
@@ -208,6 +210,7 @@ Basically identical to [se.swedenconnect.security.credential.factory.X509Certifi
 
 So, the `X509CertificateFactoryBean` of the **credentials-support** library is really indented for those that don't use Shibboleth.
 
+<a name="generic-pkicredentialfactorybean-for-springboot-users"></a>
 #### 3.3.2. Generic PkiCredentialFactoryBean for SpringBoot users
 
 SpringBoot configuration is usually done by configuration properties. Therefore, we have supply the [PkiCredentialFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/factory/PkiCredentialFactoryBean.java) that can be used as a generic factory bean for creating a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) object.

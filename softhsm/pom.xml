@@ -5,7 +5,7 @@
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support-test</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.1</version>
   <packaging>jar</packaging>
 
   <name>Sweden Connect :: PKI credentials support library (test)</name>
@@ -100,7 +100,7 @@
     <dependency>
       <groupId>se.swedenconnect.security</groupId>
       <artifactId>credentials-support</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1</version>
     </dependency>
 
     <dependency>
