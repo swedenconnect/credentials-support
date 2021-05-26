@@ -18,9 +18,7 @@ package se.swedenconnect.security.credential.utils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.InvalidParameterException;
 import java.security.Provider;
-import java.security.ProviderException;
 
 /**
  * Utilities for the Java Security Provider class.
@@ -31,7 +29,7 @@ import java.security.ProviderException;
 public class ProviderUtils {
 
   /**
-   * Since the `Provider.isConfigured` method does not exist for Java 8, when encapsulate this method.
+   * Since the Provider.isConfigured method does not exist for Java 8, when encapsulate this method.
    * 
    * @param provider
    *          the provider

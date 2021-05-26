@@ -50,10 +50,10 @@ public class TestCredentialsService {
   @Qualifier("rsa1b")
   private PkiCredential rsa1b;
 
-  @Setter
-  @Autowired
-  @Qualifier("rsa1bb")
-  private PkiCredential rsa1bb;
+//  @Setter
+//  @Autowired
+//  @Qualifier("rsa1bb")
+//  private PkiCredential rsa1bb;
 
   @Setter
   @Autowired
@@ -64,7 +64,7 @@ public class TestCredentialsService {
     StringBuffer sb = new StringBuffer();
     sb.append(this.testSignAndVerify(this.rsa1)).append(System.lineSeparator()).append(System.lineSeparator());
     sb.append(this.testSignAndVerify(this.rsa1b)).append(System.lineSeparator()).append(System.lineSeparator());
-    sb.append(this.testSignAndVerify(this.rsa1bb)).append(System.lineSeparator());
+//    sb.append(this.testSignAndVerify(this.rsa1bb)).append(System.lineSeparator());
     return sb.toString();
   }
 

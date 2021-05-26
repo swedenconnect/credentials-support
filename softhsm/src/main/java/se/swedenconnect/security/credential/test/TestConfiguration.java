@@ -79,13 +79,13 @@ public class TestConfiguration {
     return new KeyStoreCredential();
   }
 
-  @Bean("rsa1bb")
-  @ConfigurationProperties("test.credential.rsa1bb")
-  public PkiCredential rsa1bb(final KeyStore keyStore) {
-    KeyStoreCredential cred = new KeyStoreCredential();
-    cred.setKeyStore(keyStore);
-    return cred;
-  }
+//  @Bean("rsa1bb")
+//  @ConfigurationProperties("test.credential.rsa1bb")
+//  public PkiCredential rsa1bb(final KeyStore keyStore) {
+//    KeyStoreCredential cred = new KeyStoreCredential();
+//    cred.setKeyStore(keyStore);
+//    return cred;
+//  }
 
   @Bean("keyStore")
   @ConfigurationProperties("test.keystore")
