@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.credential.utils.ProviderUtils;
 
 /**
  * Factory bean for creating and unlocking a {@link KeyStore}.
@@ -119,12 +120,12 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
         if (securityProvider == null) {
           throw new NoSuchProviderException(String.format("Provider '%s' does not exist", this.provider));
         }
-        if (!securityProvider.isConfigured()) {
+        if (!ProviderUtils.isConfigured(securityProvider)) {
           if (this.pkcs11Configuration == null) {
             throw new IllegalArgumentException("Missing pkcs11Configuration");
           }
           log.debug("Configuring security provider '{}' using '{}'", this.provider, this.pkcs11Configuration);
-          securityProvider = securityProvider.configure(this.pkcs11Configuration);
+          securityProvider = ProviderUtils.configure(securityProvider, this.pkcs11Configuration); 
           Security.addProvider(securityProvider);
           this.provider = securityProvider.getName();
           log.debug("After configuration of provider, the '{}' provider name will be used", this.provider);
