@@ -22,7 +22,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.security.InvalidParameterException;
 import java.security.Key;
 import java.security.KeyStoreException;
@@ -62,9 +62,8 @@ public class MockSunPkcs11Provider extends Provider {
     this(name, "1.0.0", "Mock provider");
   }
 
-  @SuppressWarnings("deprecation")
   protected MockSunPkcs11Provider(String name, String versionStr, String info) {
-    super(name, 1.0, "Mock provider");
+    super(name, "1.0.0", "Mock provider");
 
     final Provider sunProvider = Security.getProvider("SUN");
     for (final Object k : sunProvider.keySet()) {
@@ -92,6 +91,7 @@ public class MockSunPkcs11Provider extends Provider {
   }
   
   /** {@inheritDoc} */
+  @Override
   public Provider configure(final String configArg) {
     if (configArg == null) {
       throw new NullPointerException("configArg is null");
@@ -105,7 +105,7 @@ public class MockSunPkcs11Provider extends Provider {
         configData = configArg.substring(2);
       }
       else {
-        configData = new String(Files.readAllBytes(Paths.get(configArg)));
+        configData = Files.readString(Path.of(configArg));
       }
       String name = null;
       boolean librarySet = false;
@@ -141,6 +141,7 @@ public class MockSunPkcs11Provider extends Provider {
     }
   }
 
+  @Override
   public boolean isConfigured() {
     return this.configured;
   }  

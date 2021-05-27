@@ -25,7 +25,6 @@ import java.security.cert.X509Certificate;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.security.credential.utils.ProviderUtils;
 
 /**
  * The default PKCS#11 configuration class. This implementation assumes that the SunPKCS11 security provider is used.
@@ -111,7 +110,7 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
     if (p == null) {
       throw new Pkcs11ConfigurationException(String.format("Failed to get the %s provider", this.getBaseProviderName()));
     }
-    if (ProviderUtils.isConfigured(p)) {
+    if (p.isConfigured()) {
       // If a statically configured provider is used, we don't allow anything to be configured.
       //
       if (this.getConfigurationFile() != null || this.getLibrary() != null || this.getName() != null
@@ -134,59 +133,39 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
       return this.provider;
     }
 
-    if (ProviderUtils.isModernProvider()) {
-
-      // Create a SunPKCS11 provider ...
-      //
-      Provider p = Security.getProvider(this.getBaseProviderName());
-      if (p == null) {
-        throw new Pkcs11ConfigurationException(String.format("Failed to get the %s provider", this.getBaseProviderName()));
-      }
-
-      if (!ProviderUtils.isConfigured(p)) {
-        // Configure it, and get a new provider instance ...
-        //
-        final String configData = this.getConfigurationData();
-        log.debug("Configuring {} provider with the following configuration data: {}", this.getBaseProviderName(), configData);
-        try {
-          p = ProviderUtils.configure(p, configData);
-        }
-        catch (InvalidParameterException e) {
-          throw new Pkcs11ConfigurationException(String.format("Failed to configure %s provider", this.getBaseProviderName()), e);
-        }
-        log.debug("{} provider successfully configured - Provider name: {}", this.getBaseProviderName(), p.getName());
-
-        // Install it ...
-        //
-        final int result = Security.addProvider(p);
-        if (result == -1) {
-          log.warn("A provider with the name '{}' has already been installed", p.getName());
-        }
-      }
-      else {
-        log.debug("The {} provider has already been configured ...", this.getBaseProviderName());
-      }
-      this.provider = p;
-      return this.provider;
+    // Create a SunPKCS11 provider ...
+    //
+    Provider p = Security.getProvider(this.getBaseProviderName());
+    if (p == null) {
+      throw new Pkcs11ConfigurationException(String.format("Failed to get the %s provider", this.getBaseProviderName()));
     }
-    else {
-      // Java 8 ...
-      log.debug("Configuring SunPKCS11 provider with the following configuration data: {}", this.getConfigurationData());    
-      Provider p = ProviderUtils.java8CreateSunPkcs11Provider(this.getConfigurationData());
-      if (p == null) {
-        throw new Pkcs11ConfigurationException("Failed to get the SunPKCS11 provider");
+
+    if (!p.isConfigured()) {
+      // Configure it, and get a new provider instance ...
+      //
+      final String configData = this.getConfigurationData();
+      log.debug("Configuring {} provider with the following configuration data: {}", this.getBaseProviderName(), configData);
+      try {
+        p = p.configure(configData);
       }
-      
+      catch (InvalidParameterException e) {
+        throw new Pkcs11ConfigurationException(String.format("Failed to configure %s provider", this.getBaseProviderName()), e);
+      }
+      log.debug("{} provider successfully configured - Provider name: {}", this.getBaseProviderName(), p.getName());
+
       // Install it ...
       //
       final int result = Security.addProvider(p);
       if (result == -1) {
         log.warn("A provider with the name '{}' has already been installed", p.getName());
       }
-      
-      this.provider = p;
-      return this.provider;
     }
+    else {
+      log.debug("The {} provider has already been configured ...", this.getBaseProviderName());
+    }
+
+    this.provider = p;
+    return this.provider;
   }
 
   /** {@inheritDoc} */
