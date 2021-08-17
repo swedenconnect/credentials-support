@@ -87,6 +87,31 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   /** The password to unlock the private key from the keystore. */
   private char[] keyPassword;
 
+  /**
+   * Default constructor.
+   */
+  public PkiCredentialFactoryBean() {
+  }
+
+  /**
+   * Constructor that initializes the factory from the supplied credential configuration properties object.
+   * 
+   * @param properties
+   *          credential configuration properties
+   */
+  public PkiCredentialFactoryBean(final PkiCredentialConfigurationProperties properties) {
+    this.setName(properties.getName());
+    this.setCertificate(properties.getCertificate());
+    this.setPrivateKey(properties.getPrivateKey());
+    this.setResource(properties.getResource());
+    this.setPassword(properties.getPassword());
+    this.setType(properties.getType());
+    this.setProvider(properties.getProvider());
+    this.setPkcs11Configuration(properties.getPkcs11Configuration());
+    this.setAlias(properties.getAlias());
+    this.setKeyPassword(properties.getKeyPassword());
+  }
+
   /** {@inheritDoc} */
   @Override
   protected PkiCredential createInstance() throws Exception {
@@ -275,7 +300,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
     }
     super.afterPropertiesSet();
   }
-  
+
   /** {@inheritDoc} */
   @Override
   public void destroy() throws Exception {
