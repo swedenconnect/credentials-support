@@ -81,7 +81,7 @@ public class PkiCredentialConfigurationProperties {
   private char[] keyPassword;
 
   /**
-   * Assigns the PIN (which is the same as {@link #setKeyPassword(char[])}. Used mainly for PKCS#11.
+   * Assigns the PIN (which is the same as {@code keyPassword}. Used mainly for PKCS#11.
    * 
    * @param pin
    *          the PIN
@@ -91,7 +91,7 @@ public class PkiCredentialConfigurationProperties {
   }
 
   /**
-   * Gets the PIN (which is the same as {@link #getKeyPassword()}). Used mainly for PKCS#11.
+   * Gets the PIN (which is the same as {@code keyPassword}). Used mainly for PKCS#11.
    * 
    * @return the PIN
    */

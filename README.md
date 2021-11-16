@@ -260,7 +260,7 @@ See [SpringBootTest](https://github.com/swedenconnect/credentials-support/blob/m
 <a name="api-documentation"></a>
 ## 6. API documentation
 
-* [Java API documentation](https://docs.swedenconnect.se/credentials-support/apidoc/)
+* [Java API documentation](https://docs.swedenconnect.se/credentials-support/apidoc/index.html)
 
 ---
 
