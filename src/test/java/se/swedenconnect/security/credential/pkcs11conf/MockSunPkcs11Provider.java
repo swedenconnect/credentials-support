@@ -217,6 +217,9 @@ public class MockSunPkcs11Provider extends Provider {
 
     @Override
     public Certificate[] engineGetCertificateChain(String alias) {
+      if (MockedPkcs11ResourceHolder.getInstance().isMockNoCertificate()) {
+        return null;
+      }      
       return this.spi.engineGetCertificateChain(alias);
     }
 

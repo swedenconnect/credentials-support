@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,22 @@
  */
 package se.swedenconnect.security.credential.converters;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.security.KeyException;
 import java.security.PrivateKey;
 
-import org.opensaml.security.crypto.KeySupport;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.core.io.Resource;
+
+import se.swedenconnect.security.credential.utils.PrivateKeyUtils;
 
 /**
  * A {@link Converter} that gets the property value (e.g., {@code classpath:signing.key}) and instantiates a
  * {@link PrivateKey} object.
  * <p>
- * Note: The converter only handles non-encrypted RSA/DSA private keys in DER, PEM, or PKCS#8 (encrypted or unencrypted)
- * formats.
+ * Note: The converter only handles non-encrypted private keys in DER, PEM, and PKCS#8 formats.
  * </p>
  * <p>
  * To use this converter it has to be instantiated as a bean and then registered in the registry using
@@ -50,9 +47,6 @@ import org.springframework.core.io.Resource;
  *   return new PropertyToPrivateKeyConverter();
  * }
  * </pre>
- * <p>
- * <b>Note:</b> OpenSAML is required.
- * </p>
  * 
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -66,12 +60,10 @@ public class PropertyToPrivateKeyConverter implements Converter<String, PrivateK
   @Override
   public PrivateKey convert(final String source) {
 
-    final Resource resource = this.applicationContext.getResource(source);
-
-    try (InputStream is = resource.getInputStream()) {
-      return KeySupport.decodePrivateKey(is, null);
+    try {
+      return PrivateKeyUtils.decodePrivateKey(this.applicationContext.getResource(source));
     }
-    catch (KeyException | IOException e) {
+    catch (final KeyException e) {
       throw new IllegalArgumentException("Failed to instantiate private key object from " + source, e);
     }
   }

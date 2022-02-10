@@ -6,7 +6,7 @@
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0-SNAPSHOT</version>
 
   <name>Sweden Connect :: PKI credentials support library</name>
   <description>Support for credentials (including PKCS11 based keys and HSM:s)</description>
@@ -106,7 +106,13 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
-      <version>[1.68,)</version>
+      <version>[1.70,)</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.cryptacular</groupId>
+      <artifactId>cryptacular</artifactId>
+      <version>1.2.4</version>
     </dependency>
     
     <dependency>
@@ -135,18 +141,18 @@
         </exclusion>
       </exclusions>
     </dependency>
-
+    
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
+      <version>[${slf4j.version},)</version>
       <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.8</version>
+      <version>1.18.22</version>
       <scope>provided</scope>
     </dependency>
 
@@ -154,7 +160,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
 

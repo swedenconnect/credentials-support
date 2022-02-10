@@ -24,8 +24,10 @@ import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -67,6 +69,7 @@ import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunc
  * Another possibility is to supply the provider name of a security provider configured for PKCS#11. This could
  * typically look something like:
  * </p>
+ * 
  * <pre>
  * // Create a SunPKCS11 provider instance using our PKCS#11 configuration ...
  * Provider provider = Security.getProvider("SunPKCS11");
@@ -82,6 +85,7 @@ import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunc
  * In the above example we created the SunPKCS11 provider instance manually. It is also to create a
  * {@code KeyStoreCredential} instance by supplying the PKCS#11 configuration file.
  * </p>
+ * 
  * <pre>
  * KeyStoreCredential credential = new KeyStoreCredential(null, "PKCS11", "SunPKCS11", tokenPw, alias, null);
  * credential.setPkcs11Configuration(pkcs11CfgFile);
@@ -247,7 +251,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
       }
       this.keyStoreFactory.afterPropertiesSet();
       this.keyStore = this.keyStoreFactory.getObject();
-      
+
       // For PKCS11, install a default test function (if none has been set) ...
       //
       if ("PKCS11".equals(this.keyStore.getType()) && this.getTestFunction() == null) {
@@ -263,12 +267,23 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
     if (super.getCertificate() == null) {
       Assert.hasText(this.alias, "Property 'alias' must be set");
-      X509Certificate cert = (X509Certificate) this.keyStore.getCertificate(this.alias);
-      if (cert == null) {
-        throw new CertificateException("No certificate found at entry " + this.alias);
+
+      final Object[] chain = this.keyStore.getCertificateChain(alias);
+      if (chain == null || chain.length == 0) {
+        // Just to be sure. Some P11 implementations may not handle chains...
+        final X509Certificate cert = (X509Certificate) this.keyStore.getCertificate(this.alias);
+        if (cert == null) {
+          throw new CertificateException("No certificate found at entry " + this.alias);
+        }
+        this.setCertificate(cert);
+        log.debug("Certificate loaded from entry '{}'", this.alias);
       }
-      this.setCertificate(cert);
-      log.debug("Certificate loaded from entry '{}'", this.alias);
+      else {
+        this.setCertificateChain(Arrays.stream(chain)
+          .map(X509Certificate.class::cast)
+          .collect(Collectors.toList()));
+        log.debug("Certificate loaded from entry '{}'", this.alias);
+      }
     }
   }
 
@@ -404,8 +419,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /** {@inheritDoc} */
   @Override
   public PublicKey getPublicKey() {
-    final X509Certificate cert = this.getCertificate();
-    return cert != null ? cert.getPublicKey() : null;
+    return Optional.ofNullable(this.getCertificate()).map(X509Certificate::getPublicKey).orElse(null);
   }
 
   /**
@@ -419,6 +433,13 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /** {@inheritDoc} */
   @Override
   public synchronized X509Certificate getCertificate() {
+    this.getCertificateChain();    
+    return super.getCertificate();
+  }
+  
+  /** {@inheritDoc} */
+  @Override
+  public synchronized List<X509Certificate> getCertificateChain() {
     if (!this.loaded) {
       log.warn("KeyStoreCredential '{}' has not been loaded ...", this.getName());
       try {
@@ -429,9 +450,9 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
         throw new SecurityException("Failed to load KeyStoreCredential - " + e.getMessage(), e);
       }
     }
-    return super.getCertificate();
+    return super.getCertificateChain();
   }
-  
+
   /** {@inheritDoc} */
   @Override
   public synchronized PrivateKey getPrivateKey() {

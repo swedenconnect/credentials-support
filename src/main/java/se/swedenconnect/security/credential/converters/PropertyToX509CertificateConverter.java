@@ -15,10 +15,7 @@
  */
 package se.swedenconnect.security.credential.converters;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import org.springframework.beans.BeansException;
@@ -26,7 +23,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.core.io.Resource;
+
+import se.swedenconnect.security.credential.utils.X509Utils;
 
 /**
  * A {@link Converter} that gets the property value (e.g., {@code classpath:cert.crt}) and instantiates a
@@ -60,12 +58,10 @@ public class PropertyToX509CertificateConverter implements Converter<String, X50
   @Override
   public X509Certificate convert(final String source) {
 
-    final Resource resource = this.applicationContext.getResource(source);
-
-    try (InputStream is = resource.getInputStream()) {
-      return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+    try {
+      return X509Utils.decodeCertificate(this.applicationContext.getResource(source));
     }
-    catch (CertificateException | IOException e) {
+    catch (final CertificateException e) {
       throw new IllegalArgumentException(String.format("Failed to convert %s to a X509Certificate", source));
     }
   }

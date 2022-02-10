@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,13 @@
 package se.swedenconnect.security.credential.opensaml;
 
 import java.security.KeyStore;
-import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import net.shibboleth.utilities.java.support.logic.ConstraintViolationException;
-import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
+import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
 
 /**
@@ -76,7 +74,7 @@ public class OpenSamlCredentialTest {
     Assert.assertNotNull(cred.getPublicKey());
   }
   
-  @Test(expected = ConstraintViolationException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testMixedInit() throws Exception {
     PkiCredential _cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());
     _cred.init();
@@ -90,9 +88,7 @@ public class OpenSamlCredentialTest {
     PkiCredential _cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());
     _cred.init();
     
-    final OpenSamlCredential cred = new OpenSamlCredential(_cred);
-    cred.setEntityCertificateChain(Arrays.asList(_cred.getCertificate()));
-    
+    final OpenSamlCredential cred = new OpenSamlCredential(_cred);    
     Assert.assertTrue(cred.getEntityCertificateChain().size() == 1);
   }
   

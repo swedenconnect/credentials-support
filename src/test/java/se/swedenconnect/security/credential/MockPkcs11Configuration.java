@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,8 +101,8 @@ public class MockPkcs11Configuration implements Pkcs11Configuration {
   public Pkcs11ObjectProvider<PkiCredential> getCredentialProvider() {
     return (provider, alias, pin) -> {
       try {
-        PrivateKey pk = !this.simulateNoPrivateKey ? (PrivateKey) this.keyStore.getKey(alias, pin) : null;
-        X509Certificate cert = !this.simulateNoCertificate ? (X509Certificate) this.keyStore.getCertificate(alias) : null; 
+        final PrivateKey pk = !this.simulateNoPrivateKey ? (PrivateKey) this.keyStore.getKey(alias, pin) : null;
+        final X509Certificate cert = !this.simulateNoCertificate ? (X509Certificate) this.keyStore.getCertificate(alias) : null; 
         if (pk == null && cert == null) {
           return null;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 package se.swedenconnect.security.credential.factory;
 
-import java.io.InputStream;
-import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
-import org.opensaml.security.crypto.KeySupport;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
@@ -31,6 +31,8 @@ import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.Pkcs11Credential;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.utils.PrivateKeyUtils;
+import se.swedenconnect.security.credential.utils.X509Utils;
 
 /**
  * A utility factory that can create any type of {@link PkiCredential} class defined in this module.
@@ -62,6 +64,12 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
    * keystore).
    */
   private Resource certificate;
+
+  /**
+   * A list of resources holding the certificate chain that part of the credential (optional since the certificate may
+   * be part of a keystore). If used, the entity certificate must be the first element.
+   */
+  private List<Resource> certificates;
 
   /** A resource holding the private key part of the credential (optional since the key may be part of a keystore). */
   private Resource privateKey;
@@ -102,6 +110,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   public PkiCredentialFactoryBean(final PkiCredentialConfigurationProperties properties) {
     this.setName(properties.getName());
     this.setCertificate(properties.getCertificate());
+    this.setCertificates(properties.getCertificates());
     this.setPrivateKey(properties.getPrivateKey());
     this.setResource(properties.getResource());
     this.setPassword(properties.getPassword());
@@ -117,13 +126,19 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   protected PkiCredential createInstance() throws Exception {
 
     AbstractPkiCredential credential = null;
-
-    if (this.certificate != null && this.privateKey != null) {
-      PrivateKey _privateKey = null;
-      try (InputStream is = this.privateKey.getInputStream()) {
-        _privateKey = KeySupport.decodePrivateKey(is, null);
+    
+    final List<X509Certificate> _certificates = new ArrayList<>();
+    if (this.certificates != null && !this.certificates.isEmpty()) {
+      for (final Resource r : this.certificates) {
+        _certificates.add(X509Utils.decodeCertificate(r));
       }
-      credential = new BasicCredential(this.certificate, _privateKey);
+    }
+    else if (this.certificate != null) {
+      _certificates.add(X509Utils.decodeCertificate(this.certificate));
+    }
+
+    if (!_certificates.isEmpty() && this.privateKey != null) {
+      credential = new BasicCredential(_certificates, PrivateKeyUtils.decodePrivateKey(this.privateKey));          
     }
     else if (StringUtils.hasText(this.pkcs11Configuration) && StringUtils.hasText(this.alias) && this.keyPassword != null
         && (!StringUtils.hasText(this.type) || "PKCS11".equalsIgnoreCase(this.type))) {
@@ -131,8 +146,8 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
       p11Cred.setConfigurationFile(this.pkcs11Configuration);
       p11Cred.setAlias(this.alias);
       p11Cred.setPin(this.keyPassword);
-      if (this.certificate != null) {
-        p11Cred.setCertificate(this.certificate);
+      if (!_certificates.isEmpty()) {
+        p11Cred.setCertificateChain(_certificates);
       }
       credential = p11Cred;
     }
@@ -188,7 +203,24 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
    *          certificate resource
    */
   public void setCertificate(final Resource certificate) {
+    if (this.certificates != null && !this.certificates.isEmpty()) {
+      throw new IllegalArgumentException("Can not assign both 'certificate' and 'certificates'");
+    }
     this.certificate = certificate;
+  }
+
+  /**
+   * Assigns the list of resources holding the certificate chain that part of the credential (optional since the
+   * certificate may be part of a keystore). If used, the entity certificate must be the first element.
+   * 
+   * @param certificates
+   *          a list of certificate resources
+   */
+  public void setCertificates(final List<Resource> certificates) {
+    if (this.certificate != null) {
+      throw new IllegalArgumentException("Can not assign both 'certificate' and 'certificates'");
+    }
+    this.certificates = certificates;
   }
 
   /**
@@ -285,7 +317,8 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   /** {@inheritDoc} */
   @Override
   public void afterPropertiesSet() throws Exception {
-    if (this.certificate != null && this.privateKey != null) {
+    if ((this.certificate != null || (this.certificates != null && !this.certificates.isEmpty())) 
+        && this.privateKey != null) {
       log.debug("A BasicCredential will be created");
     }
     else if (StringUtils.hasText(this.pkcs11Configuration) && StringUtils.hasText(this.alias) && this.keyPassword != null
