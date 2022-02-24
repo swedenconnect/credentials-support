@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.BasicCredential;
@@ -181,7 +184,7 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
         keyStore.load(null, pin);
 
         log.debug("Getting private key from entry '{}' ...", alias);
-        PrivateKey pk = (PrivateKey) keyStore.getKey(alias, pin);
+        final PrivateKey pk = (PrivateKey) keyStore.getKey(alias, pin);
 
         if (pk != null) {
           log.debug("Private key was successfully obtained from device at alias '{}' using provider '{}'", alias, provider.getName());
@@ -191,7 +194,7 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
         }
         return pk;
       }
-      catch (Exception e) {
+      catch (final Exception e) {
         throw new SecurityException(
           String.format("Failed to load private key from provider '%s' - {}", provider.getName(), e.getMessage()), e);
       }
@@ -204,7 +207,7 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
     return (provider, alias, pin) -> {
       try {
         log.debug("Creating a PKCS11 KeyStore using provider '{}' ...", provider.getName());
-        KeyStore keyStore = KeyStore.getInstance("PKCS11", provider.getName());
+        final KeyStore keyStore = KeyStore.getInstance("PKCS11", provider.getName());
 
         log.debug("Loading KeyStore using supplied PIN ...");
         keyStore.load(null, pin);
@@ -220,16 +223,26 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
           return null;
         }
 
-        final X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
-        if (cert != null) {
-          log.debug("Certificate was successfully obtained from device at alias '{}' using provider '{}'", alias, provider.getName());
+        final Object[] _certs = keyStore.getCertificateChain(alias);
+        if (_certs == null || _certs.length == 0) {
+          final X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
+          if (cert != null) {
+            log.debug("Certificate was successfully obtained from device at alias '{}' using provider '{}'", alias, provider.getName());
+          }
+          else {
+            log.debug("No certificate was found on device at alias '{}' using provider '{}'", alias, provider.getName());
+          }
+          return new BasicCredential(cert, pk);
         }
         else {
-          log.debug("No certificate was found on device at alias '{}' using provider '{}'", alias, provider.getName());
+          log.debug("Certificate chain was successfully obtained from device at alias '{}' using provider '{}'", alias, provider.getName());
+          final List<X509Certificate> certs = Arrays.stream(_certs)
+              .map(X509Certificate.class::cast)
+              .collect(Collectors.toList());
+          return new BasicCredential(certs, pk);
         }
-        return new BasicCredential(cert, pk);
       }
-      catch (Exception e) {
+      catch (final Exception e) {
         throw new SecurityException(
           String.format("Failed to load private key and certificate from provider '%s' - {}", provider.getName(), e.getMessage()), e);
       }

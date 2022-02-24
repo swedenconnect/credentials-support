@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,13 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 
-import se.swedenconnect.security.credential.factory.X509CertificateFactoryBean;
+import se.swedenconnect.security.credential.utils.X509Utils;
 
 /**
  * Abstract base class for classes implementing the {@link PkiCredential} interface.
@@ -35,8 +38,8 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   /** The private key. */
   private PrivateKey privateKey;
 
-  /** The certificate. */
-  private X509Certificate certificate;
+  /** The certificates. */
+  private List<X509Certificate> certificates;
 
   /** The public key. */
   private PublicKey publicKey;
@@ -53,7 +56,9 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   /** {@inheritDoc} */
   @Override
   public PublicKey getPublicKey() {
-    return this.certificate != null ? this.certificate.getPublicKey() : this.publicKey;
+    return Optional.ofNullable(this.getCertificate())
+      .map(X509Certificate::getPublicKey)
+      .orElse(this.publicKey);
   }
 
   /**
@@ -63,8 +68,8 @@ public abstract class AbstractPkiCredential implements PkiCredential {
    *          the public key.
    */
   public void setPublicKey(final PublicKey publicKey) {
-    if (this.certificate != null) {
-      throw new IllegalArgumentException("Cannot assign public key - certificate has already been assigned");
+    if (this.certificates != null && !this.certificates.isEmpty()) {
+      throw new IllegalArgumentException("Cannot assign public key - certificate(s) has already been assigned");
     }
     this.publicKey = publicKey;
   }
@@ -72,7 +77,10 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   /** {@inheritDoc} */
   @Override
   public X509Certificate getCertificate() {
-    return this.certificate;
+    return Optional.ofNullable(this.certificates)
+      .filter(c -> !c.isEmpty())
+      .map(c -> c.get(0))
+      .orElse(null);
   }
 
   /**
@@ -85,7 +93,12 @@ public abstract class AbstractPkiCredential implements PkiCredential {
     if (this.publicKey != null) {
       throw new IllegalArgumentException("Cannot assign certificate - public key has already been assigned");
     }
-    this.certificate = certificate;
+    if (this.certificates != null && !this.certificates.isEmpty()) {
+      throw new IllegalArgumentException("Cannot assign certificate - certificates have already been assigned");
+    }
+    if (certificate != null) {
+      this.certificates = Collections.singletonList(certificate);
+    }
   }
 
   /**
@@ -100,18 +113,35 @@ public abstract class AbstractPkiCredential implements PkiCredential {
     if (this.publicKey != null) {
       throw new IllegalArgumentException("Cannot assign certificate - public key has already been assigned");
     }
-    try {
-      X509CertificateFactoryBean factory = new X509CertificateFactoryBean(certificateResource);
-      factory.afterPropertiesSet();
-      this.certificate = factory.getObject();
+    if (this.certificates != null && !this.certificates.isEmpty()) {
+      throw new IllegalArgumentException("Cannot assign certificate - certificates have already been assigned");
     }
-    catch (Exception e) {
-      if (e instanceof CertificateException) {
-        throw (CertificateException) e;
-      }
-      else {
-        throw new IllegalArgumentException("Failed to read certificate resource", e);
-      }
+    if (certificateResource != null) {
+      this.setCertificate(X509Utils.decodeCertificate(certificateResource));
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public List<X509Certificate> getCertificateChain() {
+    return Optional.ofNullable(this.certificates).orElse(Collections.emptyList());
+  }
+
+  /**
+   * Assigns the certificate chain, where the entity certificate is placed first.
+   * 
+   * @param certificates
+   *          a non-empty list of certificates
+   */
+  public void setCertificateChain(final List<X509Certificate> certificates) {
+    if (this.publicKey != null) {
+      throw new IllegalArgumentException("Cannot assign certificate - public key has already been assigned");
+    }
+    if (this.certificates != null && !this.certificates.isEmpty()) {
+      throw new IllegalArgumentException("Cannot assign certificate - certificates have already been assigned");
+    }
+    if (certificates != null && !certificates.isEmpty()) {
+      this.certificates = Collections.unmodifiableList(certificates);
     }
   }
 
@@ -167,7 +197,7 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   @Override
   public void afterPropertiesSet() throws Exception {
     if (this.getPublicKey() == null) {
-      throw new IllegalArgumentException("Either 'certificate' or 'publicKey' must be assigned");
+      throw new IllegalArgumentException("Either 'certificate'/'certificates' or 'publicKey' must be assigned");
     }
     if (this.privateKey == null) {
       throw new IllegalArgumentException("Property 'privateKey' must be assigned");

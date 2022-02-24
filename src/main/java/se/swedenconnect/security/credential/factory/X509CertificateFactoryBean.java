@@ -15,12 +15,13 @@
  */
 package se.swedenconnect.security.credential.factory;
 
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+
+import se.swedenconnect.security.credential.utils.X509Utils;
 
 /**
  * A factory bean for creating X.509 certificates read from a resource.
@@ -57,7 +58,7 @@ public class X509CertificateFactoryBean extends AbstractFactoryBean<X509Certific
   /** {@inheritDoc} */
   @Override
   protected X509Certificate createInstance() throws Exception {
-    return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(this.resource.getInputStream());
+    return X509Utils.decodeCertificate(this.resource); 
   }
 
   /** {@inheritDoc} */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package se.swedenconnect.security.credential;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -46,6 +47,14 @@ public interface PkiCredential extends InitializingBean, DisposableBean {
   X509Certificate getCertificate();
 
   /**
+   * Gets a certificate chain for the credential, where the first element is the entity certificate
+   * ({@link #getCertificate()}). If no certificate is configured for the credential an empty list is returned.
+   * 
+   * @return a list of certificates, or an empty list
+   */
+  List<X509Certificate> getCertificateChain();
+
+  /**
    * Gets the private key.
    * 
    * @return the private key
@@ -69,5 +78,5 @@ public interface PkiCredential extends InitializingBean, DisposableBean {
   default void init() throws Exception {
     this.afterPropertiesSet();
   }
-  
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -413,18 +413,7 @@ public class KeyStoreCredentialTest {
     
     cred.getPublicKey();
   }
-  
-  @Test
-  public void testGetPublicKeyNull() throws Exception {
-    KeyStoreCredential cred = new KeyStoreCredential(
-      new ClassPathResource("rsa1.jks"), PW, ALIAS, PW);
-    cred.init();
     
-    cred.setCertificate((X509Certificate) null);
-    
-    Assert.assertNull(cred.getPublicKey());
-  }
-  
   @Test
   public void testDefaultName() throws Exception {
     KeyStoreCredential cred = new KeyStoreCredential(
@@ -531,6 +520,7 @@ public class KeyStoreCredentialTest {
   public void testMissingCertificate() throws Exception {
     KeyStore spyKeystore = Mockito.spy(this.keyStore);
     Mockito.doReturn(null).when(spyKeystore).getCertificate(Mockito.any());
+    Mockito.doReturn(null).when(spyKeystore).getCertificateChain(Mockito.any());
     
     KeyStoreCredential cred = new KeyStoreCredential(spyKeystore, ALIAS, PW);
     cred.init();

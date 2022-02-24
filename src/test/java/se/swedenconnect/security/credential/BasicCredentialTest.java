@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class BasicCredentialTest {
     cred.setCertificate(new ClassPathResource("rsa1.jks"));
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = CertificateException.class)
   public void testMissingSetCertificateResource() throws Exception {
     final BasicCredential cred = new BasicCredential();
     cred.setPrivateKey(this.privateKey);

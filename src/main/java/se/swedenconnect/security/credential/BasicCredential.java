@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.core.io.Resource;
@@ -78,6 +79,19 @@ public class BasicCredential extends AbstractPkiCredential {
     this.setCertificate(certificateResource);
     this.setPrivateKey(privateKey);
   }
+  
+  /**
+   * Constructor setting the certificate(s) and private key.
+   * 
+   * @param certificates
+   *          the certificate(s) where the entity certificate is placed first
+   * @param privateKey
+   *          the private key
+   */
+  public BasicCredential(final List<X509Certificate> certificates, final PrivateKey privateKey) {
+    this.setCertificateChain(certificates);
+    this.setPrivateKey(privateKey);
+  }  
 
   /**
    * Gets the subject DN of the certificate and if no certificate is available an UUID is used.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.opensaml.security.x509.BasicX509Credential;
 
-import net.shibboleth.utilities.java.support.collection.LazySet;
-import net.shibboleth.utilities.java.support.logic.Constraint;
 import se.swedenconnect.security.credential.Pkcs11Credential;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
@@ -41,9 +41,6 @@ public class OpenSamlCredential extends BasicX509Credential {
 
   /** The underlying credential. */
   private PkiCredential credential = null;
-
-  /** Whether a full certificate chain has been assigned. */
-  private boolean chainAssigned = false;
 
   /**
    * Default constructor.
@@ -74,38 +71,42 @@ public class OpenSamlCredential extends BasicX509Credential {
    */
   public OpenSamlCredential(final PkiCredential credential) {
     super(null);
-    this.credential = Constraint.isNotNull(credential, "Credential cannot be null");
+    this.credential = Objects.requireNonNull(credential, "Credential cannot be null");
   }
 
   /** {@inheritDoc} */
   @Override
   public PublicKey getPublicKey() {
-    return this.credential != null ? this.credential.getPublicKey() : super.getPublicKey();
+    return Optional.ofNullable(this.credential).map(PkiCredential::getPublicKey).orElse(super.getPublicKey());
   }
 
   /** {@inheritDoc} */
   @Override
   public PrivateKey getPrivateKey() {
-    return this.credential != null ? this.credential.getPrivateKey() : super.getPrivateKey();
+    return Optional.ofNullable(this.credential).map(PkiCredential::getPrivateKey).orElse(super.getPrivateKey());
   }
 
   /** {@inheritDoc} */
   @Override
   public void setPrivateKey(final PrivateKey privateKey) {
-    Constraint.isNull(this.credential, "Private key may not be installed when object is created using a PkiCredential");
+    if (this.credential != null) {
+      throw new IllegalArgumentException("Private key may not be installed when object is created using a PkiCredential");
+    }
     super.setPrivateKey(privateKey);
   }
 
   /** {@inheritDoc} */
   @Override
   public X509Certificate getEntityCertificate() {
-    return this.credential != null ? this.credential.getCertificate() : super.getEntityCertificate();
+    return Optional.ofNullable(this.credential).map(PkiCredential::getCertificate).orElse(super.getEntityCertificate());
   }
 
   /** {@inheritDoc} */
   @Override
   public void setEntityCertificate(final X509Certificate entityCertificate) {
-    Constraint.isNull(this.credential, "Entity certificate may not be installed when object is created using a PkiCredential");
+    if (this.credential != null) {
+      throw new IllegalArgumentException("Entity certificate may not be installed when object is created using a PkiCredential");
+    }
     if (entityCertificate != null) {
       super.setEntityCertificate(entityCertificate);
     }
@@ -114,21 +115,22 @@ public class OpenSamlCredential extends BasicX509Credential {
   /** {@inheritDoc} */
   @Override
   public Collection<X509Certificate> getEntityCertificateChain() {
-    if (this.chainAssigned) {
-      return super.getEntityCertificateChain();
+    if (this.credential != null) {
+      return this.credential.getCertificateChain();
     }
     else {
-      final LazySet<X509Certificate> constructedChain = new LazySet<>();
-      constructedChain.add(this.getEntityCertificate());
-      return constructedChain;
+      return super.getEntityCertificateChain();
     }
   }
 
   /** {@inheritDoc} */
   @Override
   public void setEntityCertificateChain(final Collection<X509Certificate> certificateChain) {
+    if (this.credential != null) {
+      throw new IllegalArgumentException(
+        "Entity certificate chain may not be installed when object is created using a PkiCredential");
+    }
     super.setEntityCertificateChain(certificateChain);
-    this.chainAssigned = true;
   }
 
   /**
@@ -140,9 +142,15 @@ public class OpenSamlCredential extends BasicX509Credential {
    *          the credential to wrap in a OpenSAML credential
    */
   public void setCredential(final PkiCredential credential) {
-    Constraint.isNull(super.getEntityCertificate(), "Credential can not be assigned since certificate has already been assigned");
-    Constraint.isNull(super.getPrivateKey(), "Credential can not be assigned since private key has already been assigned");
-    this.credential = Constraint.isNotNull(credential, "Credential cannot be null");
+    if (super.getEntityCertificate() != null) {
+      throw new IllegalArgumentException(
+        "Credential can not be assigned since certificate has already been assigned");
+    }
+    if (super.getPrivateKey() != null) {
+      throw new IllegalArgumentException(
+        "Credential can not be assigned since private key has already been assigned");
+    }
+    this.credential = Objects.requireNonNull(credential, "Credential cannot be null");
   }
 
 }

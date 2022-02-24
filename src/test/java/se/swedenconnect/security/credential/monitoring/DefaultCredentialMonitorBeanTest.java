@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -373,6 +373,11 @@ public class DefaultCredentialMonitorBeanTest {
     public X509Certificate getCertificate() {
       return null;
     }
+    
+    @Override
+    public List<X509Certificate> getCertificateChain() {
+      return null;
+    }    
 
     @Override
     public PrivateKey getPrivateKey() {

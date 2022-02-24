@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package se.swedenconnect.security.credential.factory;
+
+import java.util.List;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
@@ -39,6 +41,12 @@ public class PkiCredentialConfigurationProperties {
    * keystore).
    */
   private Resource certificate;
+  
+  /**
+   * A list of resources holding the certificate chain that part of the credential (optional since the certificate may be part of a
+   * keystore). If used, the entity certificate must be the first element.
+   */
+  private List<Resource> certificates;
 
   /**
    * A resource holding the private key part of the credential (optional since the key may be part of a keystore).
@@ -105,7 +113,10 @@ public class PkiCredentialConfigurationProperties {
    * @return true if empty and false otherwise
    */
   public boolean isEmpty() {
-    return !StringUtils.hasText(this.name) && this.certificate == null && this.privateKey == null
+    return !StringUtils.hasText(this.name) 
+        && this.certificate == null
+        && (this.certificates == null || this.certificates.isEmpty())
+        && this.privateKey == null
         && this.resource == null && (this.password == null || this.password.length == 0)
         && !StringUtils.hasText(this.type) && !StringUtils.hasText(this.provider)
         && !StringUtils.hasText(this.pkcs11Configuration) && !StringUtils.hasText(this.alias)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2022 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public class Pkcs11CredentialTest {
   
   @Test
   public void testConstructorAllWithCert() throws Exception {
-    Pkcs11Credential cred = new Pkcs11Credential(null, null, null, null);
+    Pkcs11Credential cred = new Pkcs11Credential(null, null, null, (X509Certificate) null);
     try {
       cred.afterPropertiesSet();
       Assert.fail("Expected IllegalArgumentException");
@@ -142,7 +142,7 @@ public class Pkcs11CredentialTest {
     
     final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);
     conf.setSimulateNoCertificate(true);
-    cred = new Pkcs11Credential(conf, null, null, null);
+    cred = new Pkcs11Credential(conf, null, null, (X509Certificate) null);
     try {
       cred.afterPropertiesSet();
       Assert.fail("Expected IllegalArgumentException");
@@ -150,7 +150,7 @@ public class Pkcs11CredentialTest {
     catch (IllegalArgumentException e) {
     }
     
-    cred = new Pkcs11Credential(conf, ALIAS, null, null);
+    cred = new Pkcs11Credential(conf, ALIAS, null, (X509Certificate) null);
     try {
       cred.afterPropertiesSet();
       Assert.fail("Expected IllegalArgumentException");
@@ -158,7 +158,7 @@ public class Pkcs11CredentialTest {
     catch (IllegalArgumentException e) {
     }
     
-    cred = new Pkcs11Credential(conf, ALIAS, PIN, null);
+    cred = new Pkcs11Credential(conf, ALIAS, PIN, (X509Certificate) null);
     try {
       cred.afterPropertiesSet();
       Assert.fail("Expected IllegalArgumentException");
