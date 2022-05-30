@@ -19,6 +19,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +30,7 @@ import se.swedenconnect.security.credential.utils.X509Utils;
 
 /**
  * Abstract base class for classes implementing the {@link PkiCredential} interface.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -63,7 +64,7 @@ public abstract class AbstractPkiCredential implements PkiCredential {
 
   /**
    * Assigns the public key of the key pair.
-   * 
+   *
    * @param publicKey
    *          the public key.
    */
@@ -85,34 +86,32 @@ public abstract class AbstractPkiCredential implements PkiCredential {
 
   /**
    * Assigns the certificate.
-   * 
+   *
    * @param certificate
    *          the certificate
    */
   public void setCertificate(final X509Certificate certificate) {
-    if (this.publicKey != null) {
-      throw new IllegalArgumentException("Cannot assign certificate - public key has already been assigned");
-    }
     if (this.certificates != null && !this.certificates.isEmpty()) {
       throw new IllegalArgumentException("Cannot assign certificate - certificates have already been assigned");
     }
-    if (certificate != null) {
-      this.certificates = Collections.singletonList(certificate);
+    if (this.publicKey != null && certificate != null) {
+      if (!Arrays.equals(this.publicKey.getEncoded(), certificate.getPublicKey().getEncoded())) {
+        throw new IllegalArgumentException("Cannot assign certificate - it does not match already installed public key");
+      }
+      this.publicKey = null;
     }
+    this.certificates = certificate != null ? Collections.singletonList(certificate) : null;
   }
 
   /**
    * Assigns the certificate by assigning a resource pointing to a DER- och PEM-encoded certificate.
-   * 
+   *
    * @param certificateResource
    *          the certificate resource
    * @throws CertificateException
-   *           if the supplied resource cannot be decoded into a {@link X509Certificate} instance
+   *           if the supplied resource cannot be decoded into a X509Certificate instance
    */
   public void setCertificate(final Resource certificateResource) throws CertificateException {
-    if (this.publicKey != null) {
-      throw new IllegalArgumentException("Cannot assign certificate - public key has already been assigned");
-    }
     if (this.certificates != null && !this.certificates.isEmpty()) {
       throw new IllegalArgumentException("Cannot assign certificate - certificates have already been assigned");
     }
@@ -129,20 +128,25 @@ public abstract class AbstractPkiCredential implements PkiCredential {
 
   /**
    * Assigns the certificate chain, where the entity certificate is placed first.
-   * 
+   *
    * @param certificates
    *          a non-empty list of certificates
    */
   public void setCertificateChain(final List<X509Certificate> certificates) {
-    if (this.publicKey != null) {
-      throw new IllegalArgumentException("Cannot assign certificate - public key has already been assigned");
+    if (certificates != null && certificates.isEmpty()) {
+      throw new IllegalArgumentException("Supplied certificate chain must contain at least one certificate");
     }
+
     if (this.certificates != null && !this.certificates.isEmpty()) {
       throw new IllegalArgumentException("Cannot assign certificate - certificates have already been assigned");
     }
-    if (certificates != null && !certificates.isEmpty()) {
-      this.certificates = Collections.unmodifiableList(certificates);
+    if (this.publicKey != null && certificates != null) {
+      if (!Arrays.equals(this.publicKey.getEncoded(), certificates.get(0).getPublicKey().getEncoded())) {
+        throw new IllegalArgumentException("Cannot assign certificate(s) - entity certificate does not match already installed public key");
+      }
+      this.publicKey = null;
     }
+    this.certificates = certificates != null ? Collections.unmodifiableList(certificates) : null;
   }
 
   /** {@inheritDoc} */
@@ -153,7 +157,7 @@ public abstract class AbstractPkiCredential implements PkiCredential {
 
   /**
    * Assigns the private key.
-   * 
+   *
    * @param privateKey
    *          the private key
    */
@@ -175,14 +179,14 @@ public abstract class AbstractPkiCredential implements PkiCredential {
    * <p>
    * Implementations must not assume that the object has been correctly initialized.
    * </p>
-   * 
+   *
    * @return the credential name
    */
   protected abstract String getDefaultName();
 
   /**
    * Assigns the credential name.
-   * 
+   *
    * @param name
    *          the name
    */
