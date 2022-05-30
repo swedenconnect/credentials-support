@@ -6,7 +6,7 @@
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support</artifactId>
-  <version>1.2.2-SNAPSHOT</version>
+  <version>1.2.2</version>
 
   <name>Sweden Connect :: PKI credentials support library</name>
   <description>Support for credentials (including PKCS11 based keys and HSM:s)</description>
