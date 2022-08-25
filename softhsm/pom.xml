@@ -5,7 +5,7 @@
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support-test</artifactId>
-  <version>1.2.2</version>
+  <version>1.2.3</version>
   <packaging>jar</packaging>
 
   <name>Sweden Connect :: PKI credentials support library (test)</name>
@@ -100,13 +100,13 @@
     <dependency>
       <groupId>se.swedenconnect.security</groupId>
       <artifactId>credentials-support</artifactId>
-      <version>1.2.2</version>
+      <version>1.2.3</version>
     </dependency>
 
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-security-api</artifactId>
-      <version>[4.0.0,)</version>
+      <version>[4.1.0,)</version>
       <exclusions>
         <exclusion>
           <groupId>org.bouncycastle</groupId>
