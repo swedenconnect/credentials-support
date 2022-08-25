@@ -84,12 +84,8 @@ public abstract class AbstractPkiCredential implements PkiCredential {
       .orElse(null);
   }
 
-  /**
-   * Assigns the certificate.
-   *
-   * @param certificate
-   *          the certificate
-   */
+  /** {@inheritDoc} */
+  @Override
   public void setCertificate(final X509Certificate certificate) {
     if (this.certificates != null && !this.certificates.isEmpty()) {
       throw new IllegalArgumentException("Cannot assign certificate - certificates have already been assigned");
@@ -126,12 +122,8 @@ public abstract class AbstractPkiCredential implements PkiCredential {
     return Optional.ofNullable(this.certificates).orElse(Collections.emptyList());
   }
 
-  /**
-   * Assigns the certificate chain, where the entity certificate is placed first.
-   *
-   * @param certificates
-   *          a non-empty list of certificates
-   */
+  /** {@inheritDoc} */
+  @Override
   public void setCertificateChain(final List<X509Certificate> certificates) {
     if (certificates != null && certificates.isEmpty()) {
       throw new IllegalArgumentException("Supplied certificate chain must contain at least one certificate");
@@ -166,7 +158,7 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   }
 
   /**
-   * Gets the name of the credential. If no name has been explicitly assigned, {@link #getDefaultName()} is used.
+   * Gets the name of the credential. If no name has been explicitly assigned, the default name is used.
    */
   @Override
   public String getName() {
