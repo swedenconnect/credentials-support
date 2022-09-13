@@ -20,8 +20,8 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
@@ -51,10 +51,10 @@ public class BasicCredentialTest {
     cred.setPrivateKey(this.privateKey);
     cred.setCertificate(this.cert);
     cred.init();
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getName());
   }
 
   @Test
@@ -63,10 +63,10 @@ public class BasicCredentialTest {
     cred.setPrivateKey(this.privateKey);
     cred.setCertificate(new ClassPathResource("rsa1.crt"));
     cred.init();
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getName());
   }
 
   @Test
@@ -75,30 +75,36 @@ public class BasicCredentialTest {
     cred.setPrivateKey(this.privateKey);
     cred.setPublicKey(this.cert.getPublicKey());
     cred.init();
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNull(cred.getCertificate());
+    assertNotNull(cred.getName());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDefaultConstructorMissingKeyAndCert() throws Exception {
-    final BasicCredential cred = new BasicCredential();
-    cred.init();
+    assertThrows(IllegalArgumentException.class, () -> {
+      final BasicCredential cred = new BasicCredential();
+      cred.init();
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDefaultConstructorMissingPublicKey() throws Exception {
-    final BasicCredential cred = new BasicCredential();
-    cred.setPrivateKey(this.privateKey);
-    cred.init();
+    assertThrows(IllegalArgumentException.class, () -> {
+      final BasicCredential cred = new BasicCredential();
+      cred.setPrivateKey(this.privateKey);
+      cred.init();
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDefaultConstructorMissingPrivateKey() throws Exception {
-    final BasicCredential cred = new BasicCredential();
-    cred.setCertificate(this.cert);
-    cred.init();
+    assertThrows(IllegalArgumentException.class, () -> {
+      final BasicCredential cred = new BasicCredential();
+      cred.setCertificate(this.cert);
+      cred.init();
+    });
   }
 
   @Test
@@ -106,10 +112,10 @@ public class BasicCredentialTest {
     final BasicCredential cred = new BasicCredential(this.cert, this.privateKey);
     cred.afterPropertiesSet();
 
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getName());
   }
 
   @Test
@@ -117,33 +123,39 @@ public class BasicCredentialTest {
     final BasicCredential cred = new BasicCredential(new ClassPathResource("rsa1.crt"), this.privateKey);
     cred.afterPropertiesSet();
 
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getName());
   }
 
-  @Test(expected = CertificateException.class)
+  @Test
   public void testBadSetCertificateResource() throws Exception {
-    final BasicCredential cred = new BasicCredential();
-    cred.setPrivateKey(this.privateKey);
-    // This is not a certificate ...
-    cred.setCertificate(new ClassPathResource("rsa1.jks"));
+    assertThrows(CertificateException.class, () -> {
+      final BasicCredential cred = new BasicCredential();
+      cred.setPrivateKey(this.privateKey);
+      // This is not a certificate ...
+      cred.setCertificate(new ClassPathResource("rsa1.jks"));
+    });
   }
 
-  @Test(expected = CertificateException.class)
+  @Test
   public void testMissingSetCertificateResource() throws Exception {
-    final BasicCredential cred = new BasicCredential();
-    cred.setPrivateKey(this.privateKey);
-    // This is not a certificate ...
-    cred.setCertificate(new ClassPathResource("rsaXX.crt"));
+    assertThrows(CertificateException.class, () -> {
+      final BasicCredential cred = new BasicCredential();
+      cred.setPrivateKey(this.privateKey);
+      // This is not a certificate ...
+      cred.setCertificate(new ClassPathResource("rsaXX.crt"));
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testIllegalSetPublicKey() throws Exception {
-    final BasicCredential cred = new BasicCredential(this.cert, this.privateKey);
-    cred.init();
-    cred.setPublicKey(this.cert.getPublicKey());
+    assertThrows(IllegalArgumentException.class, () -> {
+      final BasicCredential cred = new BasicCredential(this.cert, this.privateKey);
+      cred.init();
+      cred.setPublicKey(this.cert.getPublicKey());
+    });
   }
 
   // Should work - public key is same as cert
@@ -151,14 +163,16 @@ public class BasicCredentialTest {
     final BasicCredential cred = new BasicCredential(this.cert.getPublicKey(), this.privateKey);
     cred.init();
     cred.setCertificate(this.cert);
-    Assert.assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getCertificate());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testIllegalSetCertificate() throws Exception {
-    final BasicCredential cred = new BasicCredential(this.cert.getPublicKey(), this.privateKey);
-    cred.init();
-    cred.setCertificate(new ClassPathResource("rsa2.crt"));
+    assertThrows(IllegalArgumentException.class, () -> {
+      final BasicCredential cred = new BasicCredential(this.cert.getPublicKey(), this.privateKey);
+      cred.init();
+      cred.setCertificate(new ClassPathResource("rsa2.crt"));
+    });
   }
 
   @Test
@@ -167,28 +181,28 @@ public class BasicCredentialTest {
     cred.setName("TEST");
     cred.init();
 
-    Assert.assertEquals("TEST", cred.getName());
+    assertEquals("TEST", cred.getName());
   }
 
   @Test
   public void testDefaultNameNoSet() throws Exception {
     final BasicCredential cred = new BasicCredential();
     final String name = cred.getName();
-    Assert.assertTrue(name.startsWith("BasicCredential-"));
+    assertTrue(name.startsWith("BasicCredential-"));
   }
 
   @Test
   public void testDefaultNameCertSet() throws Exception {
     final BasicCredential cred = new BasicCredential(this.cert, this.privateKey);
     final String name = cred.getName();
-    Assert.assertTrue(name.contains("CN="));
+    assertTrue(name.contains("CN="));
   }
 
   @Test
   public void testDefaultNamePubKeySet() throws Exception {
     final BasicCredential cred = new BasicCredential(this.cert.getPublicKey(), this.privateKey);
     final String name = cred.getName();
-    Assert.assertTrue(name.startsWith("RSA-"));
+    assertTrue(name.startsWith("RSA-"));
   }
 
   @Test

@@ -17,8 +17,8 @@ package se.swedenconnect.security.credential.factory;
 
 import java.security.cert.X509Certificate;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -35,19 +35,21 @@ public class X509CertificateFactoryBeanTest {
     factory.setResource(new ClassPathResource("rsa1.crt"));
     factory.afterPropertiesSet();
     
-    Assert.assertNotNull(factory.getObject());
-    Assert.assertEquals(X509Certificate.class, factory.getObjectType());
+    assertNotNull(factory.getObject());
+    assertEquals(X509Certificate.class, factory.getObjectType());
     
     factory = new X509CertificateFactoryBean(new ClassPathResource("rsa1.crt"));
     factory.afterPropertiesSet();
     
-    Assert.assertNotNull(factory.getObject());
+    assertNotNull(factory.getObject());
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testMissingResource() throws Exception {
-    X509CertificateFactoryBean factory = new X509CertificateFactoryBean();
-    factory.afterPropertiesSet();
+    assertThrows(IllegalArgumentException.class, () -> {
+      X509CertificateFactoryBean factory = new X509CertificateFactoryBean();
+      factory.afterPropertiesSet();
+    });
   }
 
 }

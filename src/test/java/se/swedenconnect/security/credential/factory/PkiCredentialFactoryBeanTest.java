@@ -18,10 +18,10 @@ package se.swedenconnect.security.credential.factory;
 import java.security.Provider;
 import java.security.Security;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import se.swedenconnect.security.credential.BasicCredential;
@@ -39,7 +39,7 @@ public class PkiCredentialFactoryBeanTest {
 
   private final static char[] PW = "secret".toCharArray();
   
-  @Before
+  @BeforeEach
   public void init() {
     Security.addProvider(new MockSunPkcs11Provider());
 
@@ -47,7 +47,7 @@ public class PkiCredentialFactoryBeanTest {
     MockSunPkcs11Provider.MockedPkcs11ResourceHolder.getInstance().setResource(new ClassPathResource("rsa1.jks"));
   }
 
-  @After
+  @AfterEach
   public void after() {
     Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
 
@@ -65,23 +65,27 @@ public class PkiCredentialFactoryBeanTest {
   @Test
   public void testObjectType() throws Exception {
     final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
-    Assert.assertEquals(PkiCredential.class, factory.getObjectType());
+    assertEquals(PkiCredential.class, factory.getObjectType());
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testMissingConfiguration1() throws Exception {
-    final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
-    factory.setCertificate(new ClassPathResource("rsa1.crt"));
-    factory.afterPropertiesSet();
+    assertThrows(IllegalArgumentException.class, () -> {
+      final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
+      factory.setCertificate(new ClassPathResource("rsa1.crt"));
+      factory.afterPropertiesSet();
+    });
   }
   
-  @Test(expected = SecurityException.class)
+  @Test
   public void testMissingConfiguration2() throws Exception {
-    final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
-    factory.setCertificate(new ClassPathResource("rsa1.crt"));
-    factory.setSingleton(false);
-    factory.getObject();
-  }  
+    assertThrows(SecurityException.class, () -> {
+      final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
+      factory.setCertificate(new ClassPathResource("rsa1.crt"));
+      factory.setSingleton(false);
+      factory.getObject();
+    });
+  }
   
   @Test
   public void testBasicCredential() throws Exception {
@@ -91,8 +95,8 @@ public class PkiCredentialFactoryBeanTest {
     factory.setName("test");
     factory.afterPropertiesSet();
     final PkiCredential credential = factory.getObject();
-    Assert.assertTrue(credential instanceof BasicCredential);
-    Assert.assertEquals("test", credential.getName());
+    assertTrue(credential instanceof BasicCredential);
+    assertEquals("test", credential.getName());
     factory.destroy();
   }
   
@@ -104,7 +108,7 @@ public class PkiCredentialFactoryBeanTest {
     factory.setAlias("test");
     factory.afterPropertiesSet();
     PkiCredential credential = factory.getObject();
-    Assert.assertTrue(credential instanceof KeyStoreCredential);
+    assertTrue(credential instanceof KeyStoreCredential);
     factory.destroy();
     
     factory = new PkiCredentialFactoryBean();
@@ -116,7 +120,7 @@ public class PkiCredentialFactoryBeanTest {
     factory.setProvider("SUN");
     factory.afterPropertiesSet();
     credential = factory.getObject();
-    Assert.assertTrue(credential instanceof KeyStoreCredential);
+    assertTrue(credential instanceof KeyStoreCredential);
     factory.destroy();
   }
   

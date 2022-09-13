@@ -17,9 +17,9 @@ package se.swedenconnect.security.credential.converters;
 
 import java.security.cert.X509Certificate;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
@@ -28,7 +28,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import lombok.Setter;
 import se.swedenconnect.security.credential.converters.PropertyToX509CertificateConverterTest.CertConfig;
@@ -39,7 +39,7 @@ import se.swedenconnect.security.credential.converters.PropertyToX509Certificate
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @EnableConfigurationProperties(value = CertConfig.class)
 @TestPropertySource(locations = { "classpath:application.properties" })
 public class PropertyToX509CertificateConverterTest {
@@ -59,26 +59,28 @@ public class PropertyToX509CertificateConverterTest {
     converter.setApplicationContext(this.context);
     
     X509Certificate cert = converter.convert("classpath:rsa1.crt");
-    Assert.assertNotNull(cert);
+    assertNotNull(cert);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testConvertFailed() throws Exception {
-    PropertyToX509CertificateConverter converter = new PropertyToX509CertificateConverter();
-    converter.setApplicationContext(this.context);
-    
-    converter.convert("classpath:not-found.crt");
+    assertThrows(IllegalArgumentException.class, () -> {
+      PropertyToX509CertificateConverter converter = new PropertyToX509CertificateConverter();
+      converter.setApplicationContext(this.context);
+
+      converter.convert("classpath:not-found.crt");
+    });
   }
   
   @Test
   public void testConverterBean() throws Exception {
-    Assert.assertNotNull("PropertyToX509CertificateConverter bean is not present", this.propertyToX509CertificateConverter);
-    Assert.assertNotNull(this.propertyToX509CertificateConverter.convert("classpath:rsa1.crt"));
+    assertNotNull(this.propertyToX509CertificateConverter, "PropertyToX509CertificateConverter bean is not present");
+    assertNotNull(this.propertyToX509CertificateConverter.convert("classpath:rsa1.crt"));
   }
   
   @Test
   public void testSpringContextCertSet() throws Exception {
-    Assert.assertNotNull(this.testCert);
+    assertNotNull(this.testCert);
   }
 
   @Configuration  

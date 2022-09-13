@@ -63,17 +63,21 @@ public class PropertyToPrivateKeyConverterTest {
     assertNotNull(pk);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testConvertFailed() throws Exception {
-    PropertyToPrivateKeyConverter converter = new PropertyToPrivateKeyConverter();
-    converter.setApplicationContext(this.context);
-    
-    converter.convert("classpath:not-found.key");
+
+    assertThrows(IllegalArgumentException.class, () -> {
+      PropertyToPrivateKeyConverter converter = new PropertyToPrivateKeyConverter();
+      converter.setApplicationContext(this.context);
+
+      converter.convert("classpath:not-found.key");
+    });
+
   }
   
   @Test
   public void testConverterBean() throws Exception {
-    assertNotNull("PropertyToPrivateKeyConverter bean is not present", this.propertyToPrivateKeyConverter);
+    assertNotNull(this.propertyToPrivateKeyConverter, "PropertyToPrivateKeyConverter bean is not present");
     assertNotNull(this.propertyToPrivateKeyConverter.convert("classpath:rsa1.pkcs8.key"));
   }
   
