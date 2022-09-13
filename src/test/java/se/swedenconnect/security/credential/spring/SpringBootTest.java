@@ -17,15 +17,16 @@ package se.swedenconnect.security.credential.spring;
 
 import java.lang.reflect.Field;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import lombok.Setter;
@@ -40,7 +41,7 @@ import se.swedenconnect.security.credential.monitoring.CredentialMonitorBean;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @EnableConfigurationProperties(value = CredentialsConfiguration.class)
 @TestPropertySource(locations = { "classpath:application.properties" })
 @EnableScheduling
@@ -77,18 +78,18 @@ public class SpringBootTest {
   
   @Test
   public void testBeans() throws Exception {
-    Assert.assertNotNull("credential1 not created", this.credential1);
-    Assert.assertNotNull(this.credential1.getCertificate());
-    Assert.assertNotNull(this.credential1.getPrivateKey());
-    Assert.assertNotNull("credential2 not created", this.credential2);
-    Assert.assertNotNull(this.credential2.getCertificate());
-    Assert.assertNotNull(this.credential2.getPrivateKey());
-    Assert.assertNotNull("credential3 not created", this.credential3);
-    Assert.assertNotNull(this.credential3.getCertificate());
-    Assert.assertNotNull(this.credential3.getPrivateKey());
-    Assert.assertNotNull("credential4 not created", this.credential4);
-    Assert.assertNotNull(this.credential4.getCertificate());
-    Assert.assertNotNull(this.credential4.getPrivateKey());
+    assertNotNull(this.credential1, "credential1 not created");
+    assertNotNull(this.credential1.getCertificate());
+    assertNotNull(this.credential1.getPrivateKey());
+    assertNotNull(this.credential2, "credential2 not created");
+    assertNotNull(this.credential2.getCertificate());
+    assertNotNull(this.credential2.getPrivateKey());
+    assertNotNull(this.credential3, "credential3 not created");
+    assertNotNull(this.credential3.getCertificate());
+    assertNotNull(this.credential3.getPrivateKey());
+    assertNotNull(this.credential4, "credential4 not created");
+    assertNotNull(this.credential4.getCertificate());
+    assertNotNull(this.credential4.getPrivateKey());
   }
   
   @Test
@@ -105,7 +106,7 @@ public class SpringBootTest {
     Thread.sleep(3000);
     
     // Now, it should be reloaded...
-    Assert.assertNotNull(this.credential4.getPrivateKey());
+    assertNotNull(this.credential4.getPrivateKey());
     
   }
 }

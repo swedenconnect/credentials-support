@@ -19,14 +19,15 @@ import java.lang.reflect.Field;
 import java.security.Provider;
 import java.security.Security;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import lombok.Setter;
@@ -41,7 +42,7 @@ import se.swedenconnect.security.credential.pkcs11conf.MockSunPkcs11Provider;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = {"/test-config.xml"})
 public class SpringTest {
   
@@ -78,7 +79,7 @@ public class SpringTest {
     MockSunPkcs11Provider.MockedPkcs11ResourceHolder.getInstance().setResource(new ClassPathResource("rsa1.jks"));
   }
   
-  @AfterClass
+  @AfterAll
   public static void afterClass() {
     Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
 
@@ -92,21 +93,21 @@ public class SpringTest {
   
   @Test
   public void testBeans() throws Exception {
-    Assert.assertNotNull("credential1 not created", this.credential1);
-    Assert.assertNotNull(this.credential1.getCertificate());
-    Assert.assertNotNull(this.credential1.getPrivateKey());
-    Assert.assertNotNull("credential2 not created", this.credential2);
-    Assert.assertNotNull(this.credential2.getCertificate());
-    Assert.assertNotNull(this.credential2.getPrivateKey());
-    Assert.assertNotNull("credential2b not created", this.credential2);
-    Assert.assertNotNull(this.credential2b.getCertificate());
-    Assert.assertNotNull(this.credential2b.getPrivateKey());    
-    Assert.assertNotNull("credential3 not created", this.credential3);
-    Assert.assertNotNull(this.credential3.getCertificate());
-    Assert.assertNotNull(this.credential3.getPrivateKey());
-    Assert.assertNotNull("credential4 not created", this.credential4);
-    Assert.assertNotNull(this.credential4.getCertificate());
-    Assert.assertNotNull(this.credential4.getPrivateKey());
+    assertNotNull(this.credential1, "credential1 not created");
+    assertNotNull(this.credential1.getCertificate());
+    assertNotNull(this.credential1.getPrivateKey());
+    assertNotNull(this.credential2, "credential2 not created");
+    assertNotNull(this.credential2.getCertificate());
+    assertNotNull(this.credential2.getPrivateKey());
+    assertNotNull(this.credential2, "credential2b not created");
+    assertNotNull(this.credential2b.getCertificate());
+    assertNotNull(this.credential2b.getPrivateKey());
+    assertNotNull(this.credential3, "credential3 not created");
+    assertNotNull(this.credential3.getCertificate());
+    assertNotNull(this.credential3.getPrivateKey());
+    assertNotNull(this.credential4, "credential4 not created");
+    assertNotNull(this.credential4.getCertificate());
+    assertNotNull(this.credential4.getPrivateKey());
   }
   
   @Test
@@ -123,7 +124,7 @@ public class SpringTest {
     Thread.sleep(3000);
     
     // Now, it should be reloaded...
-    Assert.assertNotNull(this.credential4.getPrivateKey());
+    assertNotNull(this.credential4.getPrivateKey());
     
   }
 

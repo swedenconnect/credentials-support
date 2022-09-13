@@ -20,10 +20,10 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import se.swedenconnect.security.credential.PkiCredential;
@@ -42,7 +42,7 @@ public class DefaultPkcs11ConfigurationTest {
   private static final String LIBRARY = "/opt/foo/lib/libpkcs11.so";
   private static final String NAME = "mocked";
 
-  @Before
+  @BeforeEach
   public void init() {
     Security.insertProviderAt(new MockSunPkcs11Provider(), 1);
 
@@ -50,7 +50,7 @@ public class DefaultPkcs11ConfigurationTest {
     MockSunPkcs11Provider.MockedPkcs11ResourceHolder.getInstance().setResource(new ClassPathResource("rsa1.jks"));
   }
 
-  @After
+  @AfterEach
   public void after() {
     Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
 
@@ -72,15 +72,15 @@ public class DefaultPkcs11ConfigurationTest {
     conf.afterPropertiesSet();
 
     Provider provider = conf.getProvider();
-    Assert.assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME + "-Foo", provider.getName());
+    assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME + "-Foo", provider.getName());
 
     PkiCredential cred = conf.getCredentialProvider().get(provider, ALIAS, PIN);
-    Assert.assertNotNull(cred);
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred);
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getPrivateKey());
     
     // Get private key should also work
-    Assert.assertNotNull(conf.getPrivateKeyProvider().get(provider, ALIAS, PIN));    
+    assertNotNull(conf.getPrivateKeyProvider().get(provider, ALIAS, PIN));
   }
 
   @Test
@@ -90,12 +90,12 @@ public class DefaultPkcs11ConfigurationTest {
     conf.afterPropertiesSet();
 
     Provider provider = conf.getProvider();
-    Assert.assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME + "-" + NAME, provider.getName());
+    assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME + "-" + NAME, provider.getName());
 
     PkiCredential cred = conf.getCredentialProvider().get(provider, ALIAS, PIN);
-    Assert.assertNotNull(cred);
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred);
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getPrivateKey());
   }
 
   @Test
@@ -108,12 +108,12 @@ public class DefaultPkcs11ConfigurationTest {
     conf.afterPropertiesSet();
 
     Provider provider = conf.getProvider();
-    Assert.assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME, provider.getName());
+    assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME, provider.getName());
 
     PkiCredential cred = conf.getCredentialProvider().get(provider, ALIAS, PIN);
-    Assert.assertNotNull(cred);
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred);
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getPrivateKey());
   }
 
   @Test
@@ -125,19 +125,21 @@ public class DefaultPkcs11ConfigurationTest {
     conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
 
     Provider provider = conf.getProvider();
-    Assert.assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME, provider.getName());
+    assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME, provider.getName());
 
     PkiCredential cred = conf.getCredentialProvider().get(provider, ALIAS, PIN);
-    Assert.assertNotNull(cred);
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred);
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getPrivateKey());
   }
   
-  @Test(expected = Pkcs11ConfigurationException.class)
+  @Test
   public void testMissingParamsNoInit() throws Exception {
-    final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration();
-    conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
-    conf.getProvider();
+    assertThrows(Pkcs11ConfigurationException.class, () -> {
+      final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration();
+      conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+      conf.getProvider();
+    });
   }
 
   @Test
@@ -151,7 +153,7 @@ public class DefaultPkcs11ConfigurationTest {
       conf.setConfigurationFile(getAbsolutePath("cfg1.txt"));
       conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
       conf.afterPropertiesSet();
-      Assert.fail("Expeced Pkcs11ConfigurationException");
+      fail("Expeced Pkcs11ConfigurationException");
     }
     catch (Pkcs11ConfigurationException e) {
     }
@@ -161,7 +163,7 @@ public class DefaultPkcs11ConfigurationTest {
       conf.setLibrary(LIBRARY);
       conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
       conf.afterPropertiesSet();
-      Assert.fail("Expeced Pkcs11ConfigurationException");
+      fail("Expeced Pkcs11ConfigurationException");
     }
     catch (Pkcs11ConfigurationException e) {
     }
@@ -171,7 +173,7 @@ public class DefaultPkcs11ConfigurationTest {
       conf.setName(NAME);
       conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
       conf.afterPropertiesSet();
-      Assert.fail("Expeced Pkcs11ConfigurationException");
+      fail("Expeced Pkcs11ConfigurationException");
     }
     catch (Pkcs11ConfigurationException e) {
     }
@@ -181,7 +183,7 @@ public class DefaultPkcs11ConfigurationTest {
       conf.setSlot("1");
       conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
       conf.afterPropertiesSet();
-      Assert.fail("Expeced Pkcs11ConfigurationException");
+      fail("Expeced Pkcs11ConfigurationException");
     }
     catch (Pkcs11ConfigurationException e) {
     }
@@ -191,35 +193,41 @@ public class DefaultPkcs11ConfigurationTest {
       conf.setSlotListIndex(1);
       conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
       conf.afterPropertiesSet();
-      Assert.fail("Expeced Pkcs11ConfigurationException");
+      fail("Expeced Pkcs11ConfigurationException");
     }
     catch (Pkcs11ConfigurationException e) {
     }
   }
 
-  @Test(expected = Pkcs11ConfigurationException.class)
+  @Test
   public void testProviderNotFound() throws Exception {
-    Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
-    final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration();
-    conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
-    conf.afterPropertiesSet();
+    assertThrows(Pkcs11ConfigurationException.class, () -> {
+      Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+      final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration();
+      conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+      conf.afterPropertiesSet();
+    });
   }
   
-  @Test(expected = Pkcs11ConfigurationException.class)
-  public void testProviderNotFound2() throws Exception {    
-    final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration();
-    conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
-    Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
-    conf.getProvider();
+  @Test
+  public void testProviderNotFound2() throws Exception {
+    assertThrows(Pkcs11ConfigurationException.class, () -> {
+      final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration();
+      conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+      Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+      conf.getProvider();
+    });
   }
   
-  @Test(expected = Pkcs11ConfigurationException.class)
+  @Test
   public void testInvalidConfiguration() throws Exception {
-    final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration(getAbsolutePath("cfg-nolib.txt"));
-    conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
-    conf.afterPropertiesSet();
+    assertThrows(Pkcs11ConfigurationException.class, () -> {
+      final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration(getAbsolutePath("cfg-nolib.txt"));
+      conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+      conf.afterPropertiesSet();
 
-    conf.getProvider();
+      conf.getProvider();
+    });
   }
   
   @Test
@@ -229,24 +237,24 @@ public class DefaultPkcs11ConfigurationTest {
     conf.afterPropertiesSet();
 
     Provider provider = conf.getProvider();
-    Assert.assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME + "-Foo", provider.getName());
+    assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME + "-Foo", provider.getName());
 
     PkiCredential cred = conf.getCredentialProvider().get(provider, ALIAS, PIN);
-    Assert.assertNotNull(cred);
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred);
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getPrivateKey());
     
     final DefaultPkcs11Configuration conf2 = new DefaultPkcs11Configuration(LIBRARY, "Foo", null, null);
     conf2.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
     conf2.afterPropertiesSet();
 
     provider = conf2.getProvider();
-    Assert.assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME + "-Foo", provider.getName());
+    assertEquals(MockSunPkcs11Provider.PROVIDER_BASE_NAME + "-Foo", provider.getName());
 
     cred = conf2.getCredentialProvider().get(provider, ALIAS, PIN);
-    Assert.assertNotNull(cred);
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred);
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getPrivateKey());
   }
   
   @Test
@@ -256,17 +264,19 @@ public class DefaultPkcs11ConfigurationTest {
     conf.afterPropertiesSet();
 
     PrivateKey pk = conf.getPrivateKeyProvider().get(conf.getProvider(), "not-found", PIN);
-    Assert.assertNull(pk);
+    assertNull(pk);
   }
   
-  @Test(expected = SecurityException.class)
-  public void testFailedGetPrivateKey() throws Exception {    
-    final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration(getAbsolutePath("cfg1.txt"));
-    conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
-    conf.afterPropertiesSet();
+  @Test
+  public void testFailedGetPrivateKey() throws Exception {
+    assertThrows(SecurityException.class, () -> {
+      final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration(getAbsolutePath("cfg1.txt"));
+      conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+      conf.afterPropertiesSet();
 
-    conf.getPrivateKeyProvider().get(conf.getProvider(), ALIAS, "wrong-pin".toCharArray());
-  }  
+      conf.getPrivateKeyProvider().get(conf.getProvider(), ALIAS, "wrong-pin".toCharArray());
+    });
+  }
   
   @Test
   public void testMissingCredential() throws Exception {    
@@ -275,16 +285,18 @@ public class DefaultPkcs11ConfigurationTest {
     conf.afterPropertiesSet();
 
     PkiCredential cred = conf.getCredentialProvider().get(conf.getProvider(), "not-found", PIN);
-    Assert.assertNull(cred);
+    assertNull(cred);
   }
   
-  @Test(expected = SecurityException.class)
-  public void testFailedGetCredential() throws Exception {    
-    final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration(getAbsolutePath("cfg1.txt"));
-    conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
-    conf.afterPropertiesSet();
+  @Test
+  public void testFailedGetCredential() throws Exception {
+    assertThrows(SecurityException.class, () -> {
+      final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration(getAbsolutePath("cfg1.txt"));
+      conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
+      conf.afterPropertiesSet();
 
-    conf.getCredentialProvider().get(conf.getProvider(), ALIAS, "bad-pin".toCharArray());
+      conf.getCredentialProvider().get(conf.getProvider(), ALIAS, "bad-pin".toCharArray());
+    });
   }
   
   @Test
@@ -295,8 +307,8 @@ public class DefaultPkcs11ConfigurationTest {
     conf.afterPropertiesSet();
 
     PkiCredential cred = conf.getCredentialProvider().get(conf.getProvider(), ALIAS, PIN);
-    Assert.assertNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getPrivateKey());
+    assertNull(cred.getCertificate());
+    assertNotNull(cred.getPrivateKey());
   }
 
   private static String getAbsolutePath(final String resource) throws IOException {

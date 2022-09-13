@@ -24,6 +24,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -54,10 +56,12 @@ public class KeyStoreCredentialTest {
     this.privateKey = (PrivateKey) this.keyStore.getKey(ALIAS, PW);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDefaultConstructorNoSetters() throws Exception {
-    final KeyStoreCredential cred = new KeyStoreCredential();
-    cred.afterPropertiesSet();
+    assertThrows(IllegalArgumentException.class, () -> {
+      final KeyStoreCredential cred = new KeyStoreCredential();
+      cred.afterPropertiesSet();
+    });
   }
   
   @Test
@@ -68,10 +72,10 @@ public class KeyStoreCredentialTest {
     cred.setKeyPassword(PW);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
   }
   
   @Test
@@ -79,10 +83,10 @@ public class KeyStoreCredentialTest {
     final KeyStoreCredential cred = new KeyStoreCredential(this.keyStore, ALIAS, PW);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
   }
   
   @Test
@@ -91,28 +95,28 @@ public class KeyStoreCredentialTest {
       new ClassPathResource("rsa1.jks"), PW, ALIAS, PW);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
     
     cred = new KeyStoreCredential(
       new ClassPathResource("rsa1.jks"), "JKS", PW, ALIAS, PW);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
     
     cred = new KeyStoreCredential(
       new ClassPathResource("rsa1.jks"), "JKS", "SUN", PW, ALIAS, PW);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
   }
   
   @Test
@@ -124,10 +128,10 @@ public class KeyStoreCredentialTest {
     cred.setKeyPassword(PW);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
     
     // Call setters in different orders to make sure that the underlying keyStoreFactory is
     // set up in all cases ...
@@ -139,10 +143,10 @@ public class KeyStoreCredentialTest {
     cred.setResource(new ClassPathResource("rsa1.jks"));
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
     
     cred = new KeyStoreCredential();    
     cred.setAlias(ALIAS);
@@ -151,10 +155,10 @@ public class KeyStoreCredentialTest {
     cred.setPassword(PW);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
     
     cred = new KeyStoreCredential();        
     cred.setKeyPassword(PW);
@@ -163,10 +167,10 @@ public class KeyStoreCredentialTest {
     cred.setAlias(ALIAS);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
     
     cred = new KeyStoreCredential();
     cred.setType("JKS");
@@ -176,10 +180,10 @@ public class KeyStoreCredentialTest {
     cred.setAlias(ALIAS);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
     
     cred = new KeyStoreCredential();
     cred.setProvider("SUN");
@@ -191,10 +195,10 @@ public class KeyStoreCredentialTest {
     cred.setAlias(ALIAS);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
     
     cred = new KeyStoreCredential();    
     cred.setPkcs11Configuration("/dummy/path");
@@ -206,10 +210,10 @@ public class KeyStoreCredentialTest {
     cred.setProvider("SUN");
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
   }
   
   @Test
@@ -218,16 +222,16 @@ public class KeyStoreCredentialTest {
       new ClassPathResource("rsa1.jks"), PW, ALIAS, PW);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
     
     cred.init();
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
   }
   
   @Test
@@ -237,10 +241,10 @@ public class KeyStoreCredentialTest {
     cred.setCertificate(this.cert);    
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
   }
   
   @Test
@@ -250,29 +254,35 @@ public class KeyStoreCredentialTest {
     cred.setCertificate(new ClassPathResource("rsa1.crt"));
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void illegalSetPublicKey() throws Exception {
-    final KeyStoreCredential cred = new KeyStoreCredential();
-    cred.setPublicKey(this.cert.getPublicKey());
+    assertThrows(IllegalArgumentException.class, () -> {
+      final KeyStoreCredential cred = new KeyStoreCredential();
+      cred.setPublicKey(this.cert.getPublicKey());
+    });
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void illegalSetPrivateKey() throws Exception {
-    final KeyStoreCredential cred = new KeyStoreCredential();
-    cred.setPrivateKey(this.privateKey);
+    assertThrows(IllegalArgumentException.class, () -> {
+      final KeyStoreCredential cred = new KeyStoreCredential();
+      cred.setPrivateKey(this.privateKey);
+    });
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void missingAlias() throws Exception {
-    final KeyStoreCredential cred = new KeyStoreCredential(
-      new ClassPathResource("rsa1.jks"), PW, null, PW);
-    cred.init();
+    assertThrows(IllegalArgumentException.class, () -> {
+      final KeyStoreCredential cred = new KeyStoreCredential(
+        new ClassPathResource("rsa1.jks"), PW, null, PW);
+      cred.init();
+    });
   }
 
   @Test
@@ -281,25 +291,29 @@ public class KeyStoreCredentialTest {
       new ClassPathResource("rsa1.jks"), PW, ALIAS, null);
     cred.init();
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(ALIAS, cred.getName());
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void missingKeyPassword() throws Exception {
-    final KeyStoreCredential cred = new KeyStoreCredential();
-    cred.setKeyStore(this.keyStore);
-    cred.setAlias(ALIAS);
-    cred.init();
+    assertThrows(IllegalArgumentException.class, () -> {
+      final KeyStoreCredential cred = new KeyStoreCredential();
+      cred.setKeyStore(this.keyStore);
+      cred.setAlias(ALIAS);
+      cred.init();
+    });
   }
   
-  @Test(expected = KeyStoreException.class)
+  @Test
   public void notPrivateKey() throws Exception {
-    final KeyStoreCredential cred = new KeyStoreCredential(
-      new ClassPathResource("aes.jceks"), "JCEKS", "secret".toCharArray(), "aes", "secret".toCharArray());
-    cred.init();
+    assertThrows(KeyStoreException.class, () -> {
+      final KeyStoreCredential cred = new KeyStoreCredential(
+        new ClassPathResource("aes.jceks"), "JCEKS", "secret".toCharArray(), "aes", "secret".toCharArray());
+      cred.init();
+    });
   }
   
   @Test
@@ -316,7 +330,7 @@ public class KeyStoreCredentialTest {
     Object pw = pk.get(cred);
     char[] expected = new char[PW.length];
     Arrays.fill(expected, (char) 0);
-    Assert.assertArrayEquals(expected, (char[]) pw);      
+    assertArrayEquals(expected, (char[]) pw);
   }
   
   @Test
@@ -339,8 +353,8 @@ public class KeyStoreCredentialTest {
     
     char[] expected = new char[PW.length];
     Arrays.fill(expected, (char) 0);
-    Assert.assertArrayEquals(expected, (char[]) pw);
-    Assert.assertArrayEquals(expected, (char[]) kpw);
+    assertArrayEquals(expected, (char[]) pw);
+    assertArrayEquals(expected, (char[]) kpw);
   }
   
   @Test
@@ -357,11 +371,11 @@ public class KeyStoreCredentialTest {
     
     Field pk = KeyStoreCredential.class.getDeclaredField("password"); 
     pk.setAccessible(true);
-    Assert.assertNull(pk.get(cred));
+    assertNull(pk.get(cred));
     
     Field kpk = KeyStoreCredential.class.getDeclaredField("keyPassword"); 
     kpk.setAccessible(true);
-    Assert.assertNull(kpk.get(cred));
+    assertNull(kpk.get(cred));
   }
   
   @Test
@@ -369,47 +383,53 @@ public class KeyStoreCredentialTest {
     KeyStoreCredential cred = new KeyStoreCredential(
       new ClassPathResource("rsa1.jks"), PW, ALIAS, PW);    
     
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
     
     cred = new KeyStoreCredential(
       new ClassPathResource("rsa1.jks"), PW, ALIAS, PW);    
         
-    Assert.assertNotNull(cred.getPublicKey());
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getPrivateKey());
     
     cred = new KeyStoreCredential(
       new ClassPathResource("rsa1.jks"), PW, ALIAS, PW);    
             
-    Assert.assertNotNull(cred.getCertificate());
-    Assert.assertNotNull(cred.getPrivateKey());
-    Assert.assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
   }
   
-  @Test(expected = SecurityException.class)
+  @Test
   public void testAutoInitError() throws Exception {
-    KeyStoreCredential cred = new KeyStoreCredential(
-      new ClassPathResource("rsa1.jks"), PW, ALIAS, "dummy".toCharArray());
-    
-    cred.getPrivateKey();
+    assertThrows(SecurityException.class, () -> {
+      KeyStoreCredential cred = new KeyStoreCredential(
+        new ClassPathResource("rsa1.jks"), PW, ALIAS, "dummy".toCharArray());
+
+      cred.getPrivateKey();
+    });
   }
   
-  @Test(expected = SecurityException.class)
+  @Test
   public void testAutoInitError2() throws Exception {
-    KeyStoreCredential cred = new KeyStoreCredential(
-      new ClassPathResource("rsa1.jks"), PW, "dummy", PW);
-    
-    cred.getCertificate();
+    assertThrows(SecurityException.class, () -> {
+      KeyStoreCredential cred = new KeyStoreCredential(
+        new ClassPathResource("rsa1.jks"), PW, "dummy", PW);
+
+      cred.getCertificate();
+    });
   }
   
-  @Test(expected = SecurityException.class)
+  @Test
   public void testAutoInitError3() throws Exception {
-    KeyStoreCredential cred = new KeyStoreCredential(
-      new ClassPathResource("rsa1.jks"), PW, "dummy", PW);
-    
-    cred.getPublicKey();
+    assertThrows(SecurityException.class, () -> {
+      KeyStoreCredential cred = new KeyStoreCredential(
+        new ClassPathResource("rsa1.jks"), PW, "dummy", PW);
+
+      cred.getPublicKey();
+    });
   }
     
   @Test
@@ -418,10 +438,10 @@ public class KeyStoreCredentialTest {
       new ClassPathResource("rsa1.jks"), PW, ALIAS, PW);
     cred.init();
     
-    Assert.assertEquals(ALIAS, cred.getName());
+    assertEquals(ALIAS, cred.getName());
     
     cred = new KeyStoreCredential();
-    Assert.assertTrue(cred.getName().startsWith("KeyStoreCredential-"));
+    assertTrue(cred.getName().startsWith("KeyStoreCredential-"));
   }
   
   @Test
@@ -441,13 +461,15 @@ public class KeyStoreCredentialTest {
     
     String name = cred.getName();
     
-    Assert.assertEquals("SunPKCS11-" + ALIAS, name);
+    assertEquals("SunPKCS11-" + ALIAS, name);
   }
   
-  @Test(expected = SecurityException.class)
+  @Test
   public void testReloadNotInit() throws Exception {
-    KeyStoreCredential cred = new KeyStoreCredential();
-    cred.reload();
+    assertThrows(SecurityException.class, () -> {
+      KeyStoreCredential cred = new KeyStoreCredential();
+      cred.reload();
+    });
   }
   
   @Test
@@ -490,37 +512,40 @@ public class KeyStoreCredentialTest {
     Mockito.verify(spyKeystore, Mockito.times(2)).getKey(Mockito.any(), Mockito.any());
   }
   
-  @Test(expected = KeyStoreException.class)
+  @Test
   public void testReloadPkcs11Error() throws Exception {
-    
-    KeyStore spyKeystore = Mockito.spy(this.keyStore);
-    
-    KeyStoreCredential cred = new KeyStoreCredential(spyKeystore, ALIAS, PW);
-    cred.setName("mock");
-    cred.init();
-    
-    Mockito.verify(spyKeystore, Mockito.times(1)).getKey(Mockito.any(), Mockito.any());
-    
-    Mockito.doReturn("PKCS11").when(spyKeystore).getType();
-    Mockito.doAnswer(new Answer<Object>() {
-      @Override
-      public Object answer(InvocationOnMock invocation) throws Throwable {
-        return null;
-      }
-    }).when(spyKeystore).load(Mockito.any(), Mockito.any());
-    Mockito.doAnswer(i -> { throw new KeyStoreException("mock"); })
-      .when(spyKeystore).getKey(Mockito.any(), Mockito.any());
-    
-    cred.reload();
+    assertThrows(KeyStoreException.class, () -> {
+      KeyStore spyKeystore = Mockito.spy(this.keyStore);
+
+      KeyStoreCredential cred = new KeyStoreCredential(spyKeystore, ALIAS, PW);
+      cred.setName("mock");
+      cred.init();
+
+      Mockito.verify(spyKeystore, Mockito.times(1)).getKey(Mockito.any(), Mockito.any());
+
+      Mockito.doReturn("PKCS11").when(spyKeystore).getType();
+      Mockito.doAnswer(new Answer<Object>() {
+        @Override
+        public Object answer(InvocationOnMock invocation) throws Throwable {
+          return null;
+        }
+      }).when(spyKeystore).load(Mockito.any(), Mockito.any());
+      Mockito.doAnswer(i -> { throw new KeyStoreException("mock"); })
+        .when(spyKeystore).getKey(Mockito.any(), Mockito.any());
+
+      cred.reload();
+    });
   }
   
-  @Test(expected = CertificateException.class)
+  @Test
   public void testMissingCertificate() throws Exception {
-    KeyStore spyKeystore = Mockito.spy(this.keyStore);
-    Mockito.doReturn(null).when(spyKeystore).getCertificate(Mockito.any());
-    Mockito.doReturn(null).when(spyKeystore).getCertificateChain(Mockito.any());
-    
-    KeyStoreCredential cred = new KeyStoreCredential(spyKeystore, ALIAS, PW);
-    cred.init();
+    assertThrows(CertificateException.class, () -> {
+      KeyStore spyKeystore = Mockito.spy(this.keyStore);
+      Mockito.doReturn(null).when(spyKeystore).getCertificate(Mockito.any());
+      Mockito.doReturn(null).when(spyKeystore).getCertificateChain(Mockito.any());
+
+      KeyStoreCredential cred = new KeyStoreCredential(spyKeystore, ALIAS, PW);
+      cred.init();
+    });
   }
 }
