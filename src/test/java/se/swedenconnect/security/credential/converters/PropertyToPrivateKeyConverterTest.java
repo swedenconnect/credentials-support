@@ -17,9 +17,8 @@ package se.swedenconnect.security.credential.converters;
 
 import java.security.PrivateKey;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
@@ -28,7 +27,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 import lombok.Setter;
 import se.swedenconnect.security.credential.converters.PropertyToPrivateKeyConverterTest.KeyConfig;
@@ -39,7 +40,7 @@ import se.swedenconnect.security.credential.converters.PropertyToPrivateKeyConve
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @EnableConfigurationProperties(value = KeyConfig.class)
 @TestPropertySource(locations = { "classpath:application.properties" })
 public class PropertyToPrivateKeyConverterTest {
@@ -59,7 +60,7 @@ public class PropertyToPrivateKeyConverterTest {
     converter.setApplicationContext(this.context);
     
     PrivateKey pk = converter.convert("classpath:rsa1.pkcs8.key");
-    Assert.assertNotNull(pk);
+    assertNotNull(pk);
   }
   
   @Test(expected = IllegalArgumentException.class)
@@ -72,13 +73,13 @@ public class PropertyToPrivateKeyConverterTest {
   
   @Test
   public void testConverterBean() throws Exception {
-    Assert.assertNotNull("PropertyToPrivateKeyConverter bean is not present", this.propertyToPrivateKeyConverter);
-    Assert.assertNotNull(this.propertyToPrivateKeyConverter.convert("classpath:rsa1.pkcs8.key"));
+    assertNotNull("PropertyToPrivateKeyConverter bean is not present", this.propertyToPrivateKeyConverter);
+    assertNotNull(this.propertyToPrivateKeyConverter.convert("classpath:rsa1.pkcs8.key"));
   }
   
   @Test
   public void testSpringContextPrivateKeySet() throws Exception {
-    Assert.assertNotNull(this.testKey);
+    assertNotNull(this.testKey);
   }
 
   @Configuration  
