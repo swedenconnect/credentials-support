@@ -6,12 +6,14 @@ import se.swedenconnect.security.credential.container.AbstractPkiCredentialConta
 import se.swedenconnect.security.credential.container.credential.ErasableExternalChainCredential;
 import se.swedenconnect.security.credential.container.exceptions.PkiCredentialContainerException;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.cert.CertificateException;
+import java.util.Objects;
 
 /**
  * Implements a {@link se.swedenconnect.security.credential.container.PkiCredentialContainer} based on HSM
@@ -29,7 +31,7 @@ public class HSMPkiCredentialContainer extends AbstractPkiCredentialContainer {
    * @param hsmPin the pin for the associated HSM slot
    * @throws KeyStoreException error initiating the HSM slot key store
    */
-  public HSMPkiCredentialContainer(Provider p11Provider, String hsmPin)
+  public HSMPkiCredentialContainer(final @Nonnull Provider p11Provider,final @Nonnull String hsmPin)
     throws KeyStoreException {
     super(p11Provider, hsmPin);
   }
@@ -37,7 +39,7 @@ public class HSMPkiCredentialContainer extends AbstractPkiCredentialContainer {
 
   /** {@inheritDoc} */
   @Override
-  protected KeyStore getKeyStore(final Provider provider, final String password)
+  protected KeyStore getKeyStore(final @Nonnull Provider provider, final @Nonnull String password)
     throws KeyStoreException {
     KeyStore p11KeyStore = KeyStore.getInstance("PKCS11", provider);
     try {
@@ -51,7 +53,9 @@ public class HSMPkiCredentialContainer extends AbstractPkiCredentialContainer {
 
   /** {@inheritDoc} */
   @Override
-  public ErasableExternalChainCredential getCredential(String alias) throws PkiCredentialContainerException {
+  public ErasableExternalChainCredential getCredential(final @Nonnull String alias) throws PkiCredentialContainerException {
+    Objects.requireNonNull(alias, "Key alias must not be null");
+
     PkiCredential hsmCredential = new KeyStoreCredential(
       null, "PKCS11", provider.getName(),
       this.password, alias, null

@@ -20,6 +20,7 @@ import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 import se.swedenconnect.security.credential.container.keytype.KeyPairGeneratorFactory;
 import se.swedenconnect.security.credential.utils.X509Utils;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.*;
@@ -72,7 +73,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
    * @param password the pin for the associated key container
    * @throws KeyStoreException error initiating the key store
    */
-  public AbstractPkiCredentialContainer(final Provider provider, final String password)
+  public AbstractPkiCredentialContainer(final @Nonnull Provider provider, final @Nonnull String password)
     throws KeyStoreException {
     Objects.requireNonNull(provider, "Provider must not be null");
     Objects.requireNonNull(password, "Password must not be null");
@@ -91,7 +92,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
    * @return key store
    * @throws KeyStoreException error creating the key store
    */
-  protected abstract KeyStore getKeyStore(final Provider provider, final String password)
+  protected abstract KeyStore getKeyStore(final @Nonnull Provider provider, final String password)
     throws KeyStoreException;
 
   /**
@@ -121,10 +122,11 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
 
   /** {@inheritDoc} */
   @Override
-  public String generateCredential(String keyTypeId)
+  public String generateCredential(final @Nonnull String keyTypeName)
     throws KeyException, NoSuchAlgorithmException, CertificateException {
+    Objects.requireNonNull(keyTypeName, "Key type name must not be null");
 
-    KeyPairGeneratorFactory keyPairGeneratorFactory = getKeyGenInitiator(keyTypeId);
+    KeyPairGeneratorFactory keyPairGeneratorFactory = getKeyGenInitiator(keyTypeName);
     BigInteger alias = getAlias();
     String aliasStr = alias.toString(16);
     KeyPairGenerator keyPairGenerator = keyPairGeneratorFactory.getKeyPairGenerator(provider);
@@ -142,6 +144,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
   /** {@inheritDoc} */
   @Override
   public void deleteCredential(String alias) throws PkiCredentialContainerException {
+    Objects.requireNonNull(alias, "Key alias must not be null");
     try {
       keyStore.deleteEntry(alias);
     }
@@ -153,6 +156,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
   /** {@inheritDoc} */
   @Override
   public Instant getExpiryTime(String alias) throws PkiCredentialContainerException {
+    Objects.requireNonNull(alias, "Key alias must not be null");
     if (!getAvailableCredentials().contains(alias)){
       throw new PkiCredentialContainerException("Requested alias is not present");
     }
@@ -194,14 +198,14 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
   }
 
 
-  private KeyPairGeneratorFactory getKeyGenInitiator(String keyTypeId) throws NoSuchAlgorithmException {
+  private KeyPairGeneratorFactory getKeyGenInitiator(final String keyTypeName) throws NoSuchAlgorithmException {
     return supportedKeyGenerators.stream()
-      .filter(keyGeneratorInitiator -> keyGeneratorInitiator.supports(keyTypeId))
+      .filter(keyGeneratorInitiator -> keyGeneratorInitiator.supports(keyTypeName))
       .findFirst()
       .orElseThrow(NoSuchAlgorithmException::new);
   }
 
-  private X509Certificate generateKeyCertificate(final KeyPair kp, BigInteger alias)
+  private X509Certificate generateKeyCertificate(final KeyPair kp, final BigInteger alias)
     throws CertificateException {
 
     try {
@@ -232,7 +236,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
    * @param keyPair  generated key pair
    * @return the JCA algorithm name suitable for used with the key pair
    */
-  protected String getAlgorithmName(KeyPair keyPair) {
+  protected String getAlgorithmName(final KeyPair keyPair) {
     return  (keyPair.getPublic() instanceof ECPublicKey)
       ? algorithmNameFinder.getAlgorithmName(X9ObjectIdentifiers.ecdsa_with_SHA256)
       : algorithmNameFinder.getAlgorithmName(PKCSObjectIdentifiers.sha256WithRSAEncryption);
@@ -245,7 +249,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
    * @param alias the alias of the key for which the certificate is being issued
    * @return {@link X500Name} representing the alias
    */
-  protected X500Name getX500Name(BigInteger alias) {
+  protected X500Name getX500Name(final BigInteger alias) {
     return new X500Name(new RDN[]{
       new RDN(new AttributeTypeAndValue(BCStyle.CN, new DERUTF8String(alias.toString(16))))
     });

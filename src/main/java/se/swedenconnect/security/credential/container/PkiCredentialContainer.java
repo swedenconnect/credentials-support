@@ -4,6 +4,7 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.exceptions.PkiCredentialContainerException;
 import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 
+import javax.annotation.Nonnull;
 import java.security.KeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -36,13 +37,13 @@ public interface PkiCredentialContainer {
   /**
    * Generate key pair and self issued certificate for a new credential in the container
    *
-   * @param keyTypeId the id of the type of key to generate as provided by {@link KeyGenType}
+   * @param keyTypeName the id of the type of key to generate as provided by {@link KeyGenType}
    * @return the alias for the generated key
    * @throws KeyException on errors generating the key
    * @throws NoSuchAlgorithmException if the requested algorithm or key type is not supported
    * @throws CertificateException on errors creating a certificate for the generated key
    */
-  String generateCredential(String keyTypeId) throws KeyException, NoSuchAlgorithmException, CertificateException;
+  String generateCredential(final @Nonnull String keyTypeName) throws KeyException, NoSuchAlgorithmException, CertificateException;
 
   /**
    * Get the credential for a specific alias from the credential container
@@ -51,7 +52,7 @@ public interface PkiCredentialContainer {
    * @return credential for the specified alias
    * @throws PkiCredentialContainerException error obtaining the requested credential
    */
-  PkiCredential getCredential(String alias) throws PkiCredentialContainerException;
+  PkiCredential getCredential(final @Nonnull String alias) throws PkiCredentialContainerException;
 
   /**
    * Delete the credential specified by alias
@@ -59,7 +60,7 @@ public interface PkiCredentialContainer {
    * @param alias the alias of the credential to delete
    * @throws PkiCredentialContainerException error deleting the credential
    */
-  void deleteCredential(String alias) throws PkiCredentialContainerException;
+  void deleteCredential(final @Nonnull String alias) throws PkiCredentialContainerException;
 
   /**
    * Get the expiry time of the credential specified by alias
@@ -68,7 +69,7 @@ public interface PkiCredentialContainer {
    * @return expiry time for the specified credential or null if the credential never expires
    * @throws PkiCredentialContainerException error obtaining the expiry time
    */
-  Instant getExpiryTime(String alias) throws PkiCredentialContainerException;
+  Instant getExpiryTime(final @Nonnull String alias) throws PkiCredentialContainerException;
 
   /**
    * Get all available credential aliases from the multi credential key store

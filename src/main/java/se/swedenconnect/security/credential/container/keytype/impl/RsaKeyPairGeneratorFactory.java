@@ -2,6 +2,7 @@ package se.swedenconnect.security.credential.container.keytype.impl;
 
 import se.swedenconnect.security.credential.container.keytype.KeyPairGeneratorFactory;
 
+import javax.annotation.Nonnull;
 import java.security.*;
 import java.security.spec.AlgorithmParameterSpec;
 
@@ -22,13 +23,13 @@ public class RsaKeyPairGeneratorFactory extends KeyPairGeneratorFactory {
    * @param keyTypeName the name of the key type associated with this key pair generator factory
    * @param keySize key size of generated RSA keys
    */
-  public RsaKeyPairGeneratorFactory(String keyTypeName, int keySize) {
+  public RsaKeyPairGeneratorFactory(final @Nonnull String keyTypeName,final int keySize) {
     super(keyTypeName);
     this.keySize = keySize;
   }
 
   /** {@inheritDoc} */
-  @Override public KeyPairGenerator getKeyPairGenerator(Provider provider) throws NoSuchAlgorithmException {
+  @Override public KeyPairGenerator getKeyPairGenerator(final @Nonnull Provider provider) throws NoSuchAlgorithmException {
     KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", provider);
     keyPairGenerator.initialize(keySize);
     return keyPairGenerator;

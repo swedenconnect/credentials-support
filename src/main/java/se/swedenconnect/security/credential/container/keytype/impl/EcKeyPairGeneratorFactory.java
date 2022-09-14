@@ -2,6 +2,7 @@ package se.swedenconnect.security.credential.container.keytype.impl;
 
 import se.swedenconnect.security.credential.container.keytype.KeyPairGeneratorFactory;
 
+import javax.annotation.Nonnull;
 import java.security.*;
 import java.security.spec.AlgorithmParameterSpec;
 
@@ -22,14 +23,14 @@ public class EcKeyPairGeneratorFactory extends KeyPairGeneratorFactory {
    * @param keyTypeName the name of the key type associated with this key pair generator factory
    * @param algorithmParameterSpec algorithm specification for the specified key type
    */
-  public EcKeyPairGeneratorFactory(String keyTypeName, AlgorithmParameterSpec algorithmParameterSpec) {
+  public EcKeyPairGeneratorFactory(final @Nonnull String keyTypeName, final @Nonnull AlgorithmParameterSpec algorithmParameterSpec) {
     super(keyTypeName);
     this.algorithmParameterSpec = algorithmParameterSpec;
   }
 
   /** {@inheritDoc} */
   @Override
-  public KeyPairGenerator getKeyPairGenerator(Provider provider) throws NoSuchAlgorithmException,
+  public KeyPairGenerator getKeyPairGenerator(final @Nonnull Provider provider) throws NoSuchAlgorithmException,
     KeyException {
 
     KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC", provider);
