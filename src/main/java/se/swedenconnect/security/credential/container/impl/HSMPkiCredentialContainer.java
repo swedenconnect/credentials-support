@@ -2,6 +2,7 @@ package se.swedenconnect.security.credential.container.impl;
 
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.AbstractPkiCredentialContainer;
 import se.swedenconnect.security.credential.container.credential.ErasableExternalChainCredential;
 import se.swedenconnect.security.credential.container.exceptions.PkiCredentialContainerException;
 
@@ -13,39 +14,28 @@ import java.security.Provider;
 import java.security.cert.CertificateException;
 
 /**
- * Description
+ * Implements a {@link se.swedenconnect.security.credential.container.PkiCredentialContainer} based on HSM
+ * or in-memory key storage (i.e. not using a HSM device for key storage).
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class HSMMultiCredentialContainer extends AbstractMultiCredentialContainer {
+public class HSMPkiCredentialContainer extends AbstractPkiCredentialContainer {
+
   /**
-   * Constructor for the default PKCS11KeyGenerator
+   * Constructor for the default PKCS11 credential container where keys are stored in a HSM slot
    *
    * @param p11Provider the provider that provides access to the HSM key slot used to generate and store keys
    * @param hsmPin the pin for the associated HSM slot
    * @throws KeyStoreException error initiating the HSM slot key store
-   * @throws CertificateException error parsing certificates in the HSM slot
-   * @throws IOException general error processing data
-   * @throws NoSuchAlgorithmException algorithm not supported
    */
-  public HSMMultiCredentialContainer(Provider p11Provider, String hsmPin)
-    throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
+  public HSMPkiCredentialContainer(Provider p11Provider, String hsmPin)
+    throws KeyStoreException {
     super(p11Provider, hsmPin);
   }
 
 
-  /**
-   * Default overridable function to create the HSM slot key store used to store generated HSM keys.
-   *
-   * @param provider the provider for the HSM slot
-   * @param password the pin code for the HSM slot
-   * @return key store
-   * @throws KeyStoreException error creating the key store
-   * @throws CertificateException error loading existing certificates in key store
-   * @throws IOException error in input data
-   * @throws NoSuchAlgorithmException unsupported algorithm
-   */
+  /** {@inheritDoc} */
   @Override
   protected KeyStore getKeyStore(final Provider provider, final String password)
     throws KeyStoreException {
@@ -74,7 +64,5 @@ public class HSMMultiCredentialContainer extends AbstractMultiCredentialContaine
     }
     return new ErasableExternalChainCredential(hsmCredential, this.keyStore, alias);
   }
-
-
 
 }

@@ -1,6 +1,7 @@
 package se.swedenconnect.security.credential.container.impl;
 
 import se.swedenconnect.security.credential.KeyStoreCredential;
+import se.swedenconnect.security.credential.container.AbstractPkiCredentialContainer;
 import se.swedenconnect.security.credential.container.credential.ErasableExternalChainCredential;
 import se.swedenconnect.security.credential.container.exceptions.PkiCredentialContainerException;
 
@@ -12,12 +13,13 @@ import java.security.Provider;
 import java.security.cert.CertificateException;
 
 /**
- * Description
+ * Implements a {@link se.swedenconnect.security.credential.container.PkiCredentialContainer} based on software
+ * or in-memory key storage (i.e. not using a HSM device for key storage).
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class SoftMultiCredentialContainer extends AbstractMultiCredentialContainer {
+public class SoftPkiCredentialContainer extends AbstractPkiCredentialContainer {
   /**
    * Constructor for the multi credential key store
    *
@@ -28,11 +30,12 @@ public class SoftMultiCredentialContainer extends AbstractMultiCredentialContain
    * @throws IOException general error processing data
    * @throws NoSuchAlgorithmException algorithm not supported
    */
-  public SoftMultiCredentialContainer(Provider provider, String password)
+  public SoftPkiCredentialContainer(Provider provider, String password)
     throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
     super(provider, password);
   }
 
+  /** {@inheritDoc} */
   @Override public ErasableExternalChainCredential getCredential(String alias) throws PkiCredentialContainerException {
     try {
       return new ErasableExternalChainCredential(new KeyStoreCredential( this.keyStore, alias, this.password), this.keyStore, alias);
@@ -41,17 +44,7 @@ public class SoftMultiCredentialContainer extends AbstractMultiCredentialContain
     }
   }
 
-  /**
-   * Create the key store used to store generated keys.
-   *
-   * @param provider the provider for the key store
-   * @param password the password for the key store
-   * @return key store
-   * @throws KeyStoreException error creating the key store
-   * @throws CertificateException error loading existing certificates in key store
-   * @throws IOException error in input data
-   * @throws NoSuchAlgorithmException unsupported algorithm
-   */
+  /** {@inheritDoc} */
   @Override protected KeyStore getKeyStore(Provider provider, String password)
     throws KeyStoreException {
     KeyStore testKeyStore = KeyStore.getInstance(KeyStore.getDefaultType(), provider);

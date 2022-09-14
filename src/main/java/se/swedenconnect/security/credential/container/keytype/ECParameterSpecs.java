@@ -4,7 +4,12 @@ import java.math.BigInteger;
 import java.security.spec.*;
 
 /**
- * Various parameterspecs for EC. This class is redundant
+ * Various parameter specs for elliptic curves. Note that the Brainpool parameter specs are defined by paramters
+ * rather than by name in order to support usage with Java PKCS#11 and generation inside HSM.
+ *
+ * <p>
+ *   When used like this, the key still appears as named curve.
+ * </p>
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)

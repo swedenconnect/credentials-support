@@ -1,4 +1,4 @@
-package se.swedenconnect.security.credential.container.impl;
+package se.swedenconnect.security.credential.container;
 
 import lombok.Setter;
 import org.bouncycastle.asn1.DERUTF8String;
@@ -15,10 +15,9 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.cryptacular.EncodingException;
 import org.cryptacular.util.CertUtil;
-import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 import se.swedenconnect.security.credential.container.exceptions.PkiCredentialContainerException;
 import se.swedenconnect.security.credential.container.keytype.KeyGenType;
-import se.swedenconnect.security.credential.container.keytype.KeyGeneratorInitiator;
+import se.swedenconnect.security.credential.container.keytype.KeyPairGeneratorFactory;
 import se.swedenconnect.security.credential.utils.X509Utils;
 
 import java.io.IOException;
@@ -43,7 +42,7 @@ import java.util.*;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public abstract class AbstractMultiCredentialContainer implements PkiCredentialContainer {
+public abstract class AbstractPkiCredentialContainer implements PkiCredentialContainer {
 
   /** Finder for converting OIDs and AlgorithmIdentifiers into strings. */
   protected final static AlgorithmNameFinder algorithmNameFinder = new DefaultAlgorithmNameFinder();
@@ -61,7 +60,7 @@ public abstract class AbstractMultiCredentialContainer implements PkiCredentialC
   @Setter private Duration keyDuration;
 
   /** List of key generator initiators for supported key types */
-  @Setter List<KeyGeneratorInitiator> supportedKeyGenInitiators;
+  @Setter List<KeyPairGeneratorFactory> supportedKeyGenerators;
 
   /** Random source for generating unique key aliases */
   private final SecureRandom RNG = new SecureRandom();
@@ -73,14 +72,14 @@ public abstract class AbstractMultiCredentialContainer implements PkiCredentialC
    * @param password the pin for the associated key container
    * @throws KeyStoreException error initiating the key store
    */
-  public AbstractMultiCredentialContainer(final Provider provider, final String password)
+  public AbstractPkiCredentialContainer(final Provider provider, final String password)
     throws KeyStoreException {
     Objects.requireNonNull(provider, "Provider must not be null");
     Objects.requireNonNull(password, "Password must not be null");
     this.provider = provider;
     this.password = password.toCharArray();
     this.keyStore = getKeyStore(provider, password);
-    this.supportedKeyGenInitiators = getDefaultSupportedInitiators();
+    this.supportedKeyGenerators = getDefaultKeyGenerators();
     this.keyDuration = Duration.ofMinutes(15);
   }
 
@@ -98,15 +97,15 @@ public abstract class AbstractMultiCredentialContainer implements PkiCredentialC
   /**
    * Function to provide the default list of key generator initiators for generated keys
    *
-   * @return list of {@link KeyGeneratorInitiator} for each supported key type
+   * @return list of {@link KeyPairGeneratorFactory} for each supported key type
    */
-  protected List<KeyGeneratorInitiator> getDefaultSupportedInitiators() {
+  protected List<KeyPairGeneratorFactory> getDefaultKeyGenerators() {
     return List.of(
-      KeyGenType.EC_P256_Initiator,
-      KeyGenType.EC_P384_Initiator,
-      KeyGenType.EC_P521_Initiator,
-      KeyGenType.RSA_3072_Initiator,
-      KeyGenType.RSA_4096_Initiator
+      KeyGenType.EC_P256_Factory,
+      KeyGenType.EC_P384_Factory,
+      KeyGenType.EC_P521_Factory,
+      KeyGenType.RSA_3072_Factory,
+      KeyGenType.RSA_4096_Factory
     );
   }
 
@@ -125,20 +124,14 @@ public abstract class AbstractMultiCredentialContainer implements PkiCredentialC
   public String generateCredential(String keyTypeId)
     throws KeyException, NoSuchAlgorithmException, CertificateException {
 
-    KeyGeneratorInitiator keyGenInitiator = getKeyGenInitiator(keyTypeId);
+    KeyPairGeneratorFactory keyPairGeneratorFactory = getKeyGenInitiator(keyTypeId);
     BigInteger alias = getAlias();
     String aliasStr = alias.toString(16);
-    KeyPairGenerator kpg = KeyPairGenerator.getInstance(keyGenInitiator.getAlgorithmName(), provider);
+    KeyPairGenerator keyPairGenerator = keyPairGeneratorFactory.getKeyPairGenerator(provider);
+    KeyPair keyPair = keyPairGenerator.generateKeyPair();
+    X509Certificate certificate = generateKeyCertificate(keyPair, alias);
     try {
-      keyGenInitiator.initiateKeyGenerator(kpg);
-    }
-    catch (GeneralSecurityException e) {
-      throw new KeyException(e);
-    }
-    KeyPair kp = kpg.generateKeyPair();
-    X509Certificate certificate = generateKeyCertificate(kp, alias);
-    try {
-      keyStore.setKeyEntry(aliasStr, kp.getPrivate(), null,new Certificate[]{certificate});
+      keyStore.setKeyEntry(aliasStr, keyPair.getPrivate(), null,new Certificate[]{certificate});
     }
     catch (KeyStoreException e) {
       throw new KeyException(e);
@@ -201,8 +194,8 @@ public abstract class AbstractMultiCredentialContainer implements PkiCredentialC
   }
 
 
-  private KeyGeneratorInitiator getKeyGenInitiator(String keyTypeId) throws NoSuchAlgorithmException {
-    return supportedKeyGenInitiators.stream()
+  private KeyPairGeneratorFactory getKeyGenInitiator(String keyTypeId) throws NoSuchAlgorithmException {
+    return supportedKeyGenerators.stream()
       .filter(keyGeneratorInitiator -> keyGeneratorInitiator.supports(keyTypeId))
       .findFirst()
       .orElseThrow(NoSuchAlgorithmException::new);

@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.exceptions.PkiCredentialContainerException;
-import se.swedenconnect.security.credential.container.impl.AbstractMultiCredentialContainer;
-import se.swedenconnect.security.credential.container.impl.SoftMultiCredentialContainer;
+import se.swedenconnect.security.credential.container.impl.SoftPkiCredentialContainer;
 import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 
 import java.security.GeneralSecurityException;
@@ -20,7 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Description
+ * Tests for the PkiCredentialContainer
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -30,28 +29,30 @@ public class PkiCredentialContainerTest {
 
   @BeforeAll
   static void init() throws Exception {
-    Security.insertProviderAt(new BouncyCastleProvider(), 2);
+    if (Security.getProvider("BC") == null) {
+      Security.insertProviderAt(new BouncyCastleProvider(), 2);
+    }
   }
 
   @Test
   void generateKeyPair() throws Exception {
 
-    AbstractMultiCredentialContainer pkcs11KeyGenerator = new SoftMultiCredentialContainer(Security.getProvider("BC"), "Test1234");
-    pkcs11KeyGenerator.setSupportedKeyGenInitiators(List.of(
-      KeyGenType.RSA_2048_Initiator,
-      KeyGenType.RSA_3072_Initiator,
-      KeyGenType.RSA_4096_Initiator,
-      KeyGenType.EC_P192_Initiator,
-      KeyGenType.EC_P224_Initiator,
-      KeyGenType.EC_P256_Initiator,
-      KeyGenType.EC_P384_Initiator,
-      KeyGenType.EC_P521_Initiator,
-      KeyGenType.EC_BRAINPOOL_192_Initiator,
-      KeyGenType.EC_BRAINPOOL_224_Initiator,
-      KeyGenType.EC_BRAINPOOL_256_Initiator,
-      KeyGenType.EC_BRAINPOOL_320_Initiator,
-      KeyGenType.EC_BRAINPOOL_384_Initiator,
-      KeyGenType.EC_BRAINPOOL_512_Initiator
+    AbstractPkiCredentialContainer pkcs11KeyGenerator = new SoftPkiCredentialContainer(Security.getProvider("BC"), "Test1234");
+    pkcs11KeyGenerator.setSupportedKeyGenerators(List.of(
+      KeyGenType.RSA_2048_Factory,
+      KeyGenType.RSA_3072_Factory,
+      KeyGenType.RSA_4096_Factory,
+      KeyGenType.EC_P192_Factory,
+      KeyGenType.EC_P224_Factory,
+      KeyGenType.EC_P256_Factory,
+      KeyGenType.EC_P384_Factory,
+      KeyGenType.EC_P521_Factory,
+      KeyGenType.EC_BRAINPOOL_192_Factory,
+      KeyGenType.EC_BRAINPOOL_224_Factory,
+      KeyGenType.EC_BRAINPOOL_256_Factory,
+      KeyGenType.EC_BRAINPOOL_320_Factory,
+      KeyGenType.EC_BRAINPOOL_384_Factory,
+      KeyGenType.EC_BRAINPOOL_512_Factory
     ));
 
     List<String> keyTypeIdList = List.of(
@@ -117,14 +118,14 @@ public class PkiCredentialContainerTest {
   void errorTests() throws Exception {
 
     errorTest("Null provider test", NullPointerException.class, () -> {
-      new SoftMultiCredentialContainer(null, "Test1234");
+      new SoftPkiCredentialContainer(null, "Test1234");
     });
 
     errorTest("Null hsm pin test", NullPointerException.class, () -> {
-      new SoftMultiCredentialContainer(Security.getProvider("BC"), null);
+      new SoftPkiCredentialContainer(Security.getProvider("BC"), null);
     });
 
-    AbstractMultiCredentialContainer pkcs11KeyGenerator = new SoftMultiCredentialContainer(Security.getProvider("BC"), "Test1234");
+    AbstractPkiCredentialContainer pkcs11KeyGenerator = new SoftPkiCredentialContainer(Security.getProvider("BC"), "Test1234");
     errorTest("Unsupported algorithm", NoSuchAlgorithmException.class, () -> {
       pkcs11KeyGenerator.generateCredential("DUMMY_ALOG");
     });
