@@ -38,7 +38,7 @@ public class PkiCredentialContainerTest {
   void generateKeyPair() throws Exception {
 
     AbstractPkiCredentialContainer pkcs11KeyGenerator = new SoftPkiCredentialContainer(Security.getProvider("BC"), "Test1234");
-    pkcs11KeyGenerator.setSupportedKeyGenerators(List.of(
+    pkcs11KeyGenerator.setSupportedKeyTypes(List.of(
       KeyGenType.RSA_2048_Factory,
       KeyGenType.RSA_3072_Factory,
       KeyGenType.RSA_4096_Factory,

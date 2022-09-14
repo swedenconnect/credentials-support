@@ -60,8 +60,8 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
   /** The duration for which all generated keys are valid */
   @Setter private Duration keyDuration;
 
-  /** List of key generator initiators for supported key types */
-  @Setter List<KeyPairGeneratorFactory> supportedKeyGenerators;
+  /** List of key generator factories for supported key types */
+  @Setter List<KeyPairGeneratorFactory> supportedKeyTypes;
 
   /** Random source for generating unique key aliases */
   private final SecureRandom RNG = new SecureRandom();
@@ -80,7 +80,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
     this.provider = provider;
     this.password = password.toCharArray();
     this.keyStore = getKeyStore(provider, password);
-    this.supportedKeyGenerators = getDefaultKeyGenerators();
+    this.supportedKeyTypes = getDefaultSupportedKeyTypes();
     this.keyDuration = Duration.ofMinutes(15);
   }
 
@@ -100,7 +100,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
    *
    * @return list of {@link KeyPairGeneratorFactory} for each supported key type
    */
-  protected List<KeyPairGeneratorFactory> getDefaultKeyGenerators() {
+  protected List<KeyPairGeneratorFactory> getDefaultSupportedKeyTypes() {
     return List.of(
       KeyGenType.EC_P256_Factory,
       KeyGenType.EC_P384_Factory,
@@ -199,7 +199,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
 
 
   private KeyPairGeneratorFactory getKeyGenInitiator(final String keyTypeName) throws NoSuchAlgorithmException {
-    return supportedKeyGenerators.stream()
+    return supportedKeyTypes.stream()
       .filter(keyGeneratorInitiator -> keyGeneratorInitiator.supports(keyTypeName))
       .findFirst()
       .orElseThrow(NoSuchAlgorithmException::new);

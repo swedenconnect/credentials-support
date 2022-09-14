@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 
 /**
- * Factory for creating a {@link KeyPairGenerator} suitable for a specific key type name
+ * Factory for creating a {@link KeyPairGenerator} suitable for a specific key type
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -41,7 +41,7 @@ public abstract class KeyPairGeneratorFactory {
   /**
    * Predicate for whether this factory instance supports a particular key type
    *
-   * @param keyType the requested key type
+   * @param keyType the requested key type name
    * @return true if this factory instance supports the specified key type
    */
   public boolean supports(final String keyType) {
