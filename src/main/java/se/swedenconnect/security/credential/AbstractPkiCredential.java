@@ -87,9 +87,6 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   /** {@inheritDoc} */
   @Override
   public void setCertificate(final X509Certificate certificate) {
-    if (this.certificates != null && !this.certificates.isEmpty()) {
-      throw new IllegalArgumentException("Cannot assign certificate - certificates have already been assigned");
-    }
     if (this.publicKey != null && certificate != null) {
       if (!Arrays.equals(this.publicKey.getEncoded(), certificate.getPublicKey().getEncoded())) {
         throw new IllegalArgumentException("Cannot assign certificate - it does not match already installed public key");
@@ -108,11 +105,11 @@ public abstract class AbstractPkiCredential implements PkiCredential {
    *           if the supplied resource cannot be decoded into a X509Certificate instance
    */
   public void setCertificate(final Resource certificateResource) throws CertificateException {
-    if (this.certificates != null && !this.certificates.isEmpty()) {
-      throw new IllegalArgumentException("Cannot assign certificate - certificates have already been assigned");
-    }
     if (certificateResource != null) {
       this.setCertificate(X509Utils.decodeCertificate(certificateResource));
+    }
+    else {
+      this.certificates = null;
     }
   }
 
@@ -129,9 +126,6 @@ public abstract class AbstractPkiCredential implements PkiCredential {
       throw new IllegalArgumentException("Supplied certificate chain must contain at least one certificate");
     }
 
-    if (this.certificates != null && !this.certificates.isEmpty()) {
-      throw new IllegalArgumentException("Cannot assign certificate - certificates have already been assigned");
-    }
     if (this.publicKey != null && certificates != null) {
       if (!Arrays.equals(this.publicKey.getEncoded(), certificates.get(0).getPublicKey().getEncoded())) {
         throw new IllegalArgumentException("Cannot assign certificate(s) - entity certificate does not match already installed public key");

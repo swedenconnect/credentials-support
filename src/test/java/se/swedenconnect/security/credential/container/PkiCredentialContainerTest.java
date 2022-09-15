@@ -1,14 +1,8 @@
 package se.swedenconnect.security.credential.container;
 
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
-import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.security.credential.container.exceptions.PkiCredentialContainerException;
-import se.swedenconnect.security.credential.container.impl.SoftPkiCredentialContainer;
-import se.swedenconnect.security.credential.container.keytype.KeyGenType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
@@ -16,7 +10,14 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 
 /**
  * Tests for the PkiCredentialContainer
@@ -39,20 +40,20 @@ public class PkiCredentialContainerTest {
 
     AbstractPkiCredentialContainer pkcs11KeyGenerator = new SoftPkiCredentialContainer(Security.getProvider("BC"), "Test1234");
     pkcs11KeyGenerator.setSupportedKeyTypes(List.of(
-      KeyGenType.RSA_2048_Factory,
-      KeyGenType.RSA_3072_Factory,
-      KeyGenType.RSA_4096_Factory,
-      KeyGenType.EC_P192_Factory,
-      KeyGenType.EC_P224_Factory,
-      KeyGenType.EC_P256_Factory,
-      KeyGenType.EC_P384_Factory,
-      KeyGenType.EC_P521_Factory,
-      KeyGenType.EC_BRAINPOOL_192_Factory,
-      KeyGenType.EC_BRAINPOOL_224_Factory,
-      KeyGenType.EC_BRAINPOOL_256_Factory,
-      KeyGenType.EC_BRAINPOOL_320_Factory,
-      KeyGenType.EC_BRAINPOOL_384_Factory,
-      KeyGenType.EC_BRAINPOOL_512_Factory
+      KeyGenType.RSA_2048,
+      KeyGenType.RSA_3072,
+      KeyGenType.RSA_4096,
+      KeyGenType.EC_P192,
+      KeyGenType.EC_P224,
+      KeyGenType.EC_P256,
+      KeyGenType.EC_P384,
+      KeyGenType.EC_P521,
+      KeyGenType.EC_BRAINPOOL_192,
+      KeyGenType.EC_BRAINPOOL_224,
+      KeyGenType.EC_BRAINPOOL_256,
+      KeyGenType.EC_BRAINPOOL_320,
+      KeyGenType.EC_BRAINPOOL_384,
+      KeyGenType.EC_BRAINPOOL_512
     ));
 
     List<String> keyTypeIdList = List.of(
@@ -75,7 +76,7 @@ public class PkiCredentialContainerTest {
     List<PkiCredential> credentialList = issueKeyTypes(keyTypeIdList, pkcs11KeyGenerator);
     assertEquals(keyTypeIdList.size(), credentialList.size());
 
-    List<String> availableCredentials = pkcs11KeyGenerator.getAvailableCredentials();
+    List<String> availableCredentials = pkcs11KeyGenerator.listCredentials();
     log.info("Available credentials: {}", availableCredentials);
 
     assertEquals(keyTypeIdList.size(), availableCredentials.size());
@@ -84,20 +85,20 @@ public class PkiCredentialContainerTest {
       credential.destroy();
     }
 
-    assertEquals(0, pkcs11KeyGenerator.getAvailableCredentials().size());
+    assertEquals(0, pkcs11KeyGenerator.listCredentials().size());
 
     // Issue credentials again:
     credentialList = issueKeyTypes(keyTypeIdList, pkcs11KeyGenerator);
     assertEquals(keyTypeIdList.size(), credentialList.size());
 
     // Delete them using the pkcs11 key generator
-    availableCredentials = pkcs11KeyGenerator.getAvailableCredentials();
+    availableCredentials = pkcs11KeyGenerator.listCredentials();
     for (String alias : availableCredentials) {
       pkcs11KeyGenerator.deleteCredential(alias);
     }
 
     // make sure they are deleted
-    assertEquals(0, pkcs11KeyGenerator.getAvailableCredentials().size());
+    assertEquals(0, pkcs11KeyGenerator.listCredentials().size());
 
   }
 
