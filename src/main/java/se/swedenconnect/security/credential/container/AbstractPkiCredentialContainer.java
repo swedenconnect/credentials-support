@@ -23,7 +23,9 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -413,6 +415,47 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
     public void destroy() throws Exception {
       this.credential.destroy();
       this.keyStore.deleteEntry(this.alias);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public PublicKey getPublicKey() {
+      return credential.getCertificateChain().get(0).getPublicKey();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public X509Certificate getCertificate() {
+      return credential.getCertificateChain().get(0);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setCertificate(final X509Certificate x509Certificate) {
+      Objects.requireNonNull(x509Certificate, "Certificate must not be null");
+      credential.setCertificateChain(List.of(x509Certificate));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<X509Certificate> getCertificateChain() {
+      return credential.getCertificateChain();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setCertificateChain(final List<X509Certificate> certificateChain) {
+      Objects.requireNonNull(certificateChain, "Certificate chain must not be null");
+      if (certificateChain.isEmpty()) {
+        throw new IllegalArgumentException("Certificate chain must not be empty");
+      }
+      credential.setCertificateChain(certificateChain);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public PrivateKey getPrivateKey() {
+      return this.credential.getPrivateKey();
     }
 
   }

@@ -56,7 +56,7 @@ public class KeyPairGeneratorFactoryRegistry {
     else if (KeyGenType.RSA_4096.equalsIgnoreCase(keyGenType)) {
       factory = new RsaKeyPairGeneratorFactory(KeyGenType.RSA_4096, 4096);
     }
-    else if (KeyGenType.EC_P192.equalsIgnoreCase(KeyGenType.EC_P192)) {
+    else if (KeyGenType.EC_P192.equalsIgnoreCase(keyGenType)) {
       factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_P192, ECParameterSpecs.NIST_P192);
     }
     else if (KeyGenType.EC_P224.equalsIgnoreCase(keyGenType)) {
