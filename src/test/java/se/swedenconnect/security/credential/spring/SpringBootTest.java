@@ -15,9 +15,10 @@
  */
 package se.swedenconnect.security.credential.spring;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.lang.reflect.Field;
 
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import lombok.Setter;
 import se.swedenconnect.security.credential.AbstractPkiCredential;
@@ -37,7 +37,7 @@ import se.swedenconnect.security.credential.monitoring.CredentialMonitorBean;
 
 /**
  * Tests that credentials can be initiated using Spring boot configuration properties.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -51,31 +51,31 @@ public class SpringBootTest {
   @Autowired(required = false)
   @Qualifier("credential1")
   private PkiCredential credential1;
-  
+
   @Setter
   @Autowired(required = false)
   @Qualifier("credential2")
   private PkiCredential credential2;
-  
+
   @Setter
   @Autowired(required = false)
   @Qualifier("credential3")
   private ReloadablePkiCredential credential3;
-  
+
   @Setter
   @Autowired(required = false)
   @Qualifier("credential4")
   private ReloadablePkiCredential credential4;
-  
+
   @Setter
   @Autowired
   private CredentialMonitorBean credentialMonitorBean;
-  
+
   @Scheduled(fixedDelay = 1000, initialDelay = 1000)
   public void scheduleCredentialMonitor() {
     this.credentialMonitorBean.test();
   }
-  
+
   @Test
   public void testBeans() throws Exception {
     assertNotNull(this.credential1, "credential1 not created");
@@ -91,22 +91,22 @@ public class SpringBootTest {
     assertNotNull(this.credential4.getCertificate());
     assertNotNull(this.credential4.getPrivateKey());
   }
-  
+
   @Test
   public void testMonitorAndReload() throws Exception {
     // First simulate that credential 4 has stopped working ...
     //
     // Mess up the private key
-    Field pk = AbstractPkiCredential.class.getDeclaredField("privateKey"); 
+    Field pk = AbstractPkiCredential.class.getDeclaredField("privateKey");
     pk.setAccessible(true);
     pk.set(this.credential4, null);
-    
+
     // Wait for the monitor to detect and fix the credential ...
     //
     Thread.sleep(3000);
-    
+
     // Now, it should be reloaded...
     assertNotNull(this.credential4.getPrivateKey());
-    
+
   }
 }

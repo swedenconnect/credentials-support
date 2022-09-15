@@ -15,12 +15,13 @@
  */
 package se.swedenconnect.security.credential.spring;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.lang.reflect.Field;
 import java.security.Provider;
 import java.security.Security;
 
 import org.junit.jupiter.api.AfterAll;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import lombok.Setter;
 import se.swedenconnect.security.credential.AbstractPkiCredential;
@@ -38,29 +38,29 @@ import se.swedenconnect.security.credential.pkcs11conf.MockSunPkcs11Provider;
 
 /**
  * Tests that credentials can be initiated using a Spring context file.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = {"/test-config.xml"})
 public class SpringTest {
-  
+
   @Setter
   @Autowired(required = false)
   @Qualifier("credential1")
   private PkiCredential credential1;
-  
+
   @Setter
   @Autowired(required = false)
   @Qualifier("credential2")
   private PkiCredential credential2;
-  
+
   @Setter
   @Autowired(required = false)
   @Qualifier("credential2b")
   private PkiCredential credential2b;
-  
+
   @Setter
   @Autowired(required = false)
   @Qualifier("credential3")
@@ -78,7 +78,7 @@ public class SpringTest {
     // We let rsa1.jks simulate our PKCS#11 device.
     MockSunPkcs11Provider.MockedPkcs11ResourceHolder.getInstance().setResource(new ClassPathResource("rsa1.jks"));
   }
-  
+
   @AfterAll
   public static void afterClass() {
     Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
@@ -90,7 +90,7 @@ public class SpringTest {
       }
     }
   }
-  
+
   @Test
   public void testBeans() throws Exception {
     assertNotNull(this.credential1, "credential1 not created");
@@ -109,23 +109,23 @@ public class SpringTest {
     assertNotNull(this.credential4.getCertificate());
     assertNotNull(this.credential4.getPrivateKey());
   }
-  
+
   @Test
   public void testMonitorAndReload() throws Exception {
     // First simulate that credential 4 has stopped working ...
     //
     // Mess up the private key
-    Field pk = AbstractPkiCredential.class.getDeclaredField("privateKey"); 
+    Field pk = AbstractPkiCredential.class.getDeclaredField("privateKey");
     pk.setAccessible(true);
     pk.set(this.credential4, null);
-    
+
     // Wait for the monitor to detect and fix the credential ...
     //
     Thread.sleep(3000);
-    
+
     // Now, it should be reloaded...
     assertNotNull(this.credential4.getPrivateKey());
-    
+
   }
 
 }

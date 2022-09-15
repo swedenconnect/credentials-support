@@ -22,11 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Tests that the {@link Pkcs11Configuration} classes can be configured the Spring Boot-way.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -35,16 +34,16 @@ public class SpringBootConfigurationTest {
 
   @Autowired
   ApplicationContext context;
-  
+
   @Test
   public void test() throws Exception {
     Assertions.assertNotNull(this.context);
   }
-  
+
   @Configuration
   public static class TestConfiguration {
-    
-    
+
+
   }
 
 }
