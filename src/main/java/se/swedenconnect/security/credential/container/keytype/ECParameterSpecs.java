@@ -35,31 +35,50 @@ import java.security.spec.EllipticCurve;
  */
 public class ECParameterSpecs {
 
-  /** Nist P-192 curve. */
-  public static final AlgorithmParameterSpec NIST_P192 = new ECGenParameterSpec("secp192r1");
+  /** Algorithm parameter spec Nist P-192 curve. */
+  public static final AlgorithmParameterSpec APS_NIST_P192 = new ECGenParameterSpec("secp192r1");
 
-  /** Nist P-224 curve. */
-  public static final AlgorithmParameterSpec NIST_P224 = new ECGenParameterSpec("secp224r1");
+  /** Algorithm parameter spec Nist P-224 curve. */
+  public static final AlgorithmParameterSpec APS_NIST_P224 = new ECGenParameterSpec("secp224r1");
 
-  /** Nist P-256 curve. */
-  public static final AlgorithmParameterSpec NIST_P256 = new ECGenParameterSpec("secp256r1");
+  /** Algorithm parameter spec Nist P-256 curve. */
+  public static final AlgorithmParameterSpec APS_NIST_P256 = new ECGenParameterSpec("secp256r1");
 
-  /** Nist P-384 curve. */
-  public static final AlgorithmParameterSpec NIST_P384 = new ECGenParameterSpec("secp384r1");
+  /** Algorithm parameter spec Nist P-384 curve. */
+  public static final AlgorithmParameterSpec APS_NIST_P384 = new ECGenParameterSpec("secp384r1");
 
-  /** Nist P-512 curve. */
-  public static final AlgorithmParameterSpec NIST_P521 = new ECGenParameterSpec("secp521r1");
+  /** Algorithm parameter spec Nist P-512 curve. */
+  public static final AlgorithmParameterSpec APS_NIST_P521 = new ECGenParameterSpec("secp521r1");
 
-  /** Brainpool P192R1. */
-  public static final ECParameterSpec BRAINPOOL_P192R1 = createSpec("C302F41D932A36CDA7A3463093D18DB78FCE476DE1A86297",
+  /** Algorithm parameter spec Brainpool P-192 R1 curve. */
+  public static final AlgorithmParameterSpec APS_BRAINPOOL_P192R1 = new ECGenParameterSpec("brainpoolp192r1");
+
+  /** Algorithm parameter spec Brainpool P-224 R1 curve. */
+  public static final AlgorithmParameterSpec APS_BRAINPOOL_P224R1 = new ECGenParameterSpec("brainpoolp224r1");
+
+  /** Algorithm parameter spec Brainpool P-256 R1 curve. */
+  public static final AlgorithmParameterSpec APS_BRAINPOOL_P256R1 = new ECGenParameterSpec("brainpoolp256r1");
+
+  /** Algorithm parameter spec Brainpool P-320 R1 curve. */
+  public static final AlgorithmParameterSpec APS_BRAINPOOL_P320R1 = new ECGenParameterSpec("brainpoolp320r1");
+
+  /** Algorithm parameter spec Brainpool P-384 R1 curve. */
+  public static final AlgorithmParameterSpec APS_BRAINPOOL_P384R1 = new ECGenParameterSpec("brainpoolp384r1");
+
+  /** Algorithm parameter spec Brainpool P-512 R1 curve. */
+  public static final AlgorithmParameterSpec APS_BRAINPOOL_P512R1 = new ECGenParameterSpec("brainpoolp512r1");
+
+
+  /** Parameter spec Brainpool P192R1. */
+  public static final ECParameterSpec SPEC_BRAINPOOL_P192R1 = createSpec("C302F41D932A36CDA7A3463093D18DB78FCE476DE1A86297",
       "6A91174076B1E0E19C39C031FE8685C1CAE040E5C69A28EF",
       "469A28EF7C28CCA3DC721D044F4496BCCA7EF4146FBF25C9",
       "C0A0647EAAB6A48753B033C56CB0F0900A2F5C4853375FD6",
       "14B690866ABD5BB88B5F4828C1490002E6773FA2FA299B8F",
       "C302F41D932A36CDA7A3462F9E9E916B5BE8F1029AC4ACC1");
 
-  /** Brainpool P224 R1. */
-  public static final ECParameterSpec BRAINPOOL_P224R1 =
+  /** Parameter spec Brainpool P224 R1. */
+  public static final ECParameterSpec SPEC_BRAINPOOL_P224R1 =
       createSpec("D7C134AA264366862A18302575D1D787B09F075797DA89F57EC8C0FF",
           "68A5E62CA9CE6C1C299803A6C1530B514E182AD8B0042A59CAD29F43",
           "2580F63CCFE44138870713B1A92369E33E2135D266DBB372386C400B",
@@ -67,8 +86,8 @@ public class ECParameterSpecs {
           "58AA56F772C0726F24C6B89E4ECDAC24354B9E99CAA3F6D3761402CD",
           "D7C134AA264366862A18302575D0FB98D116BC4B6DDEBCA3A5A7939F");
 
-  /** Brainpool P256 R1. */
-  public static final ECParameterSpec BRAINPOOL_P256R1 =
+  /** Parameter spec Brainpool P256 R1. */
+  public static final ECParameterSpec SPEC_BRAINPOOL_P256R1 =
       createSpec("A9FB57DBA1EEA9BC3E660A909D838D726E3BF623D52620282013481D1F6E5377",
           "7D5A0975FC2C3057EEF67530417AFFE7FB8055C126DC5C6CE94A4B44F330B5D9",
           "26DC5C6CE94A4B44F330B5D9BBD77CBF958416295CF7E1CE6BCCDC18FF8C07B6",
@@ -76,8 +95,8 @@ public class ECParameterSpecs {
           "547EF835C3DAC4FD97F8461A14611DC9C27745132DED8E545C1D54C72F046997",
           "A9FB57DBA1EEA9BC3E660A909D838D718C397AA3B561A6F7901E0E82974856A7");
 
-  /** Brainpool P320 R1. */
-  public static final ECParameterSpec BRAINPOOL_P320R1 =
+  /** Parameter spec Brainpool P320 R1. */
+  public static final ECParameterSpec SPEC_BRAINPOOL_P320R1 =
       createSpec("D35E472036BC4FB7E13C785ED201E065F98FCFA6F6F40DEF4F92B9EC7893EC28FCD412B1F1B32E27",
           "3EE30B568FBAB0F883CCEBD46D3F3BB8A2A73513F5EB79DA66190EB085FFA9F492F375A97D860EB4",
           "520883949DFDBC42D3AD198640688A6FE13F41349554B49ACC31DCCD884539816F5EB4AC8FB1F1A6",
@@ -85,8 +104,8 @@ public class ECParameterSpecs {
           "14FDD05545EC1CC8AB4093247F77275E0743FFED117182EAA9C77877AAAC6AC7D35245D1692E8EE1",
           "D35E472036BC4FB7E13C785ED201E065F98FCFA5B68F12A32D482EC7EE8658E98691555B44C59311");
 
-  /** Brainpool P384 R1. */
-  public static final ECParameterSpec BRAINPOOL_P384R1 =
+  /** Parameter spec Brainpool P384 R1. */
+  public static final ECParameterSpec SPEC_BRAINPOOL_P384R1 =
       createSpec("8CB91E82A3386D280F5D6F7E50E641DF152F7109ED5456B412B1DA197FB71123ACD3A729901D1A71874700133107EC53",
           "7BC382C63D8C150C3C72080ACE05AFA0C2BEA28E4FB22787139165EFBA91F90F8AA5814A503AD4EB04A8C7DD22CE2826",
           "04A8C7DD22CE28268B39B55416F0447C2FB77DE107DCD2A62E880EA53EEB62D57CB4390295DBC9943AB78696FA504C11",
@@ -94,8 +113,8 @@ public class ECParameterSpecs {
           "8ABE1D7520F9C2A45CB1EB8E95CFD55262B70B29FEEC5864E19C054FF99129280E4646217791811142820341263C5315",
           "8CB91E82A3386D280F5D6F7E50E641DF152F7109ED5456B31F166E6CAC0425A7CF3AB6AF6B7FC3103B883202E9046565");
 
-  /** Brainpool P512 R1. */
-  public static final ECParameterSpec BRAINPOOL_P512R1 = createSpec(
+  /** Parameter spec Brainpool P512 R1. */
+  public static final ECParameterSpec SPEC_BRAINPOOL_P512R1 = createSpec(
       "AADD9DB8DBE9C48B3FD4E6AE33C9FC07CB308DB3B3C9D20ED6639CCA703308717D4D9B009BC66842AECDA12AE6A380E62881FF2F2D82C68528AA6056583A48F3",
       "7830A3318B603B89E2327145AC234CC594CBDD8D3DF91610A83441CAEA9863BC2DED5D5AA8253AA10A2EF1C98B9AC8B57F1117A72BF2C7B9E7C1AC4D77FC94CA",
       "3DF91610A83441CAEA9863BC2DED5D5AA8253AA10A2EF1C98B9AC8B57F1117A72BF2C7B9E7C1AC4D77FC94CADC083E67984050B75EBAE5DD2809BD638016F723",

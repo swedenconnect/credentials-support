@@ -57,37 +57,37 @@ public class KeyPairGeneratorFactoryRegistry {
       factory = new RsaKeyPairGeneratorFactory(KeyGenType.RSA_4096, 4096);
     }
     else if (KeyGenType.EC_P192.equalsIgnoreCase(keyGenType)) {
-      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_P192, ECParameterSpecs.NIST_P192);
+      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_P192, ECParameterSpecs.APS_NIST_P192);
     }
     else if (KeyGenType.EC_P224.equalsIgnoreCase(keyGenType)) {
-      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_P224, ECParameterSpecs.NIST_P224);
+      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_P224, ECParameterSpecs.APS_NIST_P224);
     }
     else if (KeyGenType.EC_P256.equalsIgnoreCase(keyGenType)) {
-      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_P256, ECParameterSpecs.NIST_P256);
+      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_P256, ECParameterSpecs.APS_NIST_P256);
     }
     else if (KeyGenType.EC_P384.equalsIgnoreCase(keyGenType)) {
-      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_P384, ECParameterSpecs.NIST_P384);
+      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_P384, ECParameterSpecs.APS_NIST_P384);
     }
     else if (KeyGenType.EC_P521.equalsIgnoreCase(keyGenType)) {
-      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_P521, ECParameterSpecs.NIST_P521);
+      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_P521, ECParameterSpecs.APS_NIST_P521);
     }
     else if (KeyGenType.EC_BRAINPOOL_192.equalsIgnoreCase(keyGenType)) {
-      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_192, ECParameterSpecs.BRAINPOOL_P192R1);
+      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_192, ECParameterSpecs.SPEC_BRAINPOOL_P192R1);
     }
     else if (KeyGenType.EC_BRAINPOOL_224.equalsIgnoreCase(keyGenType)) {
-      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_224, ECParameterSpecs.BRAINPOOL_P224R1);
+      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_224, ECParameterSpecs.SPEC_BRAINPOOL_P224R1);
     }
     else if (KeyGenType.EC_BRAINPOOL_256.equalsIgnoreCase(keyGenType)) {
-      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_256, ECParameterSpecs.BRAINPOOL_P256R1);
+      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_256, ECParameterSpecs.SPEC_BRAINPOOL_P256R1);
     }
     else if (KeyGenType.EC_BRAINPOOL_320.equalsIgnoreCase(keyGenType)) {
-      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_320, ECParameterSpecs.BRAINPOOL_P320R1);
+      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_320, ECParameterSpecs.SPEC_BRAINPOOL_P320R1);
     }
     else if (KeyGenType.EC_BRAINPOOL_384.equalsIgnoreCase(keyGenType)) {
-      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_384, ECParameterSpecs.BRAINPOOL_P384R1);
+      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_384, ECParameterSpecs.SPEC_BRAINPOOL_P384R1);
     }
     else if (KeyGenType.EC_BRAINPOOL_512.equalsIgnoreCase(keyGenType)) {
-      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_512, ECParameterSpecs.BRAINPOOL_P512R1);
+      factory = new EcKeyPairGeneratorFactory(KeyGenType.EC_BRAINPOOL_512, ECParameterSpecs.SPEC_BRAINPOOL_P512R1);
     }
     else {
       throw new IllegalArgumentException("No KeyPairGeneratorFactory registered for " + keyGenType);
