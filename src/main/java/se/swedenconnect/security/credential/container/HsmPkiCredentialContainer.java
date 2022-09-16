@@ -20,12 +20,10 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
-import java.security.Security;
 import java.security.cert.CertificateException;
 
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.security.credential.pkcs11conf.DefaultPkcs11Configuration;
 
 /**
  * Implements a {@link PkiCredentialContainer} based on a HSM.
@@ -34,18 +32,6 @@ import se.swedenconnect.security.credential.pkcs11conf.DefaultPkcs11Configuratio
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class HsmPkiCredentialContainer extends AbstractPkiCredentialContainer {
-
-  /**
-   * Constructor for a PKCS#11 credential container where keys are stored in a HSM slot. The security provider used will
-   * be {@value DefaultPkcs11Configuration#DEFAULT_PROVIDER_NAME}. To use another provider, see
-   * {@link HsmPkiCredentialContainer#HsmPkiCredentialContainer(Provider, String)}.
-   *
-   * @param hsmPin the pin for the associated HSM slot
-   * @throws KeyStoreException for errors initiating the HSM slot key store
-   */
-  public HsmPkiCredentialContainer(final String hsmPin) throws KeyStoreException {
-    this(Security.getProvider(DefaultPkcs11Configuration.DEFAULT_PROVIDER_NAME), hsmPin);
-  }
 
   /**
    * Constructor for the default PKCS11 credential container where keys are stored in a HSM slot.
