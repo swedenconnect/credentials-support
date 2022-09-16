@@ -38,9 +38,11 @@ Java library for PKI credentials support, including PKCS#11 and HSM:s.
   
 4. [**Monitoring and reloading credentials**](#monitoring-and-reloading-credentials)
 
-5. [**Using SoftHSM to test PKCS#11 credentials**](#using-softhsm-to-test-pkcs11-credentials)
+5. [**Credential containers for managing keys**](#credential-containers)
 
-6. [**API documentation**](#api-documentation)
+6. [**Using SoftHSM to test PKCS#11 credentials**](#using-softhsm-to-test-pkcs11-credentials)
+
+7. [**API documentation**](#api-documentation)
 
 ---
 
@@ -252,13 +254,87 @@ The [DefaultCredentialMonitorBean](https://github.com/swedenconnect/credentials-
 
 See [SpringBootTest](https://github.com/swedenconnect/credentials-support/blob/main/src/test/java/se/swedenconnect/security/credential/spring/SpringBootTest.java) and [CredentialsConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/src/test/java/se/swedenconnect/security/credential/spring/CredentialsConfiguration.java) for an example of how to set up a scheduled monitor in Spring Boot.
 
+<a name="credential-containers"></a>
+## 5. Credential containers for managing keys
+
+This library provide support for setting up a credential container for generating, storing and managing public and private key pairs.
+
+The primary use case for the credential container is when key pairs for user accounts are generated and maintained by an application and 
+these keys are stored in a HSM slot. A typical such use case is when a signing service needs to generate a signing key that represents a 
+signer, use that key for signing and then permanently deleting this key without the key ever leaving the HSM.
+
+Even though the HSM option is the primary use case, the credential container also supports software based or in memory key storage.
+
+A credential container is created according to the following examples:
+
+**HSM based credential container**
+
+> PkiCredentialContainer credentialContainer = new HsmPkiCredentialContainer(provider, hsmSlotPin);
+
+"provider" is the security provider that implements the HSM slot. and the "hsmSlotPin" is the pin code
+for accessing the HSM slot.
+
+It is outside the scope of this library how the HSM provider is created, but a common way is to use the "SUNPKCS11"
+provider and add it to the system providers as follows:
+
+      Provider pkcs11Provider = Security.getProvider("SunPKCS11");
+      pkcs11Provider = pkcs11Provider.configure(providerConfigFilePath);
+      Security.addProvider(pkcs11Provider);
+
+
+**Software based credential container**
+
+A corresponding software based security provider can be created as follows:
+
+> PkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer(provider, password);
+
+or as:
+
+> PkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer(password);
+
+"`provider`" is the provider used to create the key store used to store keys as well as the provider used to generate keys.
+Bouncycastle provider is used by default if no provider is specified (example 2).
+
+Keys are generated in the credential container by calling the function generateCredential(keyType), where "`keyType`" is
+a string representing a registered key generation factory in `KeyPairGeneratorFactoryRegistry`
+
+Names for default supported key types are available as static constants in the `KeyGenType` class. A typical command for 
+generating credential key pairs is therefore according to this example (Nist P-256 EC key):
+
+> String alias = credentialContainer.generateCredential(KeyGenType.EC_P256);
+
+The returned alias is the handle used to use or manage this key pair with functions such as:
+
+      PkiCredential credential = credentialContainer.getCredential(alias);
+      credentialContainer.deleteCredential(alias)
+
+A full set of commands are specified in the `PkiCredential` interface
+
+The set of supported algoritms can be extended by first register new key types in the `KeyPairGeneratorFactoryRegistry` and then
+setting the supported keyType names in the credential container by the setting the supported key types as in the following example:
+
+      credentialContainer.setSupportedKeyTypes(List.of(
+      KeyGenType.RSA_3072,
+      KeyGenType.EC_P256,
+      KeyGenType.EC_BRAINPOOL_256,
+      "MyPrivateKeyType"));
+
+
+The time a generated key is kept in the container before it is automatically deleted if the "cleanup" function is called,
+is by default 15 minutes, but can be set using the `setKeyValidity(final Duration keyValidity)` function. E.g:
+
+> credentialContainer.setKeyValidity(Duration.ofDays(365))
+
+This sets key validity to 356 days for each generated key.
+
+
 <a name="using-softhsm-to-test-pkcs11-credentials"></a>
-## 5. Using SoftHSM to test PKCS#11 credentials
+## 6. Using SoftHSM to test PKCS#11 credentials
 
 [SoftHSM](https://wiki.opendnssec.org/display/SoftHSMDOCS) is a great way to test your PKCS#11 credentials without an actual HSM. The **credentials-support** library contains a simple Spring Boot app that illustrates how to set up SoftHSM and how to configure your PKCS#11 devices, see the [softhsm](https://github.com/swedenconnect/credentials-support/tree/main/softhsm) directory for details.
 
 <a name="api-documentation"></a>
-## 6. API documentation
+## 7. API documentation
 
 * [Java API documentation](https://docs.swedenconnect.se/credentials-support/apidoc/index.html)
 

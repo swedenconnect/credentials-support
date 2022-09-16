@@ -241,6 +241,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
    *
    * @param keyValidity the validity
    */
+  @Override
   public void setKeyValidity(final Duration keyValidity) {
     this.keyValidity = keyValidity;
   }
@@ -250,6 +251,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
    *
    * @param supportedKeyTypes a list of supported key types
    */
+  @Override
   public void setSupportedKeyTypes(final List<String> supportedKeyTypes) {
     this.supportedKeyTypes = Optional.ofNullable(supportedKeyTypes)
         .filter(s -> !s.isEmpty())

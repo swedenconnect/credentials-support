@@ -18,6 +18,7 @@ package se.swedenconnect.security.credential.container;
 import java.security.KeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
@@ -103,4 +104,17 @@ public interface PkiCredentialContainer {
    */
   void cleanup() throws PkiCredentialContainerException;
 
+  /**
+   * Assigns the duration for the validity of generated credentials.
+   *
+   * @param keyValidity the validity
+   */
+  public void setKeyValidity(final Duration keyValidity);
+
+  /**
+   * Assigns the key types that this container supports.
+   *
+   * @param supportedKeyTypes a list of supported key types
+   */
+  public void setSupportedKeyTypes(final List<String> supportedKeyTypes);
 }
