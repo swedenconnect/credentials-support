@@ -396,6 +396,54 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
 
     /** {@inheritDoc} */
     @Override
+    public PublicKey getPublicKey() {
+      return this.credential.getPublicKey();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setPublicKey(final PublicKey publicKey) {
+      throw new IllegalArgumentException("Can not assign public key to DisposableKeyStoreCredential");
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public X509Certificate getCertificate() {
+      return this.credential.getCertificate();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setCertificate(final X509Certificate x509Certificate) {
+      this.credential.setCertificate(x509Certificate);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<X509Certificate> getCertificateChain() {
+      return this.credential.getCertificateChain();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setCertificateChain(final List<X509Certificate> certificateChain) {
+      this.credential.setCertificateChain(certificateChain);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public PrivateKey getPrivateKey() {
+      return this.credential.getPrivateKey();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setPrivateKey(final PrivateKey privateKey) {
+      throw new IllegalArgumentException("Can not assign private key to DisposableKeyStoreCredential");
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public void reload() throws Exception {
       if (ReloadablePkiCredential.class.isInstance(this.credential)) {
         ReloadablePkiCredential.class.cast(this.credential).reload();
@@ -415,47 +463,6 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
     public void destroy() throws Exception {
       this.credential.destroy();
       this.keyStore.deleteEntry(this.alias);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public PublicKey getPublicKey() {
-      return credential.getCertificateChain().get(0).getPublicKey();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public X509Certificate getCertificate() {
-      return credential.getCertificateChain().get(0);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setCertificate(final X509Certificate x509Certificate) {
-      Objects.requireNonNull(x509Certificate, "Certificate must not be null");
-      credential.setCertificateChain(List.of(x509Certificate));
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public List<X509Certificate> getCertificateChain() {
-      return credential.getCertificateChain();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setCertificateChain(final List<X509Certificate> certificateChain) {
-      Objects.requireNonNull(certificateChain, "Certificate chain must not be null");
-      if (certificateChain.isEmpty()) {
-        throw new IllegalArgumentException("Certificate chain must not be empty");
-      }
-      credential.setCertificateChain(certificateChain);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public PrivateKey getPrivateKey() {
-      return this.credential.getPrivateKey();
     }
 
   }
