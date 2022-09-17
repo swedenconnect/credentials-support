@@ -36,21 +36,28 @@ import se.swedenconnect.security.credential.PkiCredential;
 public class SoftPkiCredentialContainer extends AbstractPkiCredentialContainer {
 
   /**
-   * Constructor that uses the Bouncy Castle security provider.
+   * Constructor loading the security provider identified by {@code providerName}.
    *
-   * @param password the store password
-   * @throws KeyStoreException for errors creating the key store
+   * @param providerName
+   *          the name of the security provider
+   * @param password
+   *          the store password
+   * @throws KeyStoreException
+   *           for errors creating the key store
    */
-  public SoftPkiCredentialContainer(final String password) throws KeyStoreException {
-    super(Security.getProvider("BC"), password);
+  public SoftPkiCredentialContainer(final String providerName, final String password) throws KeyStoreException {
+    super(Security.getProvider(providerName), password);
   }
 
   /**
    * Constructor.
    *
-   * @param provider the security provider
-   * @param password the store password
-   * @throws KeyStoreException for errors creating the key store
+   * @param provider
+   *          the security provider
+   * @param password
+   *          the store password
+   * @throws KeyStoreException
+   *           for errors creating the key store
    */
   public SoftPkiCredentialContainer(final Provider provider, final String password) throws KeyStoreException {
     super(provider, password);

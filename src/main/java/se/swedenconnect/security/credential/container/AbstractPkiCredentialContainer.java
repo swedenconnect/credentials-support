@@ -302,7 +302,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
           .orElseThrow(() -> new NoSuchAlgorithmException(String.format("%s is not supported by this container")));
     }
     catch (final IllegalArgumentException e) {
-      throw new NoSuchAlgorithmException("No matching factory found for " + keyTypeName);
+      throw new NoSuchAlgorithmException("No matching key generation factory found for " + keyTypeName);
     }
   }
 
