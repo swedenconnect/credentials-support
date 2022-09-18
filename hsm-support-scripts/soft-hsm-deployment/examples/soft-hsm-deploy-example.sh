@@ -17,29 +17,29 @@ key_id=(
   "ca01-ca" \
   "ca01-ocsp" \
   "root01-ca" \
-	"tls-ca" \
-	"tls-ocsp")
+  "tls-ca" \
+  "tls-ocsp")
 # Key store locations used as key sources
 keystore=(
   "/opt/docker/ca/instances/ca01/keys/key-ca.jks" \
   "/opt/docker/ca/instances/ca01/keys/key-ocsp.jks" \
-	"/opt/docker/ca/instances/rot01/keys/rot01-ca.jks" \
-	"/opt/docker/ca/instances/tls-client/keys/key-ca.jks" \
-	"/opt/docker/ca/instances/tls-client/keys/key-ocsp.jks")
+  "/opt/docker/ca/instances/rot01/keys/rot01-ca.jks" \
+  "/opt/docker/ca/instances/tls-client/keys/key-ca.jks" \
+  "/opt/docker/ca/instances/tls-client/keys/key-ocsp.jks")
 # Passwords for key stores
 password=(
-	"1234" \
-	"1234" \
-	"1234" \
-	"1234" \
-	"1234")
+  "1234" \
+  "1234" \
+  "1234" \
+  "1234" \
+  "1234")
 # Aliases for the keystore keys used to export these keys
 alias=(
-	"ca" \
-	"ocsp" \
-	"rot-ca" \
-	"ca" \
-	"ocsp")
+  "ca" \
+  "ocsp" \
+  "rot-ca" \
+  "ca" \
+  "ocsp")
 
 # Other build parameters
 hsm_pin="s3cr3t"
