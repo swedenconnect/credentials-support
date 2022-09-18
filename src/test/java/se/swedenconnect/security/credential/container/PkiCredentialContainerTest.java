@@ -93,10 +93,19 @@ public class PkiCredentialContainerTest {
     log.info("Testing credential container cleanup");
     final AbstractPkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer("BC", "Test1234");
     credentialContainer.setKeyValidity(Duration.ofMillis(200));
+    String expiredAlias = credentialContainer.generateCredential(KeyGenType.EC_P256);
     credentialContainer.generateCredential(KeyGenType.EC_P256);
-    assertEquals(1, credentialContainer.listCredentials().size());
+    assertEquals(2, credentialContainer.listCredentials().size());
     Thread.sleep(200);
+    // First test that it is not possible to get an expired credential
+    PkiCredentialContainerException extractExpiredEx = assertThrows(
+      PkiCredentialContainerException.class, () -> credentialContainer.getCredential(expiredAlias));
+    log.info("Attempting to retrieve the expired credential: {}", extractExpiredEx.toString());
+    // Check that the key is destroyed
+    assertEquals(1, credentialContainer.listCredentials().size());
+    // Now do a cleanup
     credentialContainer.cleanup();
+    // Ensure that all keys are deleted
     assertEquals(0, credentialContainer.listCredentials().size());
     log.info("Credential cleanup test passed");
   }
@@ -271,6 +280,14 @@ public class PkiCredentialContainerTest {
     final AbstractPkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
     assertThatThrownBy(() -> {
       container.getCredential("unknown");
+    }).isInstanceOf(PkiCredentialContainerException.class);
+  }
+
+  @Test
+  void unknownKeyExpieyTest() throws Exception {
+    final AbstractPkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
+    assertThatThrownBy(() -> {
+      container.getExpiryTime("unknown");
     }).isInstanceOf(PkiCredentialContainerException.class);
   }
 

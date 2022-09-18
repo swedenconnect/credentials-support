@@ -171,7 +171,19 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
   @Override
   public final PkiCredential getCredential(final String alias) throws PkiCredentialContainerException {
     final PkiCredential credential = this.getCredentialFromAlias(alias);
-    return new DisposableKeyStoreCredential(credential, this.keyStore, alias);
+    PkiCredential disposableCredential = new DisposableKeyStoreCredential(credential, this.keyStore, alias);
+    if (isExpired(alias)){
+      try {
+        disposableCredential.destroy();
+        throw new PkiCredentialContainerException("Requested credential has expired - Destroying credential");
+      }
+      catch (Exception e) {
+        throw (e instanceof PkiCredentialContainerException)
+          ? (PkiCredentialContainerException) e
+          : new PkiCredentialContainerException("Failure to destroy expired credential", e);
+      }
+    }
+    return disposableCredential;
   }
 
   /**
@@ -226,14 +238,18 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
     final List<String> credentialAliasList = this.listCredentials();
 
     for (final String alias : credentialAliasList) {
-      final Instant expires = this.getExpiryTime(alias);
-      if (expires == null) {
-        continue;
-      }
-      if (expires.isBefore(Instant.now())) {
+      if (isExpired(alias)){
         this.deleteCredential(alias);
       }
     }
+  }
+
+  protected boolean isExpired(String alias) throws PkiCredentialContainerException {
+    final Instant expires = this.getExpiryTime(alias);
+    if (expires == null) {
+      return false;
+    }
+    return expires.isBefore(Instant.now());
   }
 
   /**

@@ -278,11 +278,10 @@ A credential container is created according to the following examples:
 
     PkiCredentialContainer credentialContainer = new HsmPkiCredentialContainer(provider, hsmSlotPin);
 
-"provider" is the security provider that implements the HSM slot. and the "hsmSlotPin" is the pin code
+`provider` is the security provider that implements the HSM slot‚ and the `hsmSlotPin` is the pin code
 for accessing the HSM slot.
 
-As alternativ to providing a provider for the HSM slot, an alternative constructor takes a Pkcs11Configuration object as input
-as follows:
+Instead of supplying a provider for the HSM slot as input, you may instead provide a `Pkcs11Configuration` object:
 
     DefaultPkcs11Configuration pkcs11Configuration = new DefaultPkcs11Configuration(userConfigFile);
     pkcs11Configuration.afterPropertiesSet();
@@ -290,8 +289,8 @@ as follows:
     PkiCredentialContainer credentialContainer = new HsmPkiCredentialContainer(pkcs11Configuration, userKeySlotPin);
 
 
-Alternatively if the input to the SUN PKCS11 configuration is a configuration file path as shown above, then this path can be used 
-directly in the constructor for evan simpler configuration setup:
+Alternatively if the input to configuration is a path to a Sun PKCS11 configuration file (as in the example about), then this path can be used 
+directly in the constructor for an even simpler configuration setup:
 
     PkiCredentialContainer credentialContainer = new HsmPkiCredentialContainer(userConfigFile, userKeySlotPin);
 
@@ -306,14 +305,14 @@ or as:
 
 > PkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer(password);
 
-"`provider`" is the provider used to create the key store used to store keys as well as the provider used to generate keys.
-Bouncycastle provider is used by default if no provider is specified (example 2).
+`provider` is the provider used to create the key store used to store keys as well as the provider used to generate keys.
+"Bouncycastle" provider is used by default if only password is provided (example 2).
 
-Keys are generated in the credential container by calling the function generateCredential(keyType), where "`keyType`" is
+Keys are generated in the credential container by calling the function `generateCredential(keyType)`, where `keyType` is
 a string representing a registered key generation factory in `KeyPairGeneratorFactoryRegistry`
 
-Names for default supported key types are available as static constants in the `KeyGenType` class. A typical command for 
-generating credential key pairs is therefore according to this example (Nist P-256 EC key):
+Names for default supported key types are available as static constants in the `KeyGenType` class. Example: generating a 
+Nist P-256 EC key pair:
 
 > String alias = credentialContainer.generateCredential(KeyGenType.EC_P256);
 
@@ -322,10 +321,10 @@ The returned alias is the handle used to use or manage this key pair with functi
       PkiCredential credential = credentialContainer.getCredential(alias);
       credentialContainer.deleteCredential(alias)
 
-A full set of commands are specified in the `PkiCredential` interface
+A full set of functions are specified in the `PkiCredential` interface
 
-The set of supported algoritms can be extended by first register new key types in the `KeyPairGeneratorFactoryRegistry` and then
-setting the supported keyType names in the credential container by the setting the supported key types as in the following example:
+The set of supported algoritms can be extended by registering new key types in the `KeyPairGeneratorFactoryRegistry` and then
+setting the supported keyType names in the credential container. Example:
 
       credentialContainer.setSupportedKeyTypes(List.of(
       KeyGenType.RSA_3072,
@@ -334,12 +333,24 @@ setting the supported keyType names in the credential container by the setting t
       "MyPrivateKeyType"));
 
 
-The time a generated key is kept in the container before it is automatically deleted if the "cleanup" function is called,
-is by default 15 minutes, but can be set using the `setKeyValidity(final Duration keyValidity)` function. E.g:
+The validity time of a key pair, being the time a generated key is kept in the container before it is deleted by the "cleanup" 
+function (if called), can be set by configuration. The default validity time is 15 minutes. Custom validity time for generatied
+keys can be set by the `setKeyValidity(final Duration keyValidity)` function. Example:
 
 > credentialContainer.setKeyValidity(Duration.ofDays(365))
 
-This sets key validity to 356 days for each generated key.
+This example sets key validity of generated keys to 356 days.
+
+**Destroying credentials after use**
+The `PkiCredential` objects returned from the credential container have extended capabilities to ensure that the private key is
+destroyed when calling the `destroy()` function of the `PkiCredential` object.
+
+In order to ensure that private keys are properly removed after usage implementations should:
+
+1) Ensure that no two processes attempts to use the same alias if they should use different unique keys.
+2) Create keys with as short validity time as possible.
+3) On all restarts and on suitable occasions, call the cleanup function to ensure that old keys are properly deleted
+4) Always call the destroy() function immediately after its last intended use.
 
 
 <a name="using-softhsm-to-test-pkcs11-credentials"></a>
