@@ -42,7 +42,9 @@ Java library for PKI credentials support, including PKCS#11 and HSM:s.
 
 6. [**Using SoftHSM to test PKCS#11 credentials**](#using-softhsm-to-test-pkcs11-credentials)
 
-7. [**API documentation**](#api-documentation)
+7. [**Key Generation Scripts**](#key-generation-scripts)
+
+8. [**API documentation**](#api-documentation)
 
 ---
 
@@ -260,8 +262,13 @@ See [SpringBootTest](https://github.com/swedenconnect/credentials-support/blob/m
 This library provide support for setting up a credential container for generating, storing and managing public and private key pairs.
 
 The primary use case for the credential container is when key pairs for user accounts are generated and maintained by an application and 
-these keys are stored in a HSM slot. A typical such use case is when a signing service needs to generate a signing key that represents a 
-signer, use that key for signing and then permanently deleting this key without the key ever leaving the HSM.
+these keys are generated and stored in a HSM slot. 
+A typical such usage is when a signing service needs to generate a signing key for a document signer (user), 
+and where this key is used to sign a document and then permanently deleted/destroyed without ever leaving the HSM.
+
+Such procedure is necessary for the highest level of confidence that the signing key is kept under so called "sole-control" in accordance
+with the eIDAS regulation, which ensures that the key can never be copied or used by any other process or person to sign any other document
+under another identity.
 
 Even though the HSM option is the primary use case, the credential container also supports software based or in memory key storage.
 
@@ -269,17 +276,24 @@ A credential container is created according to the following examples:
 
 **HSM based credential container**
 
-> PkiCredentialContainer credentialContainer = new HsmPkiCredentialContainer(provider, hsmSlotPin);
+    PkiCredentialContainer credentialContainer = new HsmPkiCredentialContainer(provider, hsmSlotPin);
 
 "provider" is the security provider that implements the HSM slot. and the "hsmSlotPin" is the pin code
 for accessing the HSM slot.
 
-It is outside the scope of this library how the HSM provider is created, but a common way is to use the "SUNPKCS11"
-provider and add it to the system providers as follows:
+As alternativ to providing a provider for the HSM slot, an alternative constructor takes a Pkcs11Configuration object as input
+as follows:
 
-      Provider pkcs11Provider = Security.getProvider("SunPKCS11");
-      pkcs11Provider = pkcs11Provider.configure(providerConfigFilePath);
-      Security.addProvider(pkcs11Provider);
+    DefaultPkcs11Configuration pkcs11Configuration = new DefaultPkcs11Configuration(userConfigFile);
+    pkcs11Configuration.afterPropertiesSet();
+
+    PkiCredentialContainer credentialContainer = new HsmPkiCredentialContainer(pkcs11Configuration, userKeySlotPin);
+
+
+Alternatively if the input to the SUN PKCS11 configuration is a configuration file path as shown above, then this path can be used 
+directly in the constructor for evan simpler configuration setup:
+
+    PkiCredentialContainer credentialContainer = new HsmPkiCredentialContainer(userConfigFile, userKeySlotPin);
 
 
 **Software based credential container**
@@ -333,8 +347,25 @@ This sets key validity to 356 days for each generated key.
 
 [SoftHSM](https://wiki.opendnssec.org/display/SoftHSMDOCS) is a great way to test your PKCS#11 credentials without an actual HSM. The **credentials-support** library contains a simple Spring Boot app that illustrates how to set up SoftHSM and how to configure your PKCS#11 devices, see the [softhsm](https://github.com/swedenconnect/credentials-support/tree/main/softhsm) directory for details.
 
+Once you have an application that is setup to use PkiCredentials from HSM, this library also includes a set of scripts that
+extends a docker image with SoftHSM support. These scripts and their usage is described in [hsm-support-scripts/soft-hsm-deployment/README.md](hsm-support-scripts/soft-hsm-deployment/README.md)
+
+
+
+<a name="key-generation-scripts"></a>
+## 7. Key generation scripts
+
+In order to support generation and installing of keys and key certificates in any HSM device as part of setting up a production environment,
+this library also provides some supporting key generation scripts:
+
+- A PKCS11 key generation script (p11-keygen.sh) used to generate keys and install certificates in a HSM slot
+- A corresponding soft key generation script that will create key stores (JKS and PKCS12) to support test environment setup.
+
+For further information consult the information at [hsm-support-scripts/key-generation/README.md](hsm-support-scripts/key-generation/README.md)
+
+
 <a name="api-documentation"></a>
-## 7. API documentation
+## 8. API documentation
 
 * [Java API documentation](https://docs.swedenconnect.se/credentials-support/apidoc/index.html)
 
