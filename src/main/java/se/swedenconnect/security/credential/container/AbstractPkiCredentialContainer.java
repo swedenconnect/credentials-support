@@ -171,16 +171,16 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
   @Override
   public final PkiCredential getCredential(final String alias) throws PkiCredentialContainerException {
     final PkiCredential credential = this.getCredentialFromAlias(alias);
-    PkiCredential disposableCredential = new DisposableKeyStoreCredential(credential, this.keyStore, alias);
-    if (isExpired(alias)){
+    final PkiCredential disposableCredential = new DisposableKeyStoreCredential(credential, this.keyStore, alias);
+    if (this.isExpired(alias)) {
       try {
         disposableCredential.destroy();
         throw new PkiCredentialContainerException("Requested credential has expired - Destroying credential");
       }
-      catch (Exception e) {
-        throw (e instanceof PkiCredentialContainerException)
-          ? (PkiCredentialContainerException) e
-          : new PkiCredentialContainerException("Failure to destroy expired credential", e);
+      catch (final Exception e) {
+        throw PkiCredentialContainerException.class.isInstance(e)
+            ? (PkiCredentialContainerException) e
+            : new PkiCredentialContainerException("Failure to destroy expired credential", e);
       }
     }
     return disposableCredential;
@@ -238,13 +238,20 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
     final List<String> credentialAliasList = this.listCredentials();
 
     for (final String alias : credentialAliasList) {
-      if (isExpired(alias)){
+      if (this.isExpired(alias)) {
         this.deleteCredential(alias);
       }
     }
   }
 
-  protected boolean isExpired(String alias) throws PkiCredentialContainerException {
+  /**
+   * Checks if the entry identified with {@code alias} is expired.
+   *
+   * @param alias the key store alias
+   * @return true if the entry has expired, and false otherwise
+   * @throws PkiCredentialContainerException for errors getting the key store entry
+   */
+  protected boolean isExpired(final String alias) throws PkiCredentialContainerException {
     final Instant expires = this.getExpiryTime(alias);
     if (expires == null) {
       return false;
@@ -381,9 +388,9 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
   }
 
   /**
-   * The credentials returned from the container's {@link PkiCredentialContainer#getCredential(String)}
-   * all implement {@link DisposableBean} meaning that the {@code destroy} method may be invoked.
-   * If this happens we want the credential to be removed from our loaded keystore.
+   * The credentials returned from the container's {@link PkiCredentialContainer#getCredential(String)} all implement
+   * {@link DisposableBean} meaning that the {@code destroy} method may be invoked. If this happens we want the
+   * credential to be removed from our loaded keystore.
    *
    * @author Martin Lindström (martin@idsec.se)
    * @author Stefan Santesson (stefan@idsec.se)
