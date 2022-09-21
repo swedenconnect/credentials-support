@@ -407,6 +407,9 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
     /** Alias of the credential key and certificate in the key store. */
     private final String alias;
 
+    /** Flag used to avoid executing destruction several times. */
+    private boolean destroyed = false;
+
     /**
      * Constructor.
      *
@@ -487,8 +490,11 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
      */
     @Override
     public void destroy() throws Exception {
-      this.credential.destroy();
-      this.keyStore.deleteEntry(this.alias);
+      if (!destroyed) {
+        this.destroyed = true;
+        this.credential.destroy();
+        this.keyStore.deleteEntry(this.alias);
+      }
     }
 
   }
