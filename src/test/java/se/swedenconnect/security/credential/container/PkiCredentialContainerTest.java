@@ -77,7 +77,7 @@ public class PkiCredentialContainerTest {
   @Test
   void createCredentialContainer() throws Exception {
     log.info("Testing credential container constructor");
-    AbstractPkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer(Security.getProvider("BC"),
+    AbstractKeyStorePkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer(Security.getProvider("BC"),
       "Test1234");
     log.info("Credential container created with specified provider");
     String alias = credentialContainer.generateCredential(KeyGenType.EC_P256);
@@ -93,7 +93,7 @@ public class PkiCredentialContainerTest {
   @Test
   void testCleanup() throws Exception {
     log.info("Testing credential container cleanup");
-    final AbstractPkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer("BC", "Test1234");
+    final AbstractKeyStorePkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer("BC", "Test1234");
     credentialContainer.setKeyValidity(Duration.ofMillis(200));
     String expiredAlias = credentialContainer.generateCredential(KeyGenType.EC_P256);
     credentialContainer.generateCredential(KeyGenType.EC_P256);
@@ -116,7 +116,7 @@ public class PkiCredentialContainerTest {
   void testAlgorithmTypes() throws Exception {
     log.info("Testing that correct key algorithm is being used");
     final List<String> fullKeyTypeList = this.getFullKeyTypeList();
-    final AbstractPkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer("BC", "Test1234");
+    final AbstractKeyStorePkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer("BC", "Test1234");
     credentialContainer.setSupportedKeyTypes(fullKeyTypeList);
 
     // Fist attempt to issue credentials for the default key generator factories (for HSM use)
@@ -140,12 +140,11 @@ public class PkiCredentialContainerTest {
 
     // Check that we can only ask for registered key types in the registry
     assertThrows(IllegalArgumentException.class, () -> KeyPairGeneratorFactoryRegistry.getFactory("BAD_Alog"));
-
   }
 
   @Test
   void testCredentials() throws Exception {
-    final AbstractPkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer("BC", "Test1234");
+    final AbstractKeyStorePkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer("BC", "Test1234");
     credentialContainer.setKeyValidity(Duration.ofDays(30));
     log.info("Testing expiry time -  duration set to 30 days");
     final String alias = credentialContainer.generateCredential(KeyGenType.EC_P256);
@@ -161,7 +160,7 @@ public class PkiCredentialContainerTest {
     final X509Certificate certificate = credential.getCertificate();
     assertEquals(alias, certificate.getSerialNumber().toString(16));
 
-    final Method issueCert = AbstractPkiCredentialContainer.class.getDeclaredMethod("generateKeyCertificate", KeyPair.class,
+    final Method issueCert = AbstractKeyStorePkiCredentialContainer.class.getDeclaredMethod("generateKeyCertificate", KeyPair.class,
       BigInteger.class);
     issueCert.setAccessible(true);
     final KeyPair credentialKeyPair = new KeyPair(credential.getPublicKey(), credential.getPrivateKey());
@@ -197,7 +196,7 @@ public class PkiCredentialContainerTest {
   @Test
   public void testGenerateKeyPair() throws Exception {
 
-    final AbstractPkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer(Security.getProvider("BC"), "Test1234");
+    final AbstractKeyStorePkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer(Security.getProvider("BC"), "Test1234");
     final List<String> keyTypeIdList = this.getFullKeyTypeList();
     credentialContainer.setSupportedKeyTypes(keyTypeIdList);
 
@@ -261,7 +260,7 @@ public class PkiCredentialContainerTest {
 
   @Test
   public void testNullPassword() throws Exception {
-    final AbstractPkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer("BC");
+    final AbstractKeyStorePkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer("BC");
     final String alias = credentialContainer.generateCredential(KeyGenType.EC_P256);
     final PkiCredential cred = credentialContainer.getCredential(alias);
     Assertions.assertNotNull(cred);
@@ -269,7 +268,7 @@ public class PkiCredentialContainerTest {
 
   @Test
   void unsupportedAlgoTest() throws Exception {
-    final AbstractPkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
+    final AbstractKeyStorePkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
     assertThatThrownBy(() -> {
       container.generateCredential("DUMMY");
     }).isInstanceOf(NoSuchAlgorithmException.class)
@@ -278,7 +277,7 @@ public class PkiCredentialContainerTest {
 
   @Test
   void excludedAlgoTest() throws Exception {
-    final AbstractPkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
+    final AbstractKeyStorePkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
     assertThatThrownBy(() -> {
       container.generateCredential(KeyGenType.EC_BRAINPOOL_192);
     }).isInstanceOf(NoSuchAlgorithmException.class)
@@ -287,7 +286,7 @@ public class PkiCredentialContainerTest {
 
   @Test
   void unknownKeyTest() throws Exception {
-    final AbstractPkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
+    final AbstractKeyStorePkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
     assertThatThrownBy(() -> {
       container.getCredential("unknown");
     }).isInstanceOf(PkiCredentialContainerException.class);
@@ -295,7 +294,7 @@ public class PkiCredentialContainerTest {
 
   @Test
   void unknownKeyExpiryTest() throws Exception {
-    final AbstractPkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
+    final AbstractKeyStorePkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
     assertThatThrownBy(() -> {
       container.getExpiryTime("unknown");
     }).isInstanceOf(PkiCredentialContainerException.class);
@@ -303,7 +302,7 @@ public class PkiCredentialContainerTest {
 
   @Test
   void deleteUnknownKeyTest() throws Exception {
-    final AbstractPkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
+    final AbstractKeyStorePkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
     assertThatThrownBy(() -> {
       container.getCredential("unknown");
     }).isInstanceOf(PkiCredentialContainerException.class);
@@ -346,7 +345,7 @@ public class PkiCredentialContainerTest {
     }
   }
 
-  private void verifyKeyType(final String keyType, final AbstractPkiCredentialContainer credentialContainer) throws Exception {
+  private void verifyKeyType(final String keyType, final AbstractKeyStorePkiCredentialContainer credentialContainer) throws Exception {
     final String alias = credentialContainer.generateCredential(keyType);
     final PkiCredential credential = credentialContainer.getCredential(alias);
     final PublicKey publicKey = credential.getPublicKey();

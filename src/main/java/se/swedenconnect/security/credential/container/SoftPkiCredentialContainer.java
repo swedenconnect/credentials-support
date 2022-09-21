@@ -27,13 +27,17 @@ import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 
 /**
- * Implements a {@link PkiCredentialContainer} based on software or in-memory key storage (i.e. not using a HSM device
- * for key storage).
+ * Implements a {@link PkiCredentialContainer} based on a {@link KeyStore} that is held in memory (i.e. not using a HSM
+ * device for key storage).
+ * <p>
+ * Also see {@link InMemoryPkiCredentialContainer} that is an in-memory container that does not
+ * use key stores (and thus, does not generate any certificates as part of the key generation process).
+ * </p>
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class SoftPkiCredentialContainer extends AbstractPkiCredentialContainer {
+public class SoftPkiCredentialContainer extends AbstractKeyStorePkiCredentialContainer {
 
   /**
    * Constructor loading the security provider identified by {@code providerName}. No password is used for the generated
@@ -47,8 +51,7 @@ public class SoftPkiCredentialContainer extends AbstractPkiCredentialContainer {
   }
 
   /**
-   * Constructor. No password is used for the generated
-   * key store.
+   * Constructor. No password is used for the generated key store.
    *
    * @param provider the security provider
    * @throws KeyStoreException for errors creating the key store

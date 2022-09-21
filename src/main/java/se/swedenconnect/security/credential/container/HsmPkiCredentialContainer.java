@@ -35,7 +35,7 @@ import se.swedenconnect.security.credential.pkcs11conf.Pkcs11ConfigurationExcept
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class HsmPkiCredentialContainer extends AbstractPkiCredentialContainer {
+public class HsmPkiCredentialContainer extends AbstractKeyStorePkiCredentialContainer {
 
   /**
    * Constructor for the default PKCS11 credential container where keys are stored in a HSM slot.
