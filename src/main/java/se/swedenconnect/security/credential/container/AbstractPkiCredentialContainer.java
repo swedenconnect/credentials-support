@@ -248,7 +248,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
   /**
    * Checks if the entry identified with {@code alias} is expired.
    *
-   * @param alias the key store alias
+   * @param alias the key entry alias
    * @return true if the entry has expired, and false otherwise
    * @throws PkiCredentialContainerException for errors getting the key store entry
    */
