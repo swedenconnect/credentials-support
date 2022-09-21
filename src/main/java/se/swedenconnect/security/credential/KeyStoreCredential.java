@@ -69,13 +69,13 @@ import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunc
  * Another possibility is to supply the provider name of a security provider configured for PKCS#11. This could
  * typically look something like:
  * </p>
- * 
+ *
  * <pre>
  * // Create a SunPKCS11 provider instance using our PKCS#11 configuration ...
  * Provider provider = Security.getProvider("SunPKCS11");
  * provider = provider.configure(pkcs11CfgFile);
  * Security.addProvider(provider);
- * 
+ *
  * // Create a credential ...
  * KeyStoreCredential credential = new KeyStoreCredential(null, "PKCS11", provider.getName(), tokenPw, alias, null);
  * credential.init();
@@ -85,7 +85,7 @@ import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunc
  * In the above example we created the SunPKCS11 provider instance manually. It is also to create a
  * {@code KeyStoreCredential} instance by supplying the PKCS#11 configuration file.
  * </p>
- * 
+ *
  * <pre>
  * KeyStoreCredential credential = new KeyStoreCredential(null, "PKCS11", "SunPKCS11", tokenPw, alias, null);
  * credential.setPkcs11Configuration(pkcs11CfgFile);
@@ -95,7 +95,7 @@ import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunc
  * <b>Note:</b> As an alternative of using {@code KeyStoreCredential} for PKCS#11 credentials see the
  * {@link Pkcs11Credential} class.
  * </p>
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -129,7 +129,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
   /**
    * Constructor accepting an already loaded {@link KeyStore}.
-   * 
+   *
    * @param keyStore
    *          the keystore to read the key pair from
    * @param alias
@@ -146,7 +146,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * A constructor that creates and loads a {@link KeyStore} from the given resource. The default KeyStore type is used
    * and the first security provider that can create such a KeyStore is used.
-   * 
+   *
    * @param resource
    *          the resource to load the {@link KeyStore} from
    * @param password
@@ -164,7 +164,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * A constructor that creates and loads a {@link KeyStore} of the given type from the given resource. The first
    * security provider that can create such a KeyStore is used.
-   * 
+   *
    * @param resource
    *          the resource to load the {@link KeyStore} from
    * @param type
@@ -185,7 +185,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * A constructor that creates and loads a {@link KeyStore} of the given type from the given resource using the given
    * provider.
-   * 
+   *
    * @param resource
    *          the resource to load the {@link KeyStore} from
    * @param type
@@ -230,7 +230,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
   /**
    * Loads the KeyStore (if needed) and loads the private key and certificate.
-   * 
+   *
    * @throws Exception
    *           for errors loading the credential
    */
@@ -289,7 +289,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
   /**
    * Loads the private key from the keystore.
-   * 
+   *
    * @throws Exception
    *           for loading errors
    */
@@ -299,9 +299,6 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
       if (this.password != null) {
         log.debug("No key password assigned, assuming same password as for keystore ...");
         this.keyPassword = this.password;
-      }
-      else {
-        throw new IllegalArgumentException("No key password assigned");
       }
     }
     final Key key = this.keyStore.getKey(this.alias, this.keyPassword);
@@ -316,7 +313,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
   /**
    * Assigns the resource holding the KeyStore to load.
-   * 
+   *
    * @param resource
    *          KeyStore resource
    */
@@ -330,7 +327,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * Assigns the KeyStore type to use, ("JKS", "PKCS12", "PKCS11", ...). If no type is configured
    * {@link KeyStore#getDefaultType()} is assumed.
-   * 
+   *
    * @param type
    *          the KeyStore type
    */
@@ -344,7 +341,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * Assigns the name of the security provider to use when loading the KeyStore. If no provider is assigned, the first
    * provider that can create a KeyStore according to the given type is used.
-   * 
+   *
    * @param provider
    *          the provider name to use
    */
@@ -361,7 +358,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
    * The type ({@link #setType(String)}) must be "PKCS11" and the provider name must be set to the base signature
    * provider to use (e.g. "SunPKCS11").
    * </p>
-   * 
+   *
    * @param pkcs11Configuration
    *          the complete path to the PKCS#11 configuration file
    */
@@ -374,7 +371,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
   /**
    * Assigns the password needed to load the KeyStore.
-   * 
+   *
    * @param password
    *          the password
    */
@@ -388,7 +385,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
   /**
    * Assigns the keystore to read the key pair from.
-   * 
+   *
    * @param keyStore
    *          the keystore
    */
@@ -398,7 +395,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
   /**
    * Assigns the alias of the KeyStore entry.
-   * 
+   *
    * @param alias
    *          the KeyStore alias
    */
@@ -408,7 +405,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
   /**
    * Assigns the key password needed to unlock the key entry.
-   * 
+   *
    * @param keyPassword
    *          the key password
    */
@@ -433,10 +430,10 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /** {@inheritDoc} */
   @Override
   public synchronized X509Certificate getCertificate() {
-    this.getCertificateChain();    
+    this.getCertificateChain();
     return super.getCertificate();
   }
-  
+
   /** {@inheritDoc} */
   @Override
   public synchronized List<X509Certificate> getCertificateChain() {

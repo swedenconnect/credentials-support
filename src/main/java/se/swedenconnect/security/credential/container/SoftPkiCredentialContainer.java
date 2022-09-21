@@ -36,14 +36,33 @@ import se.swedenconnect.security.credential.PkiCredential;
 public class SoftPkiCredentialContainer extends AbstractPkiCredentialContainer {
 
   /**
+   * Constructor loading the security provider identified by {@code providerName}. No password is used for the generated
+   * key store.
+   *
+   * @param providerName the name of the security provider
+   * @throws KeyStoreException for errors creating the key store
+   */
+  public SoftPkiCredentialContainer(final String providerName) throws KeyStoreException {
+    this(providerName, null);
+  }
+
+  /**
+   * Constructor. No password is used for the generated
+   * key store.
+   *
+   * @param provider the security provider
+   * @throws KeyStoreException for errors creating the key store
+   */
+  public SoftPkiCredentialContainer(final Provider provider) throws KeyStoreException {
+    this(provider, null);
+  }
+
+  /**
    * Constructor loading the security provider identified by {@code providerName}.
    *
-   * @param providerName
-   *          the name of the security provider
-   * @param password
-   *          the store password
-   * @throws KeyStoreException
-   *           for errors creating the key store
+   * @param providerName the name of the security provider
+   * @param password the store password that we should use for the generated key store (may be null)
+   * @throws KeyStoreException for errors creating the key store
    */
   public SoftPkiCredentialContainer(final String providerName, final String password) throws KeyStoreException {
     super(Security.getProvider(providerName), password);
@@ -52,12 +71,9 @@ public class SoftPkiCredentialContainer extends AbstractPkiCredentialContainer {
   /**
    * Constructor.
    *
-   * @param provider
-   *          the security provider
-   * @param password
-   *          the store password
-   * @throws KeyStoreException
-   *           for errors creating the key store
+   * @param provider the security provider
+   * @param password the store password that we should use for the generated key store (may be null)
+   * @throws KeyStoreException for errors creating the key store
    */
   public SoftPkiCredentialContainer(final Provider provider, final String password) throws KeyStoreException {
     super(provider, password);
@@ -65,10 +81,10 @@ public class SoftPkiCredentialContainer extends AbstractPkiCredentialContainer {
 
   /** {@inheritDoc} */
   @Override
-  protected KeyStore createKeyStore(final Provider provider, final String password) throws KeyStoreException {
+  protected KeyStore createKeyStore(final Provider provider, final char[] password) throws KeyStoreException {
     try {
       final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType(), provider);
-      keyStore.load(null, password.toCharArray());
+      keyStore.load(null, password);
       return keyStore;
     }
     catch (final IOException | NoSuchAlgorithmException | CertificateException e) {

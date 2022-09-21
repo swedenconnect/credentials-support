@@ -44,8 +44,10 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.AbstractReloadablePkiCredential;
@@ -57,7 +59,7 @@ import se.swedenconnect.security.credential.container.keytype.KeyPairGeneratorFa
 import se.swedenconnect.security.credential.container.keytype.KeyPairGeneratorFactoryRegistry;
 
 /**
- * Tests for the PkiCredentialContainer
+ * Tests for the PkiCredentialContainer.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -225,7 +227,6 @@ public class PkiCredentialContainerTest {
 
     // make sure they are deleted
     assertEquals(0, credentialContainer.listCredentials().size());
-
   }
 
   List<PkiCredential> issueKeyTypes(final List<String> keyTypeIdList, final PkiCredentialContainer pkiCredentialContainer)
@@ -251,10 +252,19 @@ public class PkiCredentialContainerTest {
 
   @Test
   void nullHsmPinTest() throws Exception {
+    final Provider dummyProvider = Mockito.mock(Provider.class);
     assertThatThrownBy(() -> {
-      new SoftPkiCredentialContainer(Security.getProvider("BC"), null);
+      new HsmPkiCredentialContainer(dummyProvider, null);
     }).isInstanceOf(NullPointerException.class)
-      .hasMessage("password must not be null");
+      .hasMessage("hsmPin must not be null");
+  }
+
+  @Test
+  public void testNullPassword() throws Exception {
+    final AbstractPkiCredentialContainer credentialContainer = new SoftPkiCredentialContainer("BC");
+    final String alias = credentialContainer.generateCredential(KeyGenType.EC_P256);
+    final PkiCredential cred = credentialContainer.getCredential(alias);
+    Assertions.assertNotNull(cred);
   }
 
   @Test
@@ -284,7 +294,7 @@ public class PkiCredentialContainerTest {
   }
 
   @Test
-  void unknownKeyExpieyTest() throws Exception {
+  void unknownKeyExpiryTest() throws Exception {
     final AbstractPkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
     assertThatThrownBy(() -> {
       container.getExpiryTime("unknown");

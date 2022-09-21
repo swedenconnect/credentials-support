@@ -113,14 +113,15 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
    * Constructor for the multi credential key store.
    *
    * @param provider the provider that is used to create and manage keys
-   * @param password the pin for the associated key container
+   * @param password the pin for the associated key container (may be null if a container that does not require a
+   *          password is used)
    * @throws KeyStoreException error initiating the key store
    */
   public AbstractPkiCredentialContainer(final Provider provider, final String password)
       throws KeyStoreException {
     this.provider = Objects.requireNonNull(provider, "provider must not be null");
-    this.password = Objects.requireNonNull(password, "password must not be null").toCharArray();
-    this.keyStore = this.createKeyStore(provider, password);
+    this.password = Optional.ofNullable(password).map(p -> p.toCharArray()).orElse(null);
+    this.keyStore = this.createKeyStore(provider, this.password);
     this.supportedKeyTypes = Arrays.asList(DEFAULT_SUPPORTED_KEY_TYPES);
     this.keyValidity = Duration.ofMinutes(15);
   }
@@ -133,7 +134,7 @@ public abstract class AbstractPkiCredentialContainer implements PkiCredentialCon
    * @return key store
    * @throws KeyStoreException error creating the key store
    */
-  protected abstract KeyStore createKeyStore(final Provider provider, final String password) throws KeyStoreException;
+  protected abstract KeyStore createKeyStore(final Provider provider, final char[] password) throws KeyStoreException;
 
   /**
    * Overridable function to generate the unique alias for each generated key. The key alias must be a BigInteger as it

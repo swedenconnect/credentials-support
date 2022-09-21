@@ -21,6 +21,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.cert.CertificateException;
+import java.util.Objects;
 
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -44,7 +45,7 @@ public class HsmPkiCredentialContainer extends AbstractPkiCredentialContainer {
    * @throws KeyStoreException error initiating the HSM slot key store
    */
   public HsmPkiCredentialContainer(final Provider p11Provider, final String hsmPin) throws KeyStoreException {
-    super(p11Provider, hsmPin);
+    super(p11Provider, Objects.requireNonNull(hsmPin, "hsmPin must not be null"));
   }
 
   /**
@@ -56,7 +57,7 @@ public class HsmPkiCredentialContainer extends AbstractPkiCredentialContainer {
    */
   public HsmPkiCredentialContainer(final Pkcs11Configuration p11Configuration, final String hsmPin)
       throws KeyStoreException {
-    super(p11Configuration.getProvider(), hsmPin);
+    this(p11Configuration.getProvider(), hsmPin);
   }
 
   /**
@@ -67,15 +68,15 @@ public class HsmPkiCredentialContainer extends AbstractPkiCredentialContainer {
    * @throws KeyStoreException error initiating the HSM slot key store
    */
   public HsmPkiCredentialContainer(final String p11ConfigurationFile, final String hsmPin) throws KeyStoreException {
-    super(getProviderFromConfigFile(p11ConfigurationFile), hsmPin);
+    this(getProviderFromConfigFile(p11ConfigurationFile), hsmPin);
   }
 
   /** {@inheritDoc} */
   @Override
-  protected KeyStore createKeyStore(final Provider provider, final String password) throws KeyStoreException {
+  protected KeyStore createKeyStore(final Provider provider, final char[] password) throws KeyStoreException {
     try {
       final KeyStore p11KeyStore = KeyStore.getInstance("PKCS11", provider);
-      p11KeyStore.load(null, password.toCharArray());
+      p11KeyStore.load(null, password);
       return p11KeyStore;
     }
     catch (final IOException | NoSuchAlgorithmException | CertificateException e) {
