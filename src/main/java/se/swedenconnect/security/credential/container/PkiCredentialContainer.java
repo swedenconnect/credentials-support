@@ -74,6 +74,10 @@ public interface PkiCredentialContainer {
 
   /**
    * Deletes the credential specified by the supplied alias.
+   * <p>
+   * The "normal" way of deleting a credential is to invoke its {@link PkiCredential#destroy()} method. The {code
+   * deleteCredential} method is mainly for internal (and external) container maintenance.
+   * </p>
    *
    * @param alias the alias of the credential to delete
    * @throws PkiCredentialContainerException error deleting the credential

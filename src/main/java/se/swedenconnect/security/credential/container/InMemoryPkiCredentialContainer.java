@@ -68,10 +68,8 @@ public class InMemoryPkiCredentialContainer extends AbstractPkiCredentialContain
     final KeyPairGenerator keyPairGenerator =
         this.getKeyGeneratorFactory(keyTypeName).getKeyPairGenerator(this.getProvider());
     final KeyPair keyPair = keyPairGenerator.generateKeyPair();
-
-    final ExtendedBasicCredential credential = new ExtendedBasicCredential(keyPair, this.getKeyValidity());
     final String alias = this.generateAlias().toString(16);
-    credential.setName(alias);
+    final ExtendedBasicCredential credential = new ExtendedBasicCredential(keyPair, alias, this.getKeyValidity());
     try {
       credential.init();
     }
@@ -117,7 +115,7 @@ public class InMemoryPkiCredentialContainer extends AbstractPkiCredentialContain
    * @author Martin Lindström (martin@idsec.se)
    * @author Stefan Santesson (stefan@idsec.se)
    */
-  private static class ExtendedBasicCredential extends BasicCredential {
+  private class ExtendedBasicCredential extends BasicCredential {
 
     /** The expiry time. */
     private final Instant validTo;
@@ -126,10 +124,12 @@ public class InMemoryPkiCredentialContainer extends AbstractPkiCredentialContain
      * Constructor.
      *
      * @param keyPair the key pair
+     * @param alias the alias for this credential
      * @param validity the key validity (may be null)
      */
-    public ExtendedBasicCredential(final KeyPair keyPair, final Duration validity) {
+    public ExtendedBasicCredential(final KeyPair keyPair, final String alias, final Duration validity) {
       super(keyPair.getPublic(), keyPair.getPrivate());
+      super.setName(alias);
       this.validTo = validity != null
           ? Instant.now().plusMillis(validity.toMillis())
           : null;
@@ -143,6 +143,24 @@ public class InMemoryPkiCredentialContainer extends AbstractPkiCredentialContain
     public Instant getExpiryTime() {
       return this.validTo;
     }
+
+    /**
+     * Blocked from usage. The name is hard-wired to the alias.
+     */
+    @Override
+    public void setName(final String name) {
+      throw new IllegalArgumentException("The credential name can not be set");
+    }
+
+    /**
+     * Will remove itself from the container.
+     */
+    @Override
+    public void destroy() throws Exception {
+      super.destroy();
+      deleteCredential(this.getName());
+    }
+
   }
 
 }

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import se.swedenconnect.security.credential.AbstractPkiCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 
@@ -67,6 +68,19 @@ public class InMemoryPkiCredentialContainerTest {
   }
 
   @Test
+  public void testDestroy() throws Exception {
+    final InMemoryPkiCredentialContainer container = new InMemoryPkiCredentialContainer("BC");
+    final String alias = container.generateCredential(KeyGenType.EC_P256);
+    final PkiCredential cred = container.getCredential(alias);
+    Assertions.assertTrue(container.listCredentials().size() == 1);
+    cred.destroy();
+    Assertions.assertTrue(container.listCredentials().size() == 0);
+
+    // Ensure that multiple calls to destroy doesn't mess things up
+    cred.destroy();
+  }
+
+  @Test
   public void testEternalValidity() throws Exception {
     final InMemoryPkiCredentialContainer container = new InMemoryPkiCredentialContainer(Security.getProvider("BC"));
     container.setKeyValidity(null);
@@ -81,6 +95,21 @@ public class InMemoryPkiCredentialContainerTest {
       container.getCredential("not-found");
     }).isInstanceOf(PkiCredentialContainerException.class)
         .hasMessageContaining("was not found");
+  }
+
+  @Test
+  public void testCredentialName() throws Exception {
+    final InMemoryPkiCredentialContainer container = new InMemoryPkiCredentialContainer("BC");
+    final String alias = container.generateCredential(KeyGenType.EC_P256);
+    final PkiCredential cred = container.getCredential(alias);
+    Assertions.assertNotNull(cred);
+    Assertions.assertEquals(alias, cred.getName());
+
+    // Set name should not be allowed
+    assertThatThrownBy(() -> {
+      ((AbstractPkiCredential) cred).setName("new-name");
+    }).isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("The credential name can not be set");
   }
 
 }

@@ -378,7 +378,14 @@ public abstract class AbstractKeyStorePkiCredentialContainer extends AbstractPki
       if (!destroyed) {
         this.destroyed = true;
         this.credential.destroy();
-        this.keyStore.deleteEntry(this.alias);
+        // There may be several credential objects connecting to the same alias.
+        // Suppose that two thread both invoke getCredential for the same alias (odd case, both possible).
+        // In those cases the destroy() method will be invoked twice for the same entry. Therefore
+        // we ensure that the entry exists before attempting to delete it.
+        //
+        if (this.keyStore.containsAlias(alias)) {
+          this.keyStore.deleteEntry(this.alias);
+        }
       }
     }
 
