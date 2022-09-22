@@ -15,10 +15,9 @@
  */
 package se.swedenconnect.security.credential.monitoring;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import lombok.Getter;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test cases for CredentialMonitorTask.
@@ -28,9 +27,11 @@ import lombok.Getter;
  */
 public class CredentialMonitorTaskTest {
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNullBean() throws Exception {
-    new CredentialMonitorTask(null);
+    assertThrows(IllegalArgumentException.class, () -> {
+      new CredentialMonitorTask(null);
+    });
   }
   
   @Test
@@ -39,7 +40,7 @@ public class CredentialMonitorTaskTest {
     CredentialMonitorTask task = new CredentialMonitorTask(bean);
     task.run();
     
-    Assert.assertEquals(1, bean.getTestCalled());
+    assertEquals(1, bean.getTestCalled());
   }
   
   public static class TestBean implements CredentialMonitorBean {

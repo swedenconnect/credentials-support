@@ -39,7 +39,7 @@ import se.swedenconnect.security.credential.PkiCredential;
  * <p>
  * A SunPKCS11 provider can also be statically configured in the {@code java.security} file. For example:
  * </p>
- * 
+ *
  * <pre>
  * ...
  * security.provider.13=SunPKCS11 /opt/bar/cfg/pkcs11.cfg
@@ -53,12 +53,15 @@ import se.swedenconnect.security.credential.PkiCredential;
  * <a href="https://docs.oracle.com/en/java/javase/14/security/pkcs11-reference-guide1.html">PKCS#11 Reference
  * Guide</a>.
  * </p>
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
 public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
+
+  /** Default provider name. */
+  public static final String DEFAULT_PROVIDER_NAME = "SunPKCS11";
 
   /** The security provider for this configuration. */
   private Provider provider;
@@ -68,7 +71,7 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
    * "SunPKCS11-name", where 'name' is gotten from the configuration. The reason this is not a constant is for testing
    * purposes where we want to use a mocked provider instead of Sun's.
    */
-  private String baseProviderName = "SunPKCS11";
+  private String baseProviderName = DEFAULT_PROVIDER_NAME;
 
   /**
    * Default constructor.
@@ -78,7 +81,7 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
 
   /**
    * Constructor assigning the external PKCS#11 configuration file.
-   * 
+   *
    * @param configurationFile
    *          complete path to the PKCS#11 configuration file
    * @throws Pkcs11ConfigurationException
@@ -91,7 +94,7 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
   /**
    * A constructor setting the library, name, slot and slotListIndex individually. See also
    * {@link #DefaultPkcs11Configuration(String)}.
-   * 
+   *
    * @param library
    *          the PKCS#11 library path
    * @param name
@@ -256,7 +259,7 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
    * The returned string represents either a file name to an PKCS#11 configuration file or PKCS#11 configuration
    * commands (in that case the string must be prefixed with {@code --}.
    * </p>
-   * 
+   *
    * @return configuration data for a PKCS#11 provider
    * @throws Pkcs11ConfigurationException
    *           if the configuration is not valid
@@ -297,7 +300,7 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
    * <p>
    * NOTE: FOR TESTING ONLY.
    * </p>
-   * 
+   *
    * @param baseProviderName
    *          the provider name.
    */
@@ -307,7 +310,7 @@ public class DefaultPkcs11Configuration extends AbstractPkcs11Configuration {
 
   /**
    * Gets the provider name (see {@link #setBaseProviderName(String)}).
-   * 
+   *
    * @return the provider name
    */
   protected String getBaseProviderName() {

@@ -27,11 +27,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import lombok.Getter;
 import lombok.Setter;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
 /**
@@ -63,15 +62,15 @@ public class DefaultCredentialMonitorBeanTest {
 
     monitor.test();
 
-    Assert.assertEquals(1, cred.getReloadCalled());
-    Assert.assertEquals(2, tf1.getTestCalled());
+    assertEquals(1, cred.getReloadCalled());
+    assertEquals(2, tf1.getTestCalled());
 
-    Assert.assertEquals(1, cred2.getReloadCalled());
-    Assert.assertEquals(1, tf2.getTestCalled());
+    assertEquals(1, cred2.getReloadCalled());
+    assertEquals(1, tf2.getTestCalled());
 
-    Assert.assertEquals(1, cred3.getReloadCalled());
+    assertEquals(1, cred3.getReloadCalled());
 
-    Assert.assertEquals(Arrays.asList("1", "2", "3"), successConsumer.getCredentialNames());
+    assertEquals(Arrays.asList("1", "2", "3"), successConsumer.getCredentialNames());
 
     // The same with setters
     tf1 = new TestFunction();
@@ -95,15 +94,15 @@ public class DefaultCredentialMonitorBeanTest {
 
     monitor.test();
 
-    Assert.assertEquals(1, cred.getReloadCalled());
-    Assert.assertEquals(2, tf1.getTestCalled());
+    assertEquals(1, cred.getReloadCalled());
+    assertEquals(2, tf1.getTestCalled());
 
-    Assert.assertEquals(1, cred2.getReloadCalled());
-    Assert.assertEquals(1, tf2.getTestCalled());
+    assertEquals(1, cred2.getReloadCalled());
+    assertEquals(1, tf2.getTestCalled());
 
-    Assert.assertEquals(1, cred3.getReloadCalled());
+    assertEquals(1, cred3.getReloadCalled());
 
-    Assert.assertEquals(Arrays.asList("1", "2", "3"), successConsumer.getCredentialNames());
+    assertEquals(Arrays.asList("1", "2", "3"), successConsumer.getCredentialNames());
   }
 
   @Test
@@ -126,13 +125,13 @@ public class DefaultCredentialMonitorBeanTest {
 
     monitor.test();
 
-    Assert.assertEquals(1, cred.getReloadCalled());
-    Assert.assertEquals(2, tf1.getTestCalled());
+    assertEquals(1, cred.getReloadCalled());
+    assertEquals(2, tf1.getTestCalled());
 
-    Assert.assertEquals(1, cred2.getReloadCalled());
-    Assert.assertEquals(2, tf2.getTestCalled());
+    assertEquals(1, cred2.getReloadCalled());
+    assertEquals(2, tf2.getTestCalled());
 
-    Assert.assertEquals(Arrays.asList("1", "2"), successConsumer.getCredentialNames());
+    assertEquals(Arrays.asList("1", "2"), successConsumer.getCredentialNames());
   }
 
   @Test
@@ -152,13 +151,13 @@ public class DefaultCredentialMonitorBeanTest {
 
     monitor.test();
 
-    Assert.assertEquals(0, cred.getReloadCalled());
-    Assert.assertEquals(1, tf1.getTestCalled());
+    assertEquals(0, cred.getReloadCalled());
+    assertEquals(1, tf1.getTestCalled());
 
-    Assert.assertEquals(0, cred2.getReloadCalled());
-    Assert.assertEquals(1, tf2.getTestCalled());
+    assertEquals(0, cred2.getReloadCalled());
+    assertEquals(1, tf2.getTestCalled());
 
-    Assert.assertTrue(successConsumer.getCredentialNames().isEmpty());
+    assertTrue(successConsumer.getCredentialNames().isEmpty());
   }
 
   @Test
@@ -174,7 +173,7 @@ public class DefaultCredentialMonitorBeanTest {
     monitor.afterPropertiesSet();
     monitor.test();
 
-    Assert.assertEquals(0, cred.getReloadCalled());
+    assertEquals(0, cred.getReloadCalled());
 
     // Should be the same if the callback returns null
     tf1 = new TestFunction();
@@ -188,7 +187,7 @@ public class DefaultCredentialMonitorBeanTest {
     monitor.afterPropertiesSet();
     monitor.test();
 
-    Assert.assertEquals(0, cred.getReloadCalled());
+    assertEquals(0, cred.getReloadCalled());
   }
 
   @Test
@@ -204,7 +203,7 @@ public class DefaultCredentialMonitorBeanTest {
     monitor.afterPropertiesSet();
     monitor.test();
 
-    Assert.assertEquals(1, cred.getReloadCalled());
+    assertEquals(1, cred.getReloadCalled());
   }
 
   @Test
@@ -225,7 +224,7 @@ public class DefaultCredentialMonitorBeanTest {
 
     monitor.test();
 
-    Assert.assertEquals(SecurityException.class, rfc.getReceivedException().getClass());
+    assertEquals(SecurityException.class, rfc.getReceivedException().getClass());
 
     // If we don't have a callback things are only logged ...
     monitor.setReloadFailureCallback(null);
@@ -248,17 +247,19 @@ public class DefaultCredentialMonitorBeanTest {
 
     monitor.test();
 
-    Assert.assertEquals(KeyStoreException.class, rfc.getReceivedException().getClass());
+    assertEquals(KeyStoreException.class, rfc.getReceivedException().getClass());
 
     // If we don't have a callback things are only logged ...
     monitor.setReloadFailureCallback(null);
     monitor.test();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testMissingCredential() throws Exception {
-    DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean(null, Arrays.asList());
-    monitor.afterPropertiesSet();
+    assertThrows(IllegalArgumentException.class, () -> {
+      DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean(null, Arrays.asList());
+      monitor.afterPropertiesSet();
+    });
   }
 
   @Test
@@ -268,7 +269,7 @@ public class DefaultCredentialMonitorBeanTest {
     monitor.afterPropertiesSet();
     monitor.test();
 
-    Assert.assertEquals(0, cred.getReloadCalled());
+    assertEquals(0, cred.getReloadCalled());
   }
 
   public static class SuccessConsumer implements Consumer<ReloadablePkiCredential> {

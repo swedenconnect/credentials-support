@@ -15,35 +15,35 @@
  */
 package se.swedenconnect.security.credential.pkcs11conf;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * Tests that the {@link Pkcs11Configuration} classes can be configured the Spring Boot-way.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class SpringBootConfigurationTest {
 
   @Autowired
   ApplicationContext context;
-  
+
   @Test
   public void test() throws Exception {
-    Assert.assertNotNull(this.context);
+    Assertions.assertNotNull(this.context);
   }
-  
+
   @Configuration
   public static class TestConfiguration {
-    
-    
+
+
   }
 
 }

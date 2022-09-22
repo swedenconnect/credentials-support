@@ -1,0 +1,28 @@
+ARG FROM_IMAGE
+FROM $FROM_IMAGE
+
+# Get HSM pin as input argument
+ARG PIN
+# Get HSM slot label as input argument
+ARG SLOT_LABEL
+# Get key directory relative path where extracted keys are stored as input argument
+ARG KEY_DIR
+# Get script dir where the key import script is stored as input argument
+ARG SCRIPT_DIR
+
+# Make softhsm2 available for install
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN apt-get -q update
+RUN apt-get -y upgrade
+# Install softhsm2
+RUN apt-get install -y procps softhsm2
+# Install pkcs11-tool
+RUN apt-get -y install opensc
+# Copy exported keys to image
+COPY $KEY_DIR /opt/keys
+# Copy hsm key import script
+COPY $SCRIPT_DIR/key-import.sh /opt/
+# Import keys to hsm
+RUN ./opt/key-import.sh -p $PIN -l $SLOT_LABEL
+
+# Done. Entry point and port expose is assumed to be set by FROM image

@@ -22,8 +22,8 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.util.function.Function;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
 
@@ -82,13 +82,13 @@ public class DefaultCredentialTestFunctionTest {
     final Function<ReloadablePkiCredential, Exception> func = new DefaultCredentialTestFunction();
 
     Exception result = func.apply(this.rsaCred);
-    Assert.assertNull("Test of RSA key was not successful", result);
+    assertNull(result, "Test of RSA key was not successful");
 
     result = func.apply(this.dsaCred);
-    Assert.assertNull("Test of DSA key was not successful", result);
+    assertNull(result, "Test of DSA key was not successful");
 
     result = func.apply(this.ecCred);
-    Assert.assertNull("Test of EC key was not successful", result);
+    assertNull(result, "Test of EC key was not successful");
   }
 
   /**
@@ -103,25 +103,23 @@ public class DefaultCredentialTestFunctionTest {
 
     func.setProvider("SunRsaSign");
     Exception result = func.apply(this.rsaCred);
-    Assert.assertNull("Test of RSA key was not successful", result);
+    assertNull(result, "Test of RSA key was not successful");
 
     // DSA should not work with SunRsaSign provider ...
     result = func.apply(this.dsaCred);
-    Assert.assertNotNull("Expected NoSuchAlgorithmException result", result);
-    Assert.assertTrue("Expected NoSuchAlgorithmException exception",
-      NoSuchAlgorithmException.class.isInstance(result));
+    assertNotNull(result, "Expected NoSuchAlgorithmException result");
+    assertTrue(NoSuchAlgorithmException.class.isInstance(result), "Expected NoSuchAlgorithmException exception");
 
     // This should work ...
     func.setProvider("SUN");
     result = func.apply(this.dsaCred);
-    Assert.assertNull("Test of DSA key was not successful", result);
+    assertNull(result, "Test of DSA key was not successful");
 
     // Non-existing provider ...
     func.setProvider("FooBar");
     result = func.apply(this.rsaCred);
-    Assert.assertNotNull("Expected NoSuchProviderException result", result);
-    Assert.assertTrue("Expected NoSuchProviderException exception",
-      NoSuchProviderException.class.isInstance(result));
+    assertNotNull(result, "Expected NoSuchProviderException result");
+    assertTrue(NoSuchProviderException.class.isInstance(result), "Expected NoSuchProviderException exception");
   }
 
   /**
@@ -136,24 +134,24 @@ public class DefaultCredentialTestFunctionTest {
 
     // NPE
     Exception result = func.apply(null);
-    Assert.assertNotNull("Expected NPE result", result);
-    Assert.assertTrue("Expected NPE exception", NullPointerException.class.isInstance(result));
+    assertNotNull(result, "Expected NPE result");
+    assertTrue(NullPointerException.class.isInstance(result), "Expected NPE exception");
 
     // Signing failed
     func.setRsaSignatureAlgorithm("SHA256withDSA");
     result = func.apply(this.rsaCred);
-    Assert.assertNotNull("Expected KeyException result", result);
-    Assert.assertTrue("Expected KeyException exception", KeyException.class.isInstance(result));
+    assertNotNull(result, "Expected KeyException result");
+    assertTrue(KeyException.class.isInstance(result), "Expected KeyException exception");
     
     func.setDsaSignatureAlgorithm("SHA256withRSA");
     result = func.apply(this.dsaCred);
-    Assert.assertNotNull("Expected KeyException result", result);
-    Assert.assertTrue("Expected KeyException exception", KeyException.class.isInstance(result));
+    assertNotNull(result, "Expected KeyException result");
+    assertTrue(KeyException.class.isInstance(result), "Expected KeyException exception");
     
     func.setEcSignatureAlgorithm("SHA256withRSA");
     result = func.apply(this.ecCred);
-    Assert.assertNotNull("Expected KeyException result", result);
-    Assert.assertTrue("Expected KeyException exception", KeyException.class.isInstance(result));
+    assertNotNull(result,"Expected KeyException result");
+    assertTrue(KeyException.class.isInstance(result), "Expected KeyException exception");
   }
   
   @Test
@@ -162,7 +160,7 @@ public class DefaultCredentialTestFunctionTest {
     final TestCredential cred = new TestCredential("test");
     
     Exception result = func.apply(cred);
-    Assert.assertEquals(KeyException.class, result.getClass());
+    assertEquals(KeyException.class, result.getClass());
   }
   
   @Test
@@ -176,7 +174,7 @@ public class DefaultCredentialTestFunctionTest {
     
     final DefaultCredentialTestFunction func = new DefaultCredentialTestFunction();
     Exception result = func.apply(cred);
-    Assert.assertEquals(NoSuchAlgorithmException.class, result.getClass());
+    assertEquals(NoSuchAlgorithmException.class, result.getClass());
   }
   
   @Test
@@ -187,12 +185,12 @@ public class DefaultCredentialTestFunctionTest {
     func.setEcSignatureAlgorithm(null);
     
     Exception result = func.apply(this.rsaCred);
-    Assert.assertNull(result);
+    assertNull(result);
 
     result = func.apply(this.dsaCred);
-    Assert.assertNull(result);
+    assertNull(result);
 
     result = func.apply(this.ecCred);
-    Assert.assertNull(result);
+    assertNull(result);
   }
 }

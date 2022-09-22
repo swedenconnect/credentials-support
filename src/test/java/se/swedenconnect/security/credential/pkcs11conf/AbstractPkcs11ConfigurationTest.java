@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.Provider;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import se.swedenconnect.security.credential.PkiCredential;
@@ -50,13 +50,13 @@ public class AbstractPkcs11ConfigurationTest {
     
     conf.afterPropertiesSet();
     
-    Assert.assertEquals(getAbsolutePath("cfg1.txt"), conf.getConfigurationFile());
-    Assert.assertNull(conf.getLibrary());
-    Assert.assertNull(conf.getName());
-    Assert.assertNull(conf.getSlot());
-    Assert.assertNull(conf.getSlotListIndex());
+    assertEquals(getAbsolutePath("cfg1.txt"), conf.getConfigurationFile());
+    assertNull(conf.getLibrary());
+    assertNull(conf.getName());
+    assertNull(conf.getSlot());
+    assertNull(conf.getSlotListIndex());
     
-    Assert.assertEquals(getAbsolutePath("cfg1.txt"), conf.toString());
+    assertEquals(getAbsolutePath("cfg1.txt"), conf.toString());
   }
   
   @Test
@@ -66,13 +66,13 @@ public class AbstractPkcs11ConfigurationTest {
     conf.setName("  " + NAME);
     conf.afterPropertiesSet();
     
-    Assert.assertNull(conf.getConfigurationFile());
-    Assert.assertEquals(LIBRARY, conf.getLibrary());
-    Assert.assertEquals(NAME, conf.getName());
-    Assert.assertNull(conf.getSlot());
-    Assert.assertNull(conf.getSlotListIndex());
+    assertNull(conf.getConfigurationFile());
+    assertEquals(LIBRARY, conf.getLibrary());
+    assertEquals(NAME, conf.getName());
+    assertNull(conf.getSlot());
+    assertNull(conf.getSlotListIndex());
     
-    Assert.assertEquals(String.format("library='%s', name='%s', slot='null', slotListIndex='null'", LIBRARY, NAME), conf.toString());
+    assertEquals(String.format("library='%s', name='%s', slot='null', slotListIndex='null'", LIBRARY, NAME), conf.toString());
     
     conf = new TestPkcs11Configuration();
     conf.setLibrary(LIBRARY);
@@ -81,11 +81,11 @@ public class AbstractPkcs11ConfigurationTest {
     conf.setSlotListIndex(null);
     conf.afterPropertiesSet();
     
-    Assert.assertNull(conf.getConfigurationFile());
-    Assert.assertEquals(LIBRARY, conf.getLibrary());
-    Assert.assertEquals(NAME, conf.getName());
-    Assert.assertEquals("0", conf.getSlot());
-    Assert.assertNull(conf.getSlotListIndex());
+    assertNull(conf.getConfigurationFile());
+    assertEquals(LIBRARY, conf.getLibrary());
+    assertEquals(NAME, conf.getName());
+    assertEquals("0", conf.getSlot());
+    assertNull(conf.getSlotListIndex());
     
     conf = new TestPkcs11Configuration();
     conf.setLibrary(LIBRARY);
@@ -94,13 +94,13 @@ public class AbstractPkcs11ConfigurationTest {
     conf.setSlotListIndex(3);
     conf.afterPropertiesSet();
     
-    Assert.assertNull(conf.getConfigurationFile());
-    Assert.assertEquals(LIBRARY, conf.getLibrary());
-    Assert.assertEquals(NAME, conf.getName());
-    Assert.assertEquals("0", conf.getSlot());
-    Assert.assertEquals(Integer.valueOf(3), conf.getSlotListIndex());
+    assertNull(conf.getConfigurationFile());
+    assertEquals(LIBRARY, conf.getLibrary());
+    assertEquals(NAME, conf.getName());
+    assertEquals("0", conf.getSlot());
+    assertEquals(Integer.valueOf(3), conf.getSlotListIndex());
     
-    Assert.assertEquals(String.format("library='%s', name='%s', slot='0', slotListIndex='3'", LIBRARY, NAME), conf.toString());
+    assertEquals(String.format("library='%s', name='%s', slot='0', slotListIndex='3'", LIBRARY, NAME), conf.toString());
   }
   
   @Test
@@ -115,19 +115,19 @@ public class AbstractPkcs11ConfigurationTest {
     // This will nullify the above settings
     conf.setConfigurationFile(getAbsolutePath("cfg1.txt"));
     
-    Assert.assertEquals(getAbsolutePath("cfg1.txt"), conf.getConfigurationFile());
-    Assert.assertNull(conf.getLibrary());
-    Assert.assertNull(conf.getName());
-    Assert.assertNull(conf.getSlot());
-    Assert.assertNull(conf.getSlotListIndex());    
+    assertEquals(getAbsolutePath("cfg1.txt"), conf.getConfigurationFile());
+    assertNull(conf.getLibrary());
+    assertNull(conf.getName());
+    assertNull(conf.getSlot());
+    assertNull(conf.getSlotListIndex());
     
     conf.afterPropertiesSet();
     
-    Assert.assertEquals(getAbsolutePath("cfg1.txt"), conf.getConfigurationFile());
-    Assert.assertNull(conf.getLibrary());
-    Assert.assertNull(conf.getName());
-    Assert.assertNull(conf.getSlot());
-    Assert.assertNull(conf.getSlotListIndex());
+    assertEquals(getAbsolutePath("cfg1.txt"), conf.getConfigurationFile());
+    assertNull(conf.getLibrary());
+    assertNull(conf.getName());
+    assertNull(conf.getSlot());
+    assertNull(conf.getSlotListIndex());
     
     // setConfigurationFile(null) - No nullifying
     conf = new TestPkcs11Configuration();
@@ -140,31 +140,37 @@ public class AbstractPkcs11ConfigurationTest {
     conf.setConfigurationFile(null);
     conf.afterPropertiesSet();
     
-    Assert.assertNull(conf.getConfigurationFile());
-    Assert.assertEquals(LIBRARY, conf.getLibrary());
-    Assert.assertEquals(NAME, conf.getName());
-    Assert.assertEquals("0", conf.getSlot());
-    Assert.assertEquals(Integer.valueOf(3), conf.getSlotListIndex());
+    assertNull(conf.getConfigurationFile());
+    assertEquals(LIBRARY, conf.getLibrary());
+    assertEquals(NAME, conf.getName());
+    assertEquals("0", conf.getSlot());
+    assertEquals(Integer.valueOf(3), conf.getSlotListIndex());
   }
   
-  @Test(expected = Pkcs11ConfigurationException.class)
+  @Test
   public void testMissingParams() throws Exception {
-    TestPkcs11Configuration conf = new TestPkcs11Configuration();
-    conf.afterPropertiesSet();
+    assertThrows(Pkcs11ConfigurationException.class, () -> {
+      TestPkcs11Configuration conf = new TestPkcs11Configuration();
+      conf.afterPropertiesSet();
+    });
   }
   
-  @Test(expected = Pkcs11ConfigurationException.class)
+  @Test
   public void testMissingParams2() throws Exception {
-    TestPkcs11Configuration conf = new TestPkcs11Configuration();
-    conf.setName("foo");
-    conf.afterPropertiesSet();
+    assertThrows(Pkcs11ConfigurationException.class, () -> {
+      TestPkcs11Configuration conf = new TestPkcs11Configuration();
+      conf.setName("foo");
+      conf.afterPropertiesSet();
+    });
   }
   
-  @Test(expected = Pkcs11ConfigurationException.class)
+  @Test
   public void testMissingParams3() throws Exception {
-    TestPkcs11Configuration conf = new TestPkcs11Configuration();
-    conf.setLibrary(LIBRARY);
-    conf.afterPropertiesSet();
+    assertThrows(Pkcs11ConfigurationException.class, () -> {
+      TestPkcs11Configuration conf = new TestPkcs11Configuration();
+      conf.setLibrary(LIBRARY);
+      conf.afterPropertiesSet();
+    });
   }
   
   @Test
@@ -172,50 +178,60 @@ public class AbstractPkcs11ConfigurationTest {
     TestPkcs11Configuration conf = new TestPkcs11Configuration(LIBRARY, NAME, "0", 3);
     conf.afterPropertiesSet();
     
-    Assert.assertNull(conf.getConfigurationFile());
-    Assert.assertEquals(LIBRARY, conf.getLibrary());
-    Assert.assertEquals(NAME, conf.getName());
-    Assert.assertEquals("0", conf.getSlot());
-    Assert.assertEquals(Integer.valueOf(3), conf.getSlotListIndex());
+    assertNull(conf.getConfigurationFile());
+    assertEquals(LIBRARY, conf.getLibrary());
+    assertEquals(NAME, conf.getName());
+    assertEquals("0", conf.getSlot());
+    assertEquals(Integer.valueOf(3), conf.getSlotListIndex());
     
     conf = new TestPkcs11Configuration(LIBRARY, NAME, "0", null);
     conf.afterPropertiesSet();
     
-    Assert.assertNull(conf.getConfigurationFile());
-    Assert.assertEquals(LIBRARY, conf.getLibrary());
-    Assert.assertEquals(NAME, conf.getName());
-    Assert.assertEquals("0", conf.getSlot());
-    Assert.assertNull(conf.getSlotListIndex());
+    assertNull(conf.getConfigurationFile());
+    assertEquals(LIBRARY, conf.getLibrary());
+    assertEquals(NAME, conf.getName());
+    assertEquals("0", conf.getSlot());
+    assertNull(conf.getSlotListIndex());
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testIllegalSlotListIndex() throws Exception {
-    TestPkcs11Configuration conf = new TestPkcs11Configuration(LIBRARY, NAME, "0", -2);
-    conf.afterPropertiesSet();
+    assertThrows(IllegalArgumentException.class, () -> {
+      TestPkcs11Configuration conf = new TestPkcs11Configuration(LIBRARY, NAME, "0", -2);
+      conf.afterPropertiesSet();
+    });
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testIllegalSlotListIndex2() throws Exception {
-    TestPkcs11Configuration conf = new TestPkcs11Configuration();
-    conf.setLibrary(LIBRARY);
-    conf.setName(NAME);
-    conf.setSlotListIndex(-2);
-    conf.afterPropertiesSet();
+    assertThrows(IllegalArgumentException.class, () -> {
+      TestPkcs11Configuration conf = new TestPkcs11Configuration();
+      conf.setLibrary(LIBRARY);
+      conf.setName(NAME);
+      conf.setSlotListIndex(-2);
+      conf.afterPropertiesSet();
+    });
   }
   
-  @Test(expected = Pkcs11ConfigurationException.class)
+  @Test
   public void testIllegalConfigFile() throws Exception {
-    new TestPkcs11Configuration(null);
+    assertThrows(Pkcs11ConfigurationException.class, () -> {
+      new TestPkcs11Configuration(null);
+    });
   }
   
-  @Test(expected = Pkcs11ConfigurationException.class)
+  @Test
   public void testIllegalConfigFile2() throws Exception {
-    new TestPkcs11Configuration("/opt/foo/not-there.txt");
+    assertThrows(Pkcs11ConfigurationException.class, () -> {
+      new TestPkcs11Configuration("/opt/foo/not-there.txt");
+    });
   }
   
-  @Test(expected = Pkcs11ConfigurationException.class)
-  public void testIllegalConfigFile3() throws Exception {    
-    new TestPkcs11Configuration(new ClassPathResource("cfg1.txt").getFile().getAbsoluteFile().getParent());
+  @Test
+  public void testIllegalConfigFile3() throws Exception {
+    assertThrows(Pkcs11ConfigurationException.class, () -> {
+      new TestPkcs11Configuration(new ClassPathResource("cfg1.txt").getFile().getAbsoluteFile().getParent());
+    });
   }
   
   private static String getAbsolutePath(final String resource) throws IOException {
