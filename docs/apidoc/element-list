@@ -1,4 +1,6 @@
 se.swedenconnect.security.credential
+se.swedenconnect.security.credential.container
+se.swedenconnect.security.credential.container.keytype
 se.swedenconnect.security.credential.converters
 se.swedenconnect.security.credential.factory
 se.swedenconnect.security.credential.monitoring
