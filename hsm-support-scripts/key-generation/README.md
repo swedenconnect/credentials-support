@@ -1,12 +1,19 @@
+![Logo](https://github.com/swedenconnect/technical-framework/blob/master/img/sweden-connect.png)
+
 # HSM PKCS#11 Key generation
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 ___
 
 This folder provides a PKCS#11 key generation script `p11-keygen.sh`. This script can be used to generate keys inside an HSM as well as issuing a self-signed certificate for that key and loading it to the HSM device.
 
-This script is included in the example Dockerfile named `Dockerfile-softhsm-libp11` but it can be installe individually and used independently.
+This script is included in the example Dockerfile named `Dockerfile-softhsm-libp11` but it can be installed individually and used independently.
 
 ## Requirements
+
 This script requires that the following components are installed:
+
 - OpenSC
 - libp11
 - libengine-pkcs11-openssl
@@ -15,9 +22,9 @@ This script requires that the following components are installed:
 This script and the tools above must be installed on a host that is connected to the HSM device and has a HSM client installed available through a PKCS#11 library file (such as `/usr/lib/softhsm/libsofthsm2.so` for SoftHSM 2).
 
 
-## Running the script in the CA container
+## Running the script in a CA container
 
-This script can be used inside the CA container in order to initialize keys in a HSM that are to be used in a CA instance. To do this, the CA must first be started up before the instance using the keys is configured in `application-csca.properties`
+This script can be used inside a CA container in order to initialize keys in a HSM that are to be used in a CA instance. To do this, the CA must first be started up before the instance using the keys is configured in `application-csca.properties`
 
 After this script is used to create necessary keys and certificates in the HSM, then the CA instance can be configured with the created keys.
 
@@ -55,7 +62,7 @@ In the normal case, the HSM slots should already be pre-installed in the HSM and
 
 For environments, such as a test environment using SoftHSM 2, necessary slots can be created using the installed pkcs11-tool command (Available from OpenSC).
 
-The follwoing example creates a new HSM slot named "csca" as the first slot of the HSM :
+The following example creates a new HSM slot named "csca" as the first slot of the HSM :
 
 ```
 pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so \
@@ -240,10 +247,9 @@ ca-service.pkcs11.slot=487945533
 
 ```
 
-However, the downside of using the explicit configuration instead of the configuration file, is that this does not provide the cabability to customize the provider configuration settings.
+However, the downside of using the explicit configuration instead of the configuration file, is that this does not provide the capability to customize the provider configuration settings.
 
-Each key offered by the HSM is the specified by application properties by refering to the keys alias, and the HSM slot PIN as shown in the following example for the ca insance `hsmtest`.
-
+Each key offered by the HSM is the specified by application properties by referring to the keys alias, and the HSM slot PIN as shown in the following example for the ca insance `hsmtest`.
 
 ```
 ca-service.instance.conf.hsmtest.ca.key-source.type=pkcs11
@@ -256,3 +262,7 @@ ca-service.instance.conf.hsmtest.ocsp.key-source.pass=S3cr3t
 ca-service.instance.conf.hsmtest.ocsp.key-source.reloadable-keys=true
 
 ```
+
+---
+
+Copyright &copy; 2020-2022, [Sweden Connect](https://swedenconnect.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
