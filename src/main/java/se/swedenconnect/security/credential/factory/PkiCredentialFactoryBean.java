@@ -109,8 +109,12 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
    */
   public PkiCredentialFactoryBean(final PkiCredentialConfigurationProperties properties) {
     this.setName(properties.getName());
-    this.setCertificate(properties.getCertificate());
-    this.setCertificates(properties.getCertificates());
+    if (properties.getCertificate() != null) {
+      this.setCertificate(properties.getCertificate());
+    }
+    if (properties.getCertificates() != null) {
+      this.setCertificates(properties.getCertificates());
+    }
     this.setPrivateKey(properties.getPrivateKey());
     this.setResource(properties.getResource());
     this.setPassword(properties.getPassword());
