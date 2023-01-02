@@ -5,7 +5,7 @@
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support-test</artifactId>
-  <version>1.2.5-SNAPSHOT</version>
+  <version>1.2.5</version>
   <packaging>jar</packaging>
 
   <name>Sweden Connect :: PKI credentials support library (test)</name>
@@ -116,6 +116,14 @@
           <groupId>org.cryptacular</groupId>
           <artifactId>cryptacular</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcpkix-jdk15on</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcutil-jdk15on</artifactId>
+        </exclusion>        
       </exclusions>
     </dependency>
 
