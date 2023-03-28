@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,16 +62,11 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
   /**
    * Constructor.
    * 
-   * @param configuration
-   *          the PKCS#11 configuration
-   * @param alias
-   *          the token entry from where to load the private key and certificate
-   * @param pin
-   *          the PIN to unlock the token
-   * @throws IllegalArgumentException
-   *           for missing parameters
-   * @throws SecurityException
-   *           if loading of the private key and/or certificate fails
+   * @param configuration the PKCS#11 configuration
+   * @param alias the token entry from where to load the private key and certificate
+   * @param pin the PIN to unlock the token
+   * @throws IllegalArgumentException for missing parameters
+   * @throws SecurityException if loading of the private key and/or certificate fails
    */
   public Pkcs11Credential(final Pkcs11Configuration configuration, final String alias, final char[] pin)
       throws IllegalArgumentException, SecurityException {
@@ -83,36 +78,28 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
    * Constructor that takes a X.509 certificate as an argument. This constructor should be used if we know that the
    * certificate is not placed on the device (only the private key).
    * 
-   * @param configuration
-   *          the PKCS#11 configuration
-   * @param alias
-   *          the token entry from where to load the private key
-   * @param pin
-   *          the PIN to unlock the token
-   * @param certificate
-   *          the certificate
+   * @param configuration the PKCS#11 configuration
+   * @param alias the token entry from where to load the private key
+   * @param pin the PIN to unlock the token
+   * @param certificate the certificate
    */
   public Pkcs11Credential(final Pkcs11Configuration configuration, final String alias, final char[] pin,
       final X509Certificate certificate) {
-    
+
     this.setConfiguration(configuration);
     this.setAlias(alias);
     this.setPin(pin);
     this.setCertificate(certificate);
   }
-  
+
   /**
-   * Constructor that takes a list of X.509 certificates as an argument. This constructor should be used if we know that the
-   * certificate chain is not placed on the device (only the private key).
+   * Constructor that takes a list of X.509 certificates as an argument. This constructor should be used if we know that
+   * the certificate chain is not placed on the device (only the private key).
    * 
-   * @param configuration
-   *          the PKCS#11 configuration
-   * @param alias
-   *          the token entry from where to load the private key
-   * @param pin
-   *          the PIN to unlock the token
-   * @param certificates
-   *          the certificate chain (entity certificate placed first)
+   * @param configuration the PKCS#11 configuration
+   * @param alias the token entry from where to load the private key
+   * @param pin the PIN to unlock the token
+   * @param certificates the certificate chain (entity certificate placed first)
    */
   public Pkcs11Credential(final Pkcs11Configuration configuration, final String alias, final char[] pin,
       final List<X509Certificate> certificates) {
@@ -121,7 +108,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
     this.setAlias(alias);
     this.setPin(pin);
     this.setCertificateChain(certificates);
-  }  
+  }
 
   /** {@inheritDoc} */
   @Override
@@ -142,12 +129,18 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
   }
 
   /**
+   * Returns {@code true}.
+   */
+  @Override
+  public boolean isHardwareCredential() {
+    return true;
+  }
+
+  /**
    * Loads the credential.
    * 
-   * @throws IllegalArgumentException
-   *           for missing properties
-   * @throws SecurityException
-   *           for errors loading the credential
+   * @throws IllegalArgumentException for missing properties
+   * @throws SecurityException for errors loading the credential
    */
   private synchronized void load() throws IllegalArgumentException, SecurityException {
     if (this.loaded) {
@@ -166,7 +159,8 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
       pk = this.configuration.getPrivateKeyProvider().get(this.configuration.getProvider(), this.alias, this.pin);
     }
     else {
-      final PkiCredential cred = this.configuration.getCredentialProvider().get(this.configuration.getProvider(), this.alias, this.pin);
+      final PkiCredential cred =
+          this.configuration.getCredentialProvider().get(this.configuration.getProvider(), this.alias, this.pin);
       if (cred != null) {
         pk = cred.getPrivateKey();
         certs = cred.getCertificateChain();
@@ -179,10 +173,11 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
       throw new IllegalArgumentException(String.format("No private key found under alias '%s'", this.alias));
     }
     if (certs.isEmpty()) {
-      throw new IllegalArgumentException(String.format("No certificate supplied and none found under alias '%s'", this.alias));
+      throw new IllegalArgumentException(
+          String.format("No certificate supplied and none found under alias '%s'", this.alias));
     }
     super.setPrivateKey(pk);
-    
+
     // Install a default test function (if none has been set) ...
     //
     if (this.getTestFunction() == null) {
@@ -236,7 +231,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
     this.getCertificateChain();
     return super.getCertificate();
   }
-  
+
   /** {@inheritDoc} */
   @Override
   public synchronized List<X509Certificate> getCertificateChain() {
@@ -256,8 +251,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
   /**
    * Assigns the PKCS#11 configuration for the token that holds this credential.
    * 
-   * @param configuration
-   *          the configuration
+   * @param configuration the configuration
    */
   public void setConfiguration(final Pkcs11Configuration configuration) {
     this.configuration = configuration;
@@ -270,10 +264,8 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
    * security provider. If another provider is desired, use the {@link #setConfiguration(Pkcs11Configuration)} instead.
    * </p>
    * 
-   * @param configurationFile
-   *          complete path to the PKCS#11 configuration file
-   * @throws Pkcs11ConfigurationException
-   *           if the configuration file is invalid
+   * @param configurationFile complete path to the PKCS#11 configuration file
+   * @throws Pkcs11ConfigurationException if the configuration file is invalid
    */
   public void setConfigurationFile(final String configurationFile) throws Pkcs11ConfigurationException {
     final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration(configurationFile);
@@ -284,8 +276,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
   /**
    * Assigns the alias of the key pair on the token.
    * 
-   * @param alias
-   *          the alias
+   * @param alias the alias
    */
   public void setAlias(final String alias) {
     this.alias = Optional.ofNullable(alias).map(a -> a.trim()).orElse(null);
@@ -294,8 +285,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
   /**
    * Assigns the PIN (key password) needed to unlock the token.
    * 
-   * @param pin
-   *          the PIN
+   * @param pin the PIN
    */
   public void setPin(final char[] pin) {
     this.pin = Optional.ofNullable(pin).map(p -> Arrays.copyOf(p, p.length)).orElse(null);
@@ -313,18 +303,21 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
     if (this.configuration == null || this.alias == null || this.pin == null) {
       throw new SecurityException("Error in reload - Pkcs11Credential has not been initialized yet");
     }
-    log.trace("Reloading private key under alias '{}' for provider '{}' ...", this.alias, this.configuration.getProvider().getName());
+    log.trace("Reloading private key under alias '{}' for provider '{}' ...", this.alias,
+        this.configuration.getProvider().getName());
 
-    final PrivateKey pk = this.configuration.getPrivateKeyProvider().get(this.configuration.getProvider(), this.alias, this.pin);
+    final PrivateKey pk =
+        this.configuration.getPrivateKeyProvider().get(this.configuration.getProvider(), this.alias, this.pin);
     if (pk == null) {
       final String msg = String.format("No private key found under alias '%s' for provider '%s'",
-        this.alias, this.configuration.getProvider().getName());
+          this.alias, this.configuration.getProvider().getName());
       log.trace("{}", msg);
       throw new KeyException(msg);
     }
     super.setPrivateKey(pk);
 
-    log.trace("Private key under alias '{}' for provider '{}' was reloaded", this.alias, this.configuration.getProvider().getName());
+    log.trace("Private key under alias '{}' for provider '{}' was reloaded", this.alias,
+        this.configuration.getProvider().getName());
   }
 
   /** {@inheritDoc} */
@@ -332,8 +325,8 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
   protected String getDefaultName() {
     StringBuffer sb = new StringBuffer();
     sb.append(this.configuration != null ? this.configuration.getProvider().getName() : "Pkcs11Credential")
-      .append("-")
-      .append(this.alias != null ? this.alias : UUID.randomUUID().toString());
+        .append("-")
+        .append(this.alias != null ? this.alias : UUID.randomUUID().toString());
     return sb.toString();
   }
 

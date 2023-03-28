@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,15 @@ public interface PkiCredential extends InitializingBean, DisposableBean {
    * @return the name
    */
   String getName();
+
+  /**
+   * Predicate that tells whether this credential resides in a hardware module.
+   * 
+   * @return {@code true} if the credential resides in a hardware module and {@code false} otherwise
+   */
+  default boolean isHardwareCredential() {
+    return false;
+  }
 
   /**
    * The {@code init} method is here just because it is a nicer name for {@code afterPropertiesSet}. Should be manually

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,8 @@ public class OpenSamlCredential extends BasicX509Credential {
   /**
    * Constructor setting up the credential by explicitly assigning the certificate and private key.
    * 
-   * @param entityCertificate
-   *          the certificate
-   * @param privateKey
-   *          the private key
+   * @param entityCertificate the certificate
+   * @param privateKey the private key
    */
   public OpenSamlCredential(final X509Certificate entityCertificate, final PrivateKey privateKey) {
     super(entityCertificate, privateKey);
@@ -66,8 +64,7 @@ public class OpenSamlCredential extends BasicX509Credential {
    * up the {@code OpenSamlCredential} is recommended since it gives the benefits of monitoring (and reloading)
    * credentials as well as a simple way to use hardware based keys (e.g. {@link Pkcs11Credential}).
    * 
-   * @param credential
-   *          the credential to wrap in a OpenSAML credential
+   * @param credential the credential to wrap in a OpenSAML credential
    */
   public OpenSamlCredential(final PkiCredential credential) {
     super(null);
@@ -90,7 +87,8 @@ public class OpenSamlCredential extends BasicX509Credential {
   @Override
   public void setPrivateKey(final PrivateKey privateKey) {
     if (this.credential != null) {
-      throw new IllegalArgumentException("Private key may not be installed when object is created using a PkiCredential");
+      throw new IllegalArgumentException(
+          "Private key may not be installed when object is created using a PkiCredential");
     }
     super.setPrivateKey(privateKey);
   }
@@ -105,7 +103,8 @@ public class OpenSamlCredential extends BasicX509Credential {
   @Override
   public void setEntityCertificate(final X509Certificate entityCertificate) {
     if (this.credential != null) {
-      throw new IllegalArgumentException("Entity certificate may not be installed when object is created using a PkiCredential");
+      throw new IllegalArgumentException(
+          "Entity certificate may not be installed when object is created using a PkiCredential");
     }
     if (entityCertificate != null) {
       super.setEntityCertificate(entityCertificate);
@@ -128,7 +127,7 @@ public class OpenSamlCredential extends BasicX509Credential {
   public void setEntityCertificateChain(final Collection<X509Certificate> certificateChain) {
     if (this.credential != null) {
       throw new IllegalArgumentException(
-        "Entity certificate chain may not be installed when object is created using a PkiCredential");
+          "Entity certificate chain may not be installed when object is created using a PkiCredential");
     }
     super.setEntityCertificateChain(certificateChain);
   }
@@ -138,17 +137,16 @@ public class OpenSamlCredential extends BasicX509Credential {
    * since it gives the benefits of monitoring (and reloading) credentials as well as a simple way to use hardware based
    * keys.
    * 
-   * @param credential
-   *          the credential to wrap in a OpenSAML credential
+   * @param credential the credential to wrap in a OpenSAML credential
    */
   public void setCredential(final PkiCredential credential) {
     if (super.getEntityCertificate() != null) {
       throw new IllegalArgumentException(
-        "Credential can not be assigned since certificate has already been assigned");
+          "Credential can not be assigned since certificate has already been assigned");
     }
     if (super.getPrivateKey() != null) {
       throw new IllegalArgumentException(
-        "Credential can not be assigned since private key has already been assigned");
+          "Credential can not be assigned since private key has already been assigned");
     }
     this.credential = Objects.requireNonNull(credential, "Credential cannot be null");
   }
