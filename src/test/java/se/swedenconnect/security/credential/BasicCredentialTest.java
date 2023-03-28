@@ -15,12 +15,17 @@
  */
 package se.swedenconnect.security.credential;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -80,6 +85,54 @@ public class BasicCredentialTest {
     assertNull(cred.getCertificate());
     assertNotNull(cred.getName());
   }
+  
+  @Test
+  public void testSetters4() throws Exception {
+    final BasicCredential cred = new BasicCredential();
+    cred.setPrivateKey(new ClassPathResource("rsa1.pkcs8.key"));
+    cred.setPublicKey(this.cert.getPublicKey());
+    cred.init();
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNull(cred.getCertificate());
+    assertNotNull(cred.getName());
+  }
+  
+  @Test
+  public void testSetters5() throws Exception {
+    final BasicCredential cred = new BasicCredential();
+    cred.setPrivateKey(new ClassPathResource("rsa1.openssl.enc.key"), "secret".toCharArray());
+    cred.setPublicKey(this.cert.getPublicKey());
+    cred.init();
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNull(cred.getCertificate());
+    assertNotNull(cred.getName());
+  }
+  
+//  @Test
+//  public void testSetters6() throws Exception {
+//    final BasicCredential cred = new BasicCredential();
+//    cred.setPrivateKey(new ClassPathResource("rsa1.pkcs8.enc.key"), "secret".toCharArray());
+//    cred.setPublicKey(this.cert.getPublicKey());
+//    cred.init();
+//    assertNotNull(cred.getPrivateKey());
+//    assertNotNull(cred.getPublicKey());
+//    assertNull(cred.getCertificate());
+//    assertNotNull(cred.getName());
+//  }  
+  
+  @Test
+  public void testSetters7() throws Exception {
+    final BasicCredential cred = new BasicCredential();
+    cred.setPrivateKey(new ClassPathResource("rsa1.openssl.key"));
+    cred.setPublicKey(this.cert.getPublicKey());
+    cred.init();
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNull(cred.getCertificate());
+    assertNotNull(cred.getName());
+  }  
 
   @Test
   public void testDefaultConstructorMissingKeyAndCert() throws Exception {
