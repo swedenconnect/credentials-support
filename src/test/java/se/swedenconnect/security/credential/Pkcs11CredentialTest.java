@@ -128,6 +128,7 @@ public class Pkcs11CredentialTest {
     assertNotNull(cred.getPublicKey());
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getName());
+    assertTrue(cred.isHardwareCredential());
   }
   
   @Test

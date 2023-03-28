@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,6 +119,9 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
   /** Whether the credential has been loaded? */
   private boolean loaded = false;
+  
+  /** Whether this is a hardware credential or not. */
+  private boolean residesInHardware = false;
 
   /**
    * Default constructor.
@@ -227,6 +230,12 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
       Arrays.fill(this.keyPassword, (char) 0);
     }
   }
+  
+  /** {@inheritDoc} */
+  @Override
+  public boolean isHardwareCredential() {
+    return this.residesInHardware; 
+  }
 
   /**
    * Loads the KeyStore (if needed) and loads the private key and certificate.
@@ -258,6 +267,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
         final DefaultCredentialTestFunction testFunction = new DefaultCredentialTestFunction();
         testFunction.setProvider(Optional.ofNullable(this.keyStore.getProvider()).map(Provider::getName).orElse(null));
         this.setTestFunction(testFunction);
+        this.residesInHardware = true;
       }
     }
 

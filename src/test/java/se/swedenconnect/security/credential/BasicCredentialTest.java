@@ -16,6 +16,7 @@
 package se.swedenconnect.security.credential;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -60,6 +61,7 @@ public class BasicCredentialTest {
     assertNotNull(cred.getPublicKey());
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getName());
+    assertFalse(cred.isHardwareCredential());
   }
 
   @Test

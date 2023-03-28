@@ -235,7 +235,7 @@ The following properties are supported:
 | :--- | :--- |
 | `name` | The name of the credential. |
 | `certificate` | A resource holding the certificate part of the credential. Used in the cases when a [BasicCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/BasicCredential.java) is to be used, or when setting up an PKCS#11 credential that does not store the certificate on the device. |
-| `private-key` | A resource holding the private key part of the credential. Used in the cases when a [BasicCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/BasicCredential.java) is to be used. Note: If an encrypted PKCS#8 key is used, the `keyPassword` must also be set. |
+| `private-key` | A resource holding the private key part of the credential. Used in the cases when a [BasicCredential](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/BasicCredential.java) is to be used. Note: If an encrypted key is used, the `keyPassword` must also be set. |
 | `resource` | A resource to the keystore containing the credential. |
 | `password` | The keystore password. |
 | `type` | The type of keystore (defaults to JKS). |
