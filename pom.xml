@@ -6,7 +6,7 @@
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support</artifactId>
-  <version>1.2.6-SNAPSHOT</version>
+  <version>1.2.6</version>
 
   <name>Sweden Connect :: PKI credentials support library</name>
   <description>Support for credentials (including PKCS11 based keys and HSM:s)</description>
@@ -199,7 +199,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.24</version>
+      <version>1.18.26</version>
       <scope>provided</scope>
     </dependency>
 
