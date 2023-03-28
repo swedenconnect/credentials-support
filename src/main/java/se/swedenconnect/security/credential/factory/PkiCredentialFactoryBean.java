@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.Pkcs11Credential;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.security.credential.utils.PrivateKeyUtils;
 import se.swedenconnect.security.credential.utils.X509Utils;
 
 /**
@@ -142,7 +141,8 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
     }
 
     if (!_certificates.isEmpty() && this.privateKey != null) {
-      credential = new BasicCredential(_certificates, PrivateKeyUtils.decodePrivateKey(this.privateKey));          
+      final char[] pw = Optional.ofNullable(this.keyPassword).orElseGet(() -> this.password);
+      credential = new BasicCredential(_certificates, this.privateKey, pw); 
     }
     else if (StringUtils.hasText(this.pkcs11Configuration) && StringUtils.hasText(this.alias) && this.keyPassword != null
         && (!StringUtils.hasText(this.type) || "PKCS11".equalsIgnoreCase(this.type))) {

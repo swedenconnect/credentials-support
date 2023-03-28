@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 package se.swedenconnect.security.credential;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
@@ -24,8 +27,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.cryptacular.util.KeyPairUtil;
 import org.springframework.core.io.Resource;
 
+import se.swedenconnect.security.credential.utils.PrivateKeyUtils;
 import se.swedenconnect.security.credential.utils.X509Utils;
 
 /**
@@ -58,15 +63,14 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   @Override
   public PublicKey getPublicKey() {
     return Optional.ofNullable(this.getCertificate())
-      .map(X509Certificate::getPublicKey)
-      .orElse(this.publicKey);
+        .map(X509Certificate::getPublicKey)
+        .orElse(this.publicKey);
   }
 
   /**
    * Assigns the public key of the key pair.
    *
-   * @param publicKey
-   *          the public key.
+   * @param publicKey the public key.
    */
   public void setPublicKey(final PublicKey publicKey) {
     if (this.certificates != null && !this.certificates.isEmpty()) {
@@ -79,9 +83,9 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   @Override
   public X509Certificate getCertificate() {
     return Optional.ofNullable(this.certificates)
-      .filter(c -> !c.isEmpty())
-      .map(c -> c.get(0))
-      .orElse(null);
+        .filter(c -> !c.isEmpty())
+        .map(c -> c.get(0))
+        .orElse(null);
   }
 
   /** {@inheritDoc} */
@@ -89,7 +93,8 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   public void setCertificate(final X509Certificate certificate) {
     if (this.publicKey != null && certificate != null) {
       if (!Arrays.equals(this.publicKey.getEncoded(), certificate.getPublicKey().getEncoded())) {
-        throw new IllegalArgumentException("Cannot assign certificate - it does not match already installed public key");
+        throw new IllegalArgumentException(
+            "Cannot assign certificate - it does not match already installed public key");
       }
       this.publicKey = null;
     }
@@ -99,10 +104,8 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   /**
    * Assigns the certificate by assigning a resource pointing to a DER- och PEM-encoded certificate.
    *
-   * @param certificateResource
-   *          the certificate resource
-   * @throws CertificateException
-   *           if the supplied resource cannot be decoded into a X509Certificate instance
+   * @param certificateResource the certificate resource
+   * @throws CertificateException if the supplied resource cannot be decoded into a X509Certificate instance
    */
   public void setCertificate(final Resource certificateResource) throws CertificateException {
     if (certificateResource != null) {
@@ -128,7 +131,8 @@ public abstract class AbstractPkiCredential implements PkiCredential {
 
     if (this.publicKey != null && certificates != null) {
       if (!Arrays.equals(this.publicKey.getEncoded(), certificates.get(0).getPublicKey().getEncoded())) {
-        throw new IllegalArgumentException("Cannot assign certificate(s) - entity certificate does not match already installed public key");
+        throw new IllegalArgumentException(
+            "Cannot assign certificate(s) - entity certificate does not match already installed public key");
       }
       this.publicKey = null;
     }
@@ -144,11 +148,46 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   /**
    * Assigns the private key.
    *
-   * @param privateKey
-   *          the private key
+   * @param privateKey the private key
    */
   public void setPrivateKey(final PrivateKey privateKey) {
     this.privateKey = privateKey;
+  }
+
+  /**
+   * Assigns a private key resource.
+   * 
+   * @param privateKeyResource a resource holding the key in DER, PEM, or unencrypted PKCS#8 format.
+   * @throws KeyException if the key decode fails
+   */
+  public void setPrivateKey(final Resource privateKeyResource) throws KeyException {
+    this.privateKey = PrivateKeyUtils.decodePrivateKey(privateKeyResource);
+  }
+
+  /**
+   * Assigns a private key resource holding an encrypted private key. The following formats are supported:
+   * <ul>
+   * <li>DER or PEM encoded PKCS#8 format</li>
+   * <li>PEM encoded OpenSSL "traditional" format</li>
+   * </ul>
+   * 
+   * @param privateKeyResource a resource holding the key in DER, PEM, or PKCS#8 format.
+   * @param password the key password
+   * @throws KeyException if the key decode/decrypt fails
+   */
+  public void setPrivateKey(final Resource privateKeyResource, final char[] password) throws KeyException {
+    if (password == null || password.length == 0) {
+      this.setPrivateKey(privateKeyResource);
+    }
+    else {
+      
+      try (final InputStream is = privateKeyResource.getInputStream()) {
+        this.privateKey = KeyPairUtil.readPrivateKey(is, password);
+      }
+      catch (final IOException e) {
+        throw new KeyException("IO error", e);
+      }
+    }
   }
 
   /**
@@ -173,8 +212,7 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   /**
    * Assigns the credential name.
    *
-   * @param name
-   *          the name
+   * @param name the name
    */
   public void setName(final String name) {
     this.name = name;

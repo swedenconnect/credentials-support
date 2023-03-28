@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.security.credential;
 
+import java.security.KeyException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
@@ -42,10 +43,8 @@ public class BasicCredential extends AbstractPkiCredential {
   /**
    * Constructor setting the public and private keys.
    * 
-   * @param publicKey
-   *          the public key
-   * @param privateKey
-   *          the private key
+   * @param publicKey the public key
+   * @param privateKey the private key
    */
   public BasicCredential(final PublicKey publicKey, final PrivateKey privateKey) {
     this.setPublicKey(publicKey);
@@ -55,10 +54,8 @@ public class BasicCredential extends AbstractPkiCredential {
   /**
    * Constructor setting the certificate and private key.
    * 
-   * @param certificate
-   *          the certificate
-   * @param privateKey
-   *          the private key
+   * @param certificate the certificate
+   * @param privateKey the private key
    */
   public BasicCredential(final X509Certificate certificate, final PrivateKey privateKey) {
     this.setCertificate(certificate);
@@ -68,30 +65,80 @@ public class BasicCredential extends AbstractPkiCredential {
   /**
    * Constructor setting the certificate and private key.
    * 
-   * @param certificateResource
-   *          the resource holding a encoded certificate
-   * @param privateKey
-   *          the private key
-   * @throws CertificateException
-   *           if the certificate resource can not be decoded
+   * @param certificateResource the resource holding a encoded certificate
+   * @param privateKey the private key
+   * @throws CertificateException if the certificate resource can not be decoded
    */
   public BasicCredential(final Resource certificateResource, final PrivateKey privateKey) throws CertificateException {
     this.setCertificate(certificateResource);
     this.setPrivateKey(privateKey);
   }
-  
+
+  /**
+   * Constructor setting the certificate and private key.
+   * 
+   * @param certificateResource the resource holding a encoded certificate
+   * @param privateKey the private key resource
+   * @throws CertificateException if the certificate resource can not be decoded
+   * @throws KeyException if the key decode fails
+   */
+  public BasicCredential(final Resource certificateResource, final Resource privateKey)
+      throws CertificateException, KeyException {
+    this.setCertificate(certificateResource);
+    this.setPrivateKey(privateKey);
+  }
+
+  /**
+   * Constructor setting the certificate and an encrypted private key.
+   * 
+   * @param certificateResource the resource holding a encoded certificate
+   * @param privateKey the private key resource
+   * @param password the private key password
+   * @throws CertificateException if the certificate resource can not be decoded
+   * @throws KeyException if the key decode fails
+   */
+  public BasicCredential(final Resource certificateResource, final Resource privateKey, final char[] password)
+      throws CertificateException, KeyException {
+    this.setCertificate(certificateResource);
+    this.setPrivateKey(privateKey, password);
+  }
+
   /**
    * Constructor setting the certificate(s) and private key.
    * 
-   * @param certificates
-   *          the certificate(s) where the entity certificate is placed first
-   * @param privateKey
-   *          the private key
+   * @param certificates the certificate(s) where the entity certificate is placed first
+   * @param privateKey the private key
    */
   public BasicCredential(final List<X509Certificate> certificates, final PrivateKey privateKey) {
     this.setCertificateChain(certificates);
     this.setPrivateKey(privateKey);
-  }  
+  }
+
+  /**
+   * Constructor setting the certificate(s) and private key.
+   * 
+   * @param certificates the certificate(s) where the entity certificate is placed first
+   * @param privateKey the private key resource
+   * @throws KeyException if the key decode fails
+   */
+  public BasicCredential(final List<X509Certificate> certificates, final Resource privateKey) throws KeyException {
+    this.setCertificateChain(certificates);
+    this.setPrivateKey(privateKey);
+  }
+
+  /**
+   * Constructor setting the certificate and an encrypted private key.
+   * 
+   * @param certificates the certificate(s) where the entity certificate is placed first
+   * @param privateKey the private key resource
+   * @param password the private key password
+   * @throws KeyException if the key decode fails
+   */
+  public BasicCredential(final List<X509Certificate> certificates, final Resource privateKey, final char[] password)
+      throws KeyException {
+    this.setCertificateChain(certificates);
+    this.setPrivateKey(privateKey, password);
+  }
 
   /**
    * Gets the subject DN of the certificate and if no certificate is available an UUID is used.
@@ -108,5 +155,5 @@ public class BasicCredential extends AbstractPkiCredential {
     }
     return "BasicCredential-" + UUID.randomUUID().toString();
   }
-  
+
 }
