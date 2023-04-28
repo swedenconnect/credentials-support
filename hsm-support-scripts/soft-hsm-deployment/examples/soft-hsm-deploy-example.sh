@@ -53,6 +53,9 @@ for i in "${!key_id[@]}"; do
 	bash softhsm/key-extract.sh -p ${password[$i]} -t $key_store_type -a ${alias[$i]} -l ${keystore[$i]} -o softhsm/keys/${key_id[$i]}
 done
 
+echo "Pulling latest revision of origin image"
+docker pull $docker_from_image
+
 echo "Building docker image with imported keys"
 docker build -f softhsm/Dockerfile-key-import \
 	--build-arg FROM_IMAGE=$docker_from_image \
