@@ -54,7 +54,7 @@ if [ "$LABEL" == "" ]; then
 fi
 
 
-echo "Initializing key klot in soft hsm"
+echo "Initializing key slot in soft hsm"
 MODULE="/usr/lib/softhsm/libsofthsm2.so"
 
 pkcs11-tool --module $MODULE --init-token --slot 0 --so-pin 1217813 --init-pin --pin $PIN --label $LABEL

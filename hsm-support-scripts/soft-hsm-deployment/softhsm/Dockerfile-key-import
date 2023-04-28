@@ -21,8 +21,8 @@ RUN apt-get -y install opensc
 # Copy exported keys to image
 COPY $KEY_DIR /opt/keys
 # Copy hsm key import script
-COPY $SCRIPT_DIR/key-import.sh /opt/
+COPY $SCRIPT_DIR/key-import.sh /opt/key-import.sh
 # Import keys to hsm
-RUN ./opt/key-import.sh -p $PIN -l $SLOT_LABEL
+RUN bash /opt/key-import.sh -p $PIN -l $SLOT_LABEL
 
 # Done. Entry point and port expose is assumed to be set by FROM image
