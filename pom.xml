@@ -53,7 +53,7 @@
 
     <!-- Versions on dependencies -->
     <slf4j.version>1.7.36</slf4j.version>
-    <bc.version>1.72</bc.version>
+    <bc.version>1.73</bc.version>
 
   </properties>
 
@@ -335,7 +335,7 @@
                 <id>enforce</id>
                 <configuration>
                   <rules>
-                    <dependencyConvergence />
+                    <dependencyConvergence/>
                   </rules>
                 </configuration>
                 <goals>
