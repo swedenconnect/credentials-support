@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
  * {@link KeyStore} which is not possible with the {@code net.shibboleth.ext.spring.factory.KeyStoreFactoryBean} since
  * it requires the {@code resource} property to be non-null.
  * </p>
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -72,7 +72,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
    * <p>
    * The type of {@link KeyStore} created will be {@link KeyStore#getDefaultType()}.
    * </p>
-   * 
+   *
    * @param resource
    *          the keystore resource
    * @param password
@@ -85,7 +85,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
   /**
    * Constructor that accepts a resource reference to a keystore, the password to unlock this file and the store type
    * ("JKS", "PKCS12", ...).
-   * 
+   *
    * @param resource
    *          the keystore resource
    * @param password
@@ -101,14 +101,14 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
 
   /** {@inheritDoc} */
   @Override
-  protected KeyStore createInstance() throws Exception {    
+  protected KeyStore createInstance() throws Exception {
     try {
       if (this.type == null) {
         this.type = KeyStore.getDefaultType();
         log.debug("KeyStore type not given, defaulting to '{}'", this.type);
       }
-      
-      // If this is PKCS11, configure the provider ... 
+
+      // If this is PKCS11, configure the provider ...
       //
       if ("PKCS11".equalsIgnoreCase(this.type)) {
         if (this.provider == null) {
@@ -137,7 +137,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
           log.debug("Security provider '{}' has been statically configured", this.provider);
         }
       }
-      
+
       KeyStore keystore = this.provider != null
           ? KeyStore.getInstance(this.type, this.provider)
           : KeyStore.getInstance(this.type);
@@ -163,7 +163,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
 
   /**
    * Gets the resource holding the KeyStore.
-   * 
+   *
    * @return the KeyStore resource
    */
   public Resource getResource() {
@@ -172,7 +172,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
 
   /**
    * Assigns the resource holding the KeyStore.
-   * 
+   *
    * @param resource
    *          the KeyStore resource
    */
@@ -182,7 +182,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
 
   /**
    * Gets the password for unlocking the keystore.
-   * 
+   *
    * @return the password for unlocking the keystore
    */
   public char[] getPassword() {
@@ -191,7 +191,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
 
   /**
    * Assigns the password for unlocking the keystore.
-   * 
+   *
    * @param password
    *          the password to set
    */
@@ -201,7 +201,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
 
   /**
    * Gets the type of KeyStore. If not explicitly assigned, {@link KeyStore#getDefaultType()} will be returned.
-   * 
+   *
    * @return the type of the KeyStore
    */
   public String getType() {
@@ -210,7 +210,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
 
   /**
    * Assigns the type of KeyStore.
-   * 
+   *
    * @param type
    *          the type of the KeyStore
    */
@@ -222,7 +222,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
    * Gets the name of the security {@link Provider} to use when instantiating the {@link KeyStore}. If not explicitly
    * assigned {@code null} is returned. This means that the first provider that can create a {@link KeyStore} of the
    * given type will be used.
-   * 
+   *
    * @return the name of the security provider to use, or null
    */
   public String getProvider() {
@@ -231,7 +231,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
 
   /**
    * Assigns the name of the security {@link Provider} to use when instantiating the {@link KeyStore}.
-   * 
+   *
    * @param provider
    *          the name of the security provider to use
    */
@@ -243,7 +243,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
    * Gets the complete path to the PKCS#11 configuration file to use to configure the provider in the cases the type is
    * "PKCS11". If no configuration file is supplied the supplied provider ({@link #setProvider(String)}) must already
    * have been configured for use with a specific PKCS#11 configuration.
-   * 
+   *
    * @return a complete path to a PKCS#11 configuration file, or null
    */
   public String getPkcs11Configuration() {
@@ -254,7 +254,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
    * Sets the complete path to the PKCS#11 configuration file to use to configure the provider in the cases the type is
    * "PKCS11". If no configuration file is supplied the supplied provider ({@link #setProvider(String)}) must already
    * have been configured for use with a specific PKCS#11 configuration.
-   * 
+   *
    * @param pkcs11Configuration
    *          a complete path to a PKCS#11 configuration file
    */

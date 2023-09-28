@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  * Note: If the external configuration file is set, individual settings of library, name, slot or slotListIndex will be
  * ignored.
  * </p>
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -68,7 +68,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
 
   /**
    * Constructor assigning the external PKCS#11 configuration file.
-   * 
+   *
    * @param configurationFile
    *          complete path to the PKCS#11 configuration file
    * @throws Pkcs11ConfigurationException
@@ -81,7 +81,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
   /**
    * A constructor setting the library, name, slot and slotListIndex individually. See also
    * {@link #AbstractPkcs11Configuration(String)}.
-   * 
+   *
    * @param library
    *          the PKCS#11 library path
    * @param name
@@ -116,7 +116,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
 
   /**
    * Gets the complete path to the configuration file.
-   * 
+   *
    * @return the PKCS#11 configuration file, or null
    */
   public String getConfigurationFile() {
@@ -125,7 +125,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
 
   /**
    * Assigns the complete path to the external PKCS#11 configuration file.
-   * 
+   *
    * @param configurationFile
    *          the path to the external PKCS#11 configuration file
    */
@@ -159,7 +159,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
    * If the configuration has been configured by assigning a configuration file ({@link #setConfigurationFile(String)}
    * or {@link #AbstractPkcs11Configuration(String)}) this method will return {@code null}.
    * </p>
-   * 
+   *
    * @return path to PKCS#11 library
    */
   public String getLibrary() {
@@ -171,7 +171,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
    * <p>
    * Note: If the object has been configured with an external configuration file this call will have no effect.
    * </p>
-   * 
+   *
    * @param library
    *          path to PKCS#11 library
    */
@@ -190,7 +190,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
    * If the configuration has been configured by assigning a configuration file ({@link #setConfigurationFile(String)}
    * or {@link #AbstractPkcs11Configuration(String)}) this method will return {@code null}.
    * </p>
-   * 
+   *
    * @return the name of the HSM slot
    */
   public String getName() {
@@ -202,7 +202,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
    * <p>
    * Note: If the object has been configured with an external configuration file this call will have no effect.
    * </p>
-   * 
+   *
    * @param name
    *          the name of the HSM slot
    */
@@ -221,7 +221,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
    * If the configuration has been configured by assigning a configuration file ({@link #setConfigurationFile(String)}
    * or {@link #AbstractPkcs11Configuration(String)}) this method will return {@code null}.
    * </p>
-   * 
+   *
    * @return slot number/id, or null
    */
   public String getSlot() {
@@ -233,7 +233,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
    * <p>
    * Note: If the object has been configured with an external configuration file this call will have no effect.
    * </p>
-   * 
+   *
    * @param slot
    *          slot number/id
    */
@@ -252,7 +252,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
    * If the configuration has been configured by assigning a configuration file ({@link #setConfigurationFile(String)}
    * or {@link #AbstractPkcs11Configuration(String)}) this method will return {@code null}.
    * </p>
-   * 
+   *
    * @return the slot list index, or null
    */
   public Integer getSlotListIndex() {
@@ -264,7 +264,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
    * <p>
    * Note: If the object has been configured with an external configuration file this call will have no effect.
    * </p>
-   * 
+   *
    * @param slotListIndex
    *          slot list index
    */
@@ -282,7 +282,7 @@ public abstract class AbstractPkcs11Configuration implements Pkcs11Configuration
 
   /**
    * Validates that the supplied configuration file exists.
-   * 
+   *
    * @param configurationFile
    *          the file to check
    * @return the absolute path of the file

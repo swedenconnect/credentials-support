@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import lombok.Data;
 /**
  * A utility class that can be used as a configuration properties object for representing a credential (for Spring
  * Boot).
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  */
 @Data
@@ -41,7 +41,7 @@ public class PkiCredentialConfigurationProperties {
    * keystore).
    */
   private Resource certificate;
-  
+
   /**
    * A list of resources holding the certificate chain that part of the credential (optional since the certificate may be part of a
    * keystore). If used, the entity certificate must be the first element.
@@ -90,7 +90,7 @@ public class PkiCredentialConfigurationProperties {
 
   /**
    * Assigns the PIN (which is the same as {@code keyPassword}. Used mainly for PKCS#11.
-   * 
+   *
    * @param pin
    *          the PIN
    */
@@ -100,7 +100,7 @@ public class PkiCredentialConfigurationProperties {
 
   /**
    * Gets the PIN (which is the same as {@code keyPassword}). Used mainly for PKCS#11.
-   * 
+   *
    * @return the PIN
    */
   public char[] getPin() {
@@ -109,11 +109,11 @@ public class PkiCredentialConfigurationProperties {
 
   /**
    * Predicate that returns {@code true} if this object is "empty", meaning that no settings have been applied.
-   * 
+   *
    * @return true if empty and false otherwise
    */
   public boolean isEmpty() {
-    return !StringUtils.hasText(this.name) 
+    return !StringUtils.hasText(this.name)
         && this.certificate == null
         && (this.certificates == null || this.certificates.isEmpty())
         && this.privateKey == null

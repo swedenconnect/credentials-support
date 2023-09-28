@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,18 @@ package se.swedenconnect.security.credential.pkcs11conf;
 
 /**
  * Exception class for reporting invalid PKCS#11 configuration or failures to instatiate a PKCS#11 provider.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class Pkcs11ConfigurationException extends SecurityException {
 
   /** For serialization. */
-  private static final long serialVersionUID = -1028505897882269160L;
+  private static final long serialVersionUID = 4753744976030288668L;
 
   /**
    * Constructor setting the error message.
-   * 
+   *
    * @param message
    *          the error message
    */
@@ -38,7 +38,7 @@ public class Pkcs11ConfigurationException extends SecurityException {
 
   /**
    * Constructor setting the error message and the cause of the error.
-   * 
+   *
    * @param message
    *          the error message
    * @param cause

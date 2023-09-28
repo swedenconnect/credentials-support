@@ -119,7 +119,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
   /** Whether the credential has been loaded? */
   private boolean loaded = false;
-  
+
   /** Whether this is a hardware credential or not. */
   private boolean residesInHardware = false;
 
@@ -133,12 +133,9 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * Constructor accepting an already loaded {@link KeyStore}.
    *
-   * @param keyStore
-   *          the keystore to read the key pair from
-   * @param alias
-   *          the alias to the entry holding the key pair
-   * @param keyPassword
-   *          the password to unlock the key pair
+   * @param keyStore the keystore to read the key pair from
+   * @param alias the alias to the entry holding the key pair
+   * @param keyPassword the password to unlock the key pair
    */
   public KeyStoreCredential(final KeyStore keyStore, final String alias, final char[] keyPassword) {
     this.setKeyStore(keyStore);
@@ -150,17 +147,14 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
    * A constructor that creates and loads a {@link KeyStore} from the given resource. The default KeyStore type is used
    * and the first security provider that can create such a KeyStore is used.
    *
-   * @param resource
-   *          the resource to load the {@link KeyStore} from
-   * @param password
-   *          the password needed to load the KeyStore
-   * @param alias
-   *          the entry alias for the certificate and private key
-   * @param keyPassword
-   *          the password needed to unlock the certificate and private key (if null, the same value as given for
-   *          password is used)
+   * @param resource the resource to load the {@link KeyStore} from
+   * @param password the password needed to load the KeyStore
+   * @param alias the entry alias for the certificate and private key
+   * @param keyPassword the password needed to unlock the certificate and private key (if null, the same value as given
+   *          for password is used)
    */
-  public KeyStoreCredential(final Resource resource, final char[] password, final String alias, final char[] keyPassword) {
+  public KeyStoreCredential(final Resource resource, final char[] password, final String alias,
+      final char[] keyPassword) {
     this(resource, KeyStore.getDefaultType(), null, password, alias, keyPassword);
   }
 
@@ -168,17 +162,12 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
    * A constructor that creates and loads a {@link KeyStore} of the given type from the given resource. The first
    * security provider that can create such a KeyStore is used.
    *
-   * @param resource
-   *          the resource to load the {@link KeyStore} from
-   * @param type
-   *          the KeyStore type
-   * @param password
-   *          the password needed to load the KeyStore
-   * @param alias
-   *          the entry alias for the certificate and private key
-   * @param keyPassword
-   *          the password needed to unlock the certificate and private key (if null, the same value as given for
-   *          password is used)
+   * @param resource the resource to load the {@link KeyStore} from
+   * @param type the KeyStore type
+   * @param password the password needed to load the KeyStore
+   * @param alias the entry alias for the certificate and private key
+   * @param keyPassword the password needed to unlock the certificate and private key (if null, the same value as given
+   *          for password is used)
    */
   public KeyStoreCredential(final Resource resource, final String type,
       final char[] password, final String alias, final char[] keyPassword) {
@@ -189,19 +178,13 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
    * A constructor that creates and loads a {@link KeyStore} of the given type from the given resource using the given
    * provider.
    *
-   * @param resource
-   *          the resource to load the {@link KeyStore} from
-   * @param type
-   *          the KeyStore type
-   * @param provider
-   *          the security provider to use when creating the KeyStore
-   * @param password
-   *          the password needed to load the KeyStore
-   * @param alias
-   *          the entry alias for the certificate and private key
-   * @param keyPassword
-   *          the password needed to unlock the certificate and private key (if null, the same value as given for
-   *          password is used)
+   * @param resource the resource to load the {@link KeyStore} from
+   * @param type the KeyStore type
+   * @param provider the security provider to use when creating the KeyStore
+   * @param password the password needed to load the KeyStore
+   * @param alias the entry alias for the certificate and private key
+   * @param keyPassword the password needed to unlock the certificate and private key (if null, the same value as given
+   *          for password is used)
    */
   public KeyStoreCredential(final Resource resource, final String type, final String provider,
       final char[] password, final String alias, final char[] keyPassword) {
@@ -230,18 +213,17 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
       Arrays.fill(this.keyPassword, (char) 0);
     }
   }
-  
+
   /** {@inheritDoc} */
   @Override
   public boolean isHardwareCredential() {
-    return this.residesInHardware; 
+    return this.residesInHardware;
   }
 
   /**
    * Loads the KeyStore (if needed) and loads the private key and certificate.
    *
-   * @throws Exception
-   *           for errors loading the credential
+   * @throws Exception for errors loading the credential
    */
   private synchronized void load() throws Exception {
     if (this.loaded) {
@@ -290,8 +272,8 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
       }
       else {
         this.setCertificateChain(Arrays.stream(chain)
-          .map(X509Certificate.class::cast)
-          .collect(Collectors.toList()));
+            .map(X509Certificate.class::cast)
+            .collect(Collectors.toList()));
         log.debug("Certificate loaded from entry '{}'", this.alias);
       }
     }
@@ -300,8 +282,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * Loads the private key from the keystore.
    *
-   * @throws Exception
-   *           for loading errors
+   * @throws Exception for loading errors
    */
   private synchronized void loadPrivateKey() throws Exception {
     Assert.hasText(this.alias, "Property 'alias' must be set");
@@ -324,8 +305,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * Assigns the resource holding the KeyStore to load.
    *
-   * @param resource
-   *          KeyStore resource
+   * @param resource KeyStore resource
    */
   public void setResource(final Resource resource) {
     if (this.keyStoreFactory == null) {
@@ -338,8 +318,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
    * Assigns the KeyStore type to use, ("JKS", "PKCS12", "PKCS11", ...). If no type is configured
    * {@link KeyStore#getDefaultType()} is assumed.
    *
-   * @param type
-   *          the KeyStore type
+   * @param type the KeyStore type
    */
   public void setType(final String type) {
     if (this.keyStoreFactory == null) {
@@ -352,8 +331,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
    * Assigns the name of the security provider to use when loading the KeyStore. If no provider is assigned, the first
    * provider that can create a KeyStore according to the given type is used.
    *
-   * @param provider
-   *          the provider name to use
+   * @param provider the provider name to use
    */
   public void setProvider(final String provider) {
     if (this.keyStoreFactory == null) {
@@ -369,8 +347,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
    * provider to use (e.g. "SunPKCS11").
    * </p>
    *
-   * @param pkcs11Configuration
-   *          the complete path to the PKCS#11 configuration file
+   * @param pkcs11Configuration the complete path to the PKCS#11 configuration file
    */
   public void setPkcs11Configuration(final String pkcs11Configuration) {
     if (this.keyStoreFactory == null) {
@@ -382,8 +359,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * Assigns the password needed to load the KeyStore.
    *
-   * @param password
-   *          the password
+   * @param password the password
    */
   public void setPassword(final char[] password) {
     if (this.keyStoreFactory == null) {
@@ -396,8 +372,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * Assigns the keystore to read the key pair from.
    *
-   * @param keyStore
-   *          the keystore
+   * @param keyStore the keystore
    */
   public void setKeyStore(final KeyStore keyStore) {
     this.keyStore = keyStore;
@@ -406,8 +381,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * Assigns the alias of the KeyStore entry.
    *
-   * @param alias
-   *          the KeyStore alias
+   * @param alias the KeyStore alias
    */
   public void setAlias(final String alias) {
     this.alias = alias;
@@ -416,8 +390,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /**
    * Assigns the key password needed to unlock the key entry.
    *
-   * @param keyPassword
-   *          the key password
+   * @param keyPassword the key password
    */
   public void setKeyPassword(final char[] keyPassword) {
     this.keyPassword = Optional.ofNullable(keyPassword).map(p -> Arrays.copyOf(p, p.length)).orElse(null);
@@ -515,10 +488,11 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   protected String getDefaultName() {
     if (this.alias != null) {
       final String type = Optional.ofNullable(this.keyStore).map(KeyStore::getType).orElse(
-        Optional.ofNullable(this.keyStoreFactory).map(KeyStoreFactoryBean::getType).orElse(null));
+          Optional.ofNullable(this.keyStoreFactory).map(KeyStoreFactoryBean::getType).orElse(null));
 
       if ("PKCS11".equalsIgnoreCase(type)) {
-        String provider = Optional.ofNullable(this.keyStore).map(KeyStore::getProvider).map(Provider::getName).orElse(null);
+        String provider =
+            Optional.ofNullable(this.keyStore).map(KeyStore::getProvider).map(Provider::getName).orElse(null);
         if (provider == null) {
           provider = Optional.ofNullable(this.keyStoreFactory).map(KeyStoreFactoryBean::getProvider).orElse(null);
         }

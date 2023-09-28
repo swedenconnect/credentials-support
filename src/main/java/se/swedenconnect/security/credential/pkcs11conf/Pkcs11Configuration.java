@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * Interface for a PKCS#11 configuration.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -30,10 +30,9 @@ public interface Pkcs11Configuration {
 
   /**
    * Gets the Java security {@link Provider} to use when setting up a PKCS#11 credential.
-   * 
+   *
    * @return a Provider instance
-   * @throws Pkcs11ConfigurationException
-   *           if the configuration is incorrect
+   * @throws Pkcs11ConfigurationException if the configuration is incorrect
    */
   Provider getProvider() throws Pkcs11ConfigurationException;
 
@@ -46,7 +45,7 @@ public interface Pkcs11Configuration {
    * Note: If both the private key <b>and</b> the certificate should be obtained from the device, use
    * {@link #getCredentialProvider()} instead.
    * </p>
-   * 
+   *
    * @return a Pkcs11ObjectProvider instance
    */
   Pkcs11ObjectProvider<PrivateKey> getPrivateKeyProvider();
@@ -58,11 +57,10 @@ public interface Pkcs11Configuration {
    * How the objects are obtained from the device is dependent on the security provider used.
    * </p>
    * <p>
-   * In some HSM-deployments the certificate is not kept on the device, only the private key. The
-   * {@link PkiCredential} object returned from the provider will then return {@code null} for a
-   * {@link PkiCredential#getCertificate()} call.
+   * In some HSM-deployments the certificate is not kept on the device, only the private key. The {@link PkiCredential}
+   * object returned from the provider will then return {@code null} for a {@link PkiCredential#getCertificate()} call.
    * </p>
-   * 
+   *
    * @return a Pkcs11ObjectProvider instance
    */
   Pkcs11ObjectProvider<PkiCredential> getCredentialProvider();

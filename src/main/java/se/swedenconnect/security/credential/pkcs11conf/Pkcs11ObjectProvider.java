@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,21 @@ import java.security.Provider;
 
 /**
  * A functional interface for getting a reference to an object residing on a PKCS#11 device.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @FunctionalInterface
 public interface Pkcs11ObjectProvider<T> {
-  
+
   /**
    * Gets a reference to an object residing on the PKCS#11 device.
-   * 
-   * @param provider
-   *          the security provider to use
-   * @param alias
-   *          the alias to the entry holding the object
-   * @param pin
-   *          the PIN needed to access the entry
+   *
+   * @param provider the security provider to use
+   * @param alias the alias to the entry holding the object
+   * @param pin the PIN needed to access the entry
    * @return an object reference or null if the object is not available
-   * @throws SecurityException
-   *           if the operation is not successful
+   * @throws SecurityException if the operation is not successful
    */
   T get(final Provider provider, final String alias, final char[] pin) throws SecurityException;
 
