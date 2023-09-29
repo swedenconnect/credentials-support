@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.core.io.Resource;
 
 /**
  * Utility methods for working with X.509 certificates and CRL:s.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -48,12 +48,10 @@ public class X509Utils {
 
   /**
    * Decodes a {@link X509Certificate} from its encoding.
-   * 
-   * @param encoding
-   *          the certificate encoding
+   *
+   * @param encoding the certificate encoding
    * @return a X509Certificate object
-   * @throws CertificateException
-   *           for decoding errors
+   * @throws CertificateException for decoding errors
    */
   public static X509Certificate decodeCertificate(final byte[] encoding) throws CertificateException {
     try (final ByteArrayInputStream bis = new ByteArrayInputStream(encoding)) {
@@ -69,12 +67,10 @@ public class X509Utils {
    * <p>
    * The method does not close the input stream.
    * </p>
-   * 
-   * @param stream
-   *          the stream to read
+   *
+   * @param stream the stream to read
    * @return a X509Certificate object
-   * @throws CertificateException
-   *           for decoding errors
+   * @throws CertificateException for decoding errors
    */
   public static X509Certificate decodeCertificate(final InputStream stream) throws CertificateException {
     return (X509Certificate) factory.generateCertificate(stream);
@@ -82,12 +78,10 @@ public class X509Utils {
 
   /**
    * Decodes a {@link X509Certificate} from a resource.
-   * 
-   * @param resource
-   *          the resource to read
+   *
+   * @param resource the resource to read
    * @return a X509Certificate object
-   * @throws CertificateException
-   *           for decoding errors
+   * @throws CertificateException for decoding errors
    */
   public static X509Certificate decodeCertificate(final Resource resource) throws CertificateException {
     try (final InputStream is = resource.getInputStream()) {
@@ -100,12 +94,10 @@ public class X509Utils {
 
   /**
    * Decodes a {@link X509CRL} from its encoding.
-   * 
-   * @param encoding
-   *          the CRL encoding
+   *
+   * @param encoding the CRL encoding
    * @return a X509CRL object
-   * @throws CRLException
-   *           for decoding errors
+   * @throws CRLException for decoding errors
    */
   public static X509CRL decodeCrl(final byte[] encoding) throws CRLException {
     try (final ByteArrayInputStream bis = new ByteArrayInputStream(encoding)) {
@@ -121,12 +113,10 @@ public class X509Utils {
    * <p>
    * The method does not close the input stream.
    * </p>
-   * 
-   * @param stream
-   *          the stream to read
+   *
+   * @param stream the stream to read
    * @return a X509CRL object
-   * @throws CRLException
-   *           for decoding errors
+   * @throws CRLException for decoding errors
    */
   public static X509CRL decodeCrl(final InputStream stream) throws CRLException {
     return (X509CRL) factory.generateCRL(stream);
@@ -134,12 +124,10 @@ public class X509Utils {
 
   /**
    * Decodes a {@link X509CRL} from a resource.
-   * 
-   * @param resource
-   *          the resource to read
+   *
+   * @param resource the resource to read
    * @return a X509CRL object
-   * @throws CRLException
-   *           for decoding errors
+   * @throws CRLException for decoding errors
    */
   public static X509CRL decodeCrl(final Resource resource) throws CRLException {
     try (final InputStream is = resource.getInputStream()) {
@@ -153,9 +141,8 @@ public class X509Utils {
   /**
    * The {@link X509Certificate#toString()} prints way too much for a normal log entry. This method displays the
    * subject, issuer and serial number.
-   * 
-   * @param certificate
-   *          the certificate to log
+   *
+   * @param certificate the certificate to log
    * @return a log string
    */
   public static String toLogString(final X509Certificate certificate) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  */
 package se.swedenconnect.security.credential.converters;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.security.cert.X509Certificate;
 
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,7 @@ import se.swedenconnect.security.credential.converters.PropertyToX509Certificate
 
 /**
  * Test cases for PropertyToX509CertificateConverter.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -45,23 +47,23 @@ import se.swedenconnect.security.credential.converters.PropertyToX509Certificate
 public class PropertyToX509CertificateConverterTest {
 
   @Autowired
-  ApplicationContext context;  
-  
+  ApplicationContext context;
+
   @Autowired(required = false)
   PropertyToX509CertificateConverter propertyToX509CertificateConverter;
-  
+
   @Autowired(required = false)
   X509Certificate testCert;
-  
+
   @Test
   public void testConvert() throws Exception {
     PropertyToX509CertificateConverter converter = new PropertyToX509CertificateConverter();
     converter.setApplicationContext(this.context);
-    
+
     X509Certificate cert = converter.convert("classpath:rsa1.crt");
     assertNotNull(cert);
   }
-  
+
   @Test
   public void testConvertFailed() throws Exception {
     assertThrows(IllegalArgumentException.class, () -> {
@@ -71,21 +73,21 @@ public class PropertyToX509CertificateConverterTest {
       converter.convert("classpath:not-found.crt");
     });
   }
-  
+
   @Test
   public void testConverterBean() throws Exception {
     assertNotNull(this.propertyToX509CertificateConverter, "PropertyToX509CertificateConverter bean is not present");
     assertNotNull(this.propertyToX509CertificateConverter.convert("classpath:rsa1.crt"));
   }
-  
+
   @Test
   public void testSpringContextCertSet() throws Exception {
     assertNotNull(this.testCert);
   }
 
-  @Configuration  
+  @Configuration
   public static class Config {
-        
+
     @Bean
     @ConfigurationPropertiesBinding
     public PropertyToX509CertificateConverter propertyToX509CertificateConverter() {
@@ -98,12 +100,12 @@ public class PropertyToX509CertificateConverterTest {
   public static class CertConfig {
     @Setter
     private X509Certificate testcert;
-    
+
     @Bean
     public X509Certificate testCert() {
       return this.testcert;
     }
-  }    
+  }
 
 
 }

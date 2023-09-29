@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.core.io.Resource;
 
 /**
  * Utility methods for handling private keys.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -33,12 +33,10 @@ public class PrivateKeyUtils {
 
   /**
    * Decodes a private key in DER, PEM, and unencrypted PKCS#8 formats.
-   * 
-   * @param bytes
-   *          the key bytes
+   *
+   * @param bytes the key bytes
    * @return the decoded private key
-   * @throws KeyException
-   *           for decoding errors
+   * @throws KeyException for decoding errors
    */
   public static PrivateKey decodePrivateKey(final byte[] bytes) throws KeyException {
     return KeyPairUtil.decodePrivateKey(bytes);
@@ -49,12 +47,10 @@ public class PrivateKeyUtils {
    * <p>
    * The method does not close the input stream.
    * </p>
-   * 
-   * @param stream
-   *          the input stream
+   *
+   * @param stream the input stream
    * @return the decoded private key
-   * @throws KeyException
-   *           for decoding errors
+   * @throws KeyException for decoding errors
    */
   public static PrivateKey decodePrivateKey(final InputStream stream) throws KeyException {
     try {
@@ -67,12 +63,10 @@ public class PrivateKeyUtils {
 
   /**
    * Decodes a private key in DER, PEM, and unencrypted PKCS#8 formats.
-   * 
-   * @param resource
-   *          the resource
+   *
+   * @param resource the resource
    * @return the decoded private key
-   * @throws KeyException
-   *           for decoding errors
+   * @throws KeyException for decoding errors
    */
   public static PrivateKey decodePrivateKey(final Resource resource) throws KeyException {
     try (final InputStream is = resource.getInputStream()) {

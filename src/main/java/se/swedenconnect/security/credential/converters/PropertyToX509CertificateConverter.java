@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import se.swedenconnect.security.credential.utils.X509Utils;
  * <p>
  * If you are using Spring Boot, do:
  * </p>
- * 
+ *
  * <pre>
  * &#64;Bean
  * &#64;ConfigurationPropertiesBinding
@@ -44,8 +44,8 @@ import se.swedenconnect.security.credential.utils.X509Utils;
  *   return new PropertyToX509CertificateConverter();
  * }
  * </pre>
- * 
- * 
+ *
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -57,7 +57,6 @@ public class PropertyToX509CertificateConverter implements Converter<String, X50
   /** {@inheritDoc} */
   @Override
   public X509Certificate convert(final String source) {
-
     try {
       return X509Utils.decodeCertificate(this.applicationContext.getResource(source));
     }

@@ -42,7 +42,7 @@ import se.swedenconnect.security.credential.pkcs11conf.MockSunPkcs11Provider;
 
 /**
  * A Spring configuration file that illustrates how credentials are instantiated.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -79,49 +79,49 @@ public class CredentialsConfiguration implements DisposableBean {
   /**
    * Gets the bean that registers a converter that takes us from a string (in an application properties file) to a
    * {@link PrivateKey} instance.
-   * 
+   *
    * @return a PropertyToPrivateKeyConverter bean
    */
   @Bean
   @ConfigurationPropertiesBinding
-  public PropertyToPrivateKeyConverter propertyToPrivateKeyConverter() {
+  PropertyToPrivateKeyConverter propertyToPrivateKeyConverter() {
     return new PropertyToPrivateKeyConverter();
   }
 
   /**
    * Gets the bean that registers a converter that takes us from a string (in an application properties file) to a
    * {@link X509Certificate} instance.
-   * 
+   *
    * @return a PropertyToX509CertificateConverter bean
    */
   @Bean
   @ConfigurationPropertiesBinding
-  public PropertyToX509CertificateConverter propertyToX509CertificateConverter() {
+  PropertyToX509CertificateConverter propertyToX509CertificateConverter() {
     return new PropertyToX509CertificateConverter();
   }
 
   /**
    * Gets a {@link BasicCredential} instance based on the application properties prefixed by {@code credential1.}. In
    * our example the application.properties contains:
-   * 
+   *
    * <pre>
    * credential1.private-key=classpath:rsa1.pkcs8.key
    * credential1.certificate=classpath:rsa1.crt
    * credential1.name=Credential-1
    * </pre>
-   * 
+   *
    * @return a BasicCredential instance
    */
   @Bean("credential1")
   @ConfigurationProperties("credential1")
-  public PkiCredential credential1() {
+  PkiCredential credential1() {
     return new BasicCredential();
   }
 
   /**
    * Gets a {@link KeyStoreCredential} instance based on the application properties prefixed by {@code credential2.}. In
    * our example the application.properties contains:
-   * 
+   *
    * <pre>
    * credential2.resource=classpath:rsa1.jks
    * credential2.password=secret
@@ -129,19 +129,19 @@ public class CredentialsConfiguration implements DisposableBean {
    * credential2.key-password=${credential2.password}
    * credential2.type=JKS
    * </pre>
-   * 
+   *
    * @return a KeyStoreCredential instance
    */
   @Bean("credential2")
   @ConfigurationProperties("credential2")
-  public PkiCredential credential2() {
+  PkiCredential credential2() {
     return new KeyStoreCredential();
   }
 
   /**
    * Gets a {@link Pkcs11Credential} instance based on the application properties prefixed by {@code credential3.}. In
    * our example the application.properties contains:
-   * 
+   *
    * <pre>
    * credential3.configuration.configuration-file=<complete path to cfg file>
    * credential3.configuration.base-provider-name=MockSunPKCS11
@@ -153,20 +153,20 @@ public class CredentialsConfiguration implements DisposableBean {
    * scenario (where the SunPKCS11 provider is used), the following configuration could be used (with no need for an
    * explicit creation if the DefaultPkcs11Configuration bean).
    * </p>
-   * 
+   *
    * <pre>
    * credential3.configuration-file=<complete path to cfg file>
    * credential3.alias=test
    * credential3.pin=secret
    * </pre>
-   * 
+   *
    * @param pkcs11Configuration
    *          PKCS#11 configuration (needed since we are mocking PKCS#11)
    * @return a Pkcs11Credential instance
    */
   @Bean("credential3")
   @ConfigurationProperties("credential3")
-  public ReloadablePkiCredential credential3(final DefaultPkcs11Configuration pkcs11Configuration) {
+  ReloadablePkiCredential credential3(final DefaultPkcs11Configuration pkcs11Configuration) {
     final Pkcs11Credential cred = new Pkcs11Credential();
     cred.setConfiguration(pkcs11Configuration);
     return cred;
@@ -174,14 +174,14 @@ public class CredentialsConfiguration implements DisposableBean {
 
   @Bean
   @ConfigurationProperties("credential3.configuration")
-  public DefaultPkcs11Configuration pkcs11Configuration() {
+  DefaultPkcs11Configuration pkcs11Configuration() {
     return new DefaultPkcs11Configuration();
   }
-  
+
   /**
-   * Gets a {@link KeyStoreCredential} instance that delivers a KeyStore for a PKCS#11 device. It is based 
+   * Gets a {@link KeyStoreCredential} instance that delivers a KeyStore for a PKCS#11 device. It is based
    * on the application properties prefixed by {@code credential4.}. In our example the application.properties contains:
-   * 
+   *
    * <pre>
    * credential4.provider=MockSunPKCS11
    * credential4.pkcs11-configuration=src/test/resources/cfg1.txt
@@ -191,17 +191,17 @@ public class CredentialsConfiguration implements DisposableBean {
    * credential4.type=PKCS11
    * credential4.name=Credential-4
    * </pre>
-   * 
+   *
    * @return a KeyStoreCredential instance
    */
   @Bean("credential4")
   @ConfigurationProperties("credential4")
-  public ReloadablePkiCredential credential4() {
+  ReloadablePkiCredential credential4() {
     return new KeyStoreCredential();
   }
-  
+
   @Bean
-  public CredentialMonitorBean credentialMonitorBean(final List<ReloadablePkiCredential> credentials) {
+  CredentialMonitorBean credentialMonitorBean(final List<ReloadablePkiCredential> credentials) {
     final DefaultCredentialMonitorBean monitorBean = new DefaultCredentialMonitorBean(credentials);
     monitorBean.setReloadSuccessCallback((c) -> System.out.println("Credential " + c.getName() + " was reloaded"));
     monitorBean.setFailureCallback((c, e) -> {

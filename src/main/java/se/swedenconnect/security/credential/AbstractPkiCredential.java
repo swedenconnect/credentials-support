@@ -64,7 +64,7 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   public PublicKey getPublicKey() {
     return Optional.ofNullable(this.getCertificate())
         .map(X509Certificate::getPublicKey)
-        .orElse(this.publicKey);
+        .orElseGet(() -> this.publicKey);
   }
 
   /**
@@ -119,7 +119,8 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   /** {@inheritDoc} */
   @Override
   public List<X509Certificate> getCertificateChain() {
-    return Optional.ofNullable(this.certificates).orElse(Collections.emptyList());
+    return Optional.ofNullable(this.certificates)
+        .orElseGet(() -> Collections.emptyList());
   }
 
   /** {@inheritDoc} */
@@ -156,7 +157,7 @@ public abstract class AbstractPkiCredential implements PkiCredential {
 
   /**
    * Assigns a private key resource.
-   * 
+   *
    * @param privateKeyResource a resource holding the key in DER, PEM, or unencrypted PKCS#8 format.
    * @throws KeyException if the key decode fails
    */
@@ -170,7 +171,7 @@ public abstract class AbstractPkiCredential implements PkiCredential {
    * <li>DER or PEM encoded PKCS#8 format</li>
    * <li>PEM encoded OpenSSL "traditional" format</li>
    * </ul>
-   * 
+   *
    * @param privateKeyResource a resource holding the key in DER, PEM, or PKCS#8 format.
    * @param password the key password
    * @throws KeyException if the key decode/decrypt fails
@@ -180,7 +181,7 @@ public abstract class AbstractPkiCredential implements PkiCredential {
       this.setPrivateKey(privateKeyResource);
     }
     else {
-      
+
       try (final InputStream is = privateKeyResource.getInputStream()) {
         this.privateKey = KeyPairUtil.readPrivateKey(is, password);
       }

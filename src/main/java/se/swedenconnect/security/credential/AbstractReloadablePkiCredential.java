@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 /**
  * Abstract base class for reloadable credentials.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -46,10 +46,10 @@ public abstract class AbstractReloadablePkiCredential extends AbstractPkiCredent
       return null;
     }
   }
-  
+
   /**
    * Assigns a test function for this credential.
-   * 
+   *
    * @param testFunction
    *          the function
    */

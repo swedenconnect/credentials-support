@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import se.swedenconnect.security.credential.utils.PrivateKeyUtils;
  * <p>
  * If you are using Spring Boot, do:
  * </p>
- * 
+ *
  * <pre>
  * &#64;Bean
  * &#64;ConfigurationPropertiesBinding
@@ -47,7 +47,7 @@ import se.swedenconnect.security.credential.utils.PrivateKeyUtils;
  *   return new PropertyToPrivateKeyConverter();
  * }
  * </pre>
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */

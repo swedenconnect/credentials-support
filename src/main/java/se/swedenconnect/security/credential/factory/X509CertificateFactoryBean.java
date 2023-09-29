@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import se.swedenconnect.security.credential.utils.X509Utils;
  * Basically this class is the same as {@code net.shibboleth.ext.spring.factory.X509CertificateFactoryBean} residing in the
  * {@code net.shibboleth.ext:spring-extensions}.
  * </p>
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  */
 public class X509CertificateFactoryBean extends AbstractFactoryBean<X509Certificate> {
@@ -47,7 +47,7 @@ public class X509CertificateFactoryBean extends AbstractFactoryBean<X509Certific
 
   /**
    * Constructor taking a resource/path to a DER- or PEM-encoded certificate.
-   * 
+   *
    * @param resource
    *          the location of the certificate
    */
@@ -58,7 +58,7 @@ public class X509CertificateFactoryBean extends AbstractFactoryBean<X509Certific
   /** {@inheritDoc} */
   @Override
   protected X509Certificate createInstance() throws Exception {
-    return X509Utils.decodeCertificate(this.resource); 
+    return X509Utils.decodeCertificate(this.resource);
   }
 
   /** {@inheritDoc} */
@@ -69,7 +69,7 @@ public class X509CertificateFactoryBean extends AbstractFactoryBean<X509Certific
 
   /**
    * Assigns the resource holding the certificate.
-   * 
+   *
    * @param resource
    *          the certificate resource
    */
@@ -79,7 +79,7 @@ public class X509CertificateFactoryBean extends AbstractFactoryBean<X509Certific
 
   /** {@inheritDoc} */
   @Override
-  public void afterPropertiesSet() throws Exception {    
+  public void afterPropertiesSet() throws Exception {
     Assert.notNull(this.resource, "Property 'resource' has not been assigned");
     super.afterPropertiesSet();
   }

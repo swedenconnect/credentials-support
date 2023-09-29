@@ -15,9 +15,12 @@
  */
 package se.swedenconnect.security.credential.opensaml;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.security.KeyStore;
 
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -27,53 +30,41 @@ import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
 
 /**
  * Test cases for X509Credential.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class OpenSamlCredentialTest {
-  
+
   private KeyStore keyStore;
-  
+
   public OpenSamlCredentialTest() throws Exception {
     KeyStoreFactoryBean factory = new KeyStoreFactoryBean(new ClassPathResource("rsa1.jks"), "secret".toCharArray());
     factory.afterPropertiesSet();
     this.keyStore = factory.getObject();
   }
-    
+
   @Test
   public void testInitKeyAndCertificate() throws Exception {
-    PkiCredential _cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());    
-    
+    PkiCredential _cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());
+
     final OpenSamlCredential cred = new OpenSamlCredential(_cred.getCertificate(), _cred.getPrivateKey());
     assertNotNull(cred.getEntityCertificate());
     assertNotNull(cred.getPrivateKey());
     assertNotNull(cred.getPublicKey());
   }
-  
+
   @Test
   public void testInitKeyPairCredential() throws Exception {
     KeyStoreCredential _cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());
     _cred.init();
-    
+
     final OpenSamlCredential cred = new OpenSamlCredential(_cred);
     assertNotNull(cred.getEntityCertificate());
     assertNotNull(cred.getPrivateKey());
     assertNotNull(cred.getPublicKey());
   }
-  
-  @Test
-  public void testInitDefaultAndSetter() throws Exception {
-    KeyStoreCredential _cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());
-    _cred.init();
-    
-    final OpenSamlCredential cred = new OpenSamlCredential();
-    cred.setCredential(_cred);
-    assertNotNull(cred.getEntityCertificate());
-    assertNotNull(cred.getPrivateKey());
-    assertNotNull(cred.getPublicKey());
-  }
-  
+
   @Test
   public void testMixedInit() throws Exception {
     assertThrows(IllegalArgumentException.class, () -> {
@@ -84,23 +75,23 @@ public class OpenSamlCredentialTest {
       cred.setPrivateKey(_cred.getPrivateKey());
     });
   }
-  
+
   @Test
   public void testSetChain() throws Exception {
     PkiCredential _cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());
     _cred.init();
-    
-    final OpenSamlCredential cred = new OpenSamlCredential(_cred);    
+
+    final OpenSamlCredential cred = new OpenSamlCredential(_cred);
     assertTrue(cred.getEntityCertificateChain().size() == 1);
   }
-  
+
   @Test
   public void testGetChain() throws Exception {
     PkiCredential _cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());
     _cred.init();
-    
-    final OpenSamlCredential cred = new OpenSamlCredential(_cred);    
+
+    final OpenSamlCredential cred = new OpenSamlCredential(_cred);
     assertTrue(cred.getEntityCertificateChain().size() == 1);
   }
-    
+
 }

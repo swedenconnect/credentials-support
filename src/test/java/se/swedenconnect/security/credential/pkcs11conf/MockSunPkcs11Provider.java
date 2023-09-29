@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 import java.security.Key;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.NoSuchAlgorithmException;
@@ -40,16 +39,16 @@ import java.util.Scanner;
 import org.springframework.core.io.Resource;
 
 /**
- * A mocked provider implementation that mocks a PKCS#11 provider but really is the same as the SUN and SunRsaSign providers (except for
- * supporting PKCS#11 keystores).
- * 
+ * A mocked provider implementation that mocks a PKCS#11 provider but really is the same as the SUN and SunRsaSign
+ * providers (except for supporting PKCS#11 keystores).
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class MockSunPkcs11Provider extends Provider {
 
   public static final String PROVIDER_BASE_NAME = "MockSunPKCS11";
-  
+
   private boolean configured = false;
 
   private static final long serialVersionUID = -135457117436927350L;
@@ -62,7 +61,7 @@ public class MockSunPkcs11Provider extends Provider {
     this(name, "1.0.0", "Mock provider");
   }
 
-  protected MockSunPkcs11Provider(String name, String versionStr, String info) {
+  protected MockSunPkcs11Provider(final String name, final String versionStr, final String info) {
     super(name, "1.0.0", "Mock provider");
 
     final Provider sunProvider = Security.getProvider("SUN");
@@ -89,7 +88,7 @@ public class MockSunPkcs11Provider extends Provider {
     p.configured = true;
     return p;
   }
-  
+
   /** {@inheritDoc} */
   @Override
   public Provider configure(final String configArg) {
@@ -111,7 +110,7 @@ public class MockSunPkcs11Provider extends Provider {
       boolean librarySet = false;
       try (Scanner scanner = new Scanner(new ByteArrayInputStream(configData.getBytes()))) {
         while (scanner.hasNextLine()) {
-          String line = scanner.nextLine().trim();
+          final String line = scanner.nextLine().trim();
           if (line.startsWith("#")) {
             continue;
           }
@@ -119,7 +118,7 @@ public class MockSunPkcs11Provider extends Provider {
             librarySet = true;
           }
           else if (line.startsWith("name")) {
-            String[] tokens = line.split("=", 2);
+            final String[] tokens = line.split("=", 2);
             if (tokens.length == 2) {
               name = tokens[1].trim();
             }
@@ -132,11 +131,11 @@ public class MockSunPkcs11Provider extends Provider {
       if (!librarySet) {
         throw new InvalidParameterException("Invalid configuration data - Missing library");
       }
-      MockSunPkcs11Provider newProv = new MockSunPkcs11Provider(PROVIDER_BASE_NAME + "-" + name);
+      final MockSunPkcs11Provider newProv = new MockSunPkcs11Provider(PROVIDER_BASE_NAME + "-" + name);
       newProv.configured = true;
       return newProv;
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       throw new InvalidParameterException("Invalid configuration data - " + e.getMessage());
     }
   }
@@ -144,14 +143,14 @@ public class MockSunPkcs11Provider extends Provider {
   @Override
   public boolean isConfigured() {
     return this.configured;
-  }  
-  
+  }
+
   public static class MockedPkcs11ResourceHolder {
 
     private static final MockedPkcs11ResourceHolder INSTANCE = new MockedPkcs11ResourceHolder();
 
     private Resource resource;
-    
+
     private boolean mockNoCertificate = false;
 
     public static MockedPkcs11ResourceHolder getInstance() {
@@ -165,12 +164,12 @@ public class MockSunPkcs11Provider extends Provider {
     public void setResource(final Resource resource) {
       this.resource = resource;
     }
-    
+
     public boolean isMockNoCertificate() {
       return this.mockNoCertificate;
     }
 
-    public void setMockNoCertificate(boolean mockNoCertificate) {
+    public void setMockNoCertificate(final boolean mockNoCertificate) {
       this.mockNoCertificate = mockNoCertificate;
     }
 
@@ -180,114 +179,166 @@ public class MockSunPkcs11Provider extends Provider {
 
   public static class MockKeyStoreSpi extends KeyStoreSpi {
 
-    private KeyStoreSpi spi;
+    private KeyStore ks;
 
     public MockKeyStoreSpi() {
       try {
-        Class<?> spiClass = Class.forName("sun.security.provider.JavaKeyStore$JKS");
-        Constructor<?> ctor = spiClass.getConstructor();
-        this.spi = (KeyStoreSpi) ctor.newInstance();
+        this.ks = KeyStore.getInstance("JKS");
       }
-      catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | IllegalArgumentException
-          | InvocationTargetException e) {
+      catch (final KeyStoreException e) {
         throw new RuntimeException(e);
       }
     }
 
     @Override
-    public void engineLoad(InputStream stream, char[] password) throws IOException, NoSuchAlgorithmException, CertificateException {
+    public void engineLoad(final InputStream stream, final char[] password)
+        throws IOException, NoSuchAlgorithmException, CertificateException {
       if (stream != null) {
-        this.spi.engineLoad(stream, password);
+        this.ks.load(stream, password);
       }
       else {
-        Resource resource = MockedPkcs11ResourceHolder.getInstance().getResource();
+        final Resource resource = MockedPkcs11ResourceHolder.getInstance().getResource();
         if (resource == null) {
           throw new IOException("No resource available");
         }
         try (InputStream is = resource.getInputStream()) {
-          this.spi.engineLoad(is, password);
+          this.ks.load(is, password);
         }
       }
     }
 
     @Override
-    public Key engineGetKey(String alias, char[] password) throws NoSuchAlgorithmException, UnrecoverableKeyException {
-      return this.spi.engineGetKey(alias, password);
+    public Key engineGetKey(final String alias, final char[] password)
+        throws NoSuchAlgorithmException, UnrecoverableKeyException {
+      try {
+        return this.ks.getKey(alias, password);
+      }
+      catch (final KeyStoreException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     @Override
-    public Certificate[] engineGetCertificateChain(String alias) {
-      if (MockedPkcs11ResourceHolder.getInstance().isMockNoCertificate()) {
-        return null;
-      }      
-      return this.spi.engineGetCertificateChain(alias);
-    }
-
-    @Override
-    public Certificate engineGetCertificate(String alias) {
+    public Certificate[] engineGetCertificateChain(final String alias) {
       if (MockedPkcs11ResourceHolder.getInstance().isMockNoCertificate()) {
         return null;
       }
-      return this.spi.engineGetCertificate(alias);
+      try {
+        return this.ks.getCertificateChain(alias);
+      }
+      catch (final KeyStoreException e) {
+        return null;
+      }
     }
 
     @Override
-    public Date engineGetCreationDate(String alias) {
-      return this.spi.engineGetCreationDate(alias);
+    public Certificate engineGetCertificate(final String alias) {
+      if (MockedPkcs11ResourceHolder.getInstance().isMockNoCertificate()) {
+        return null;
+      }
+      try {
+        return this.ks.getCertificate(alias);
+      }
+      catch (final KeyStoreException e) {
+        return null;
+      }
     }
 
     @Override
-    public void engineSetKeyEntry(String alias, Key key, char[] password, Certificate[] chain) throws KeyStoreException {
+    public Date engineGetCreationDate(final String alias) {
+      try {
+        return this.ks.getCreationDate(alias);
+      }
+      catch (final KeyStoreException e) {
+        return null;
+      }
+    }
+
+    @Override
+    public void engineSetKeyEntry(final String alias, final Key key, final char[] password, final Certificate[] chain)
+        throws KeyStoreException {
       throw new IllegalArgumentException("Not allowed for PKCS11");
     }
 
     @Override
-    public void engineSetKeyEntry(String alias, byte[] key, Certificate[] chain) throws KeyStoreException {
+    public void engineSetKeyEntry(final String alias, final byte[] key, final Certificate[] chain)
+        throws KeyStoreException {
       throw new IllegalArgumentException("Not allowed for PKCS11");
     }
 
     @Override
-    public void engineSetCertificateEntry(String alias, Certificate cert) throws KeyStoreException {
+    public void engineSetCertificateEntry(final String alias, final Certificate cert) throws KeyStoreException {
       throw new IllegalArgumentException("Not allowed for PKCS11");
     }
 
     @Override
-    public void engineDeleteEntry(String alias) throws KeyStoreException {
+    public void engineDeleteEntry(final String alias) throws KeyStoreException {
       throw new IllegalArgumentException("Not allowed for PKCS11");
     }
 
     @Override
     public Enumeration<String> engineAliases() {
-      return this.spi.engineAliases();
+      try {
+        return this.ks.aliases();
+      }
+      catch (final KeyStoreException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     @Override
-    public boolean engineContainsAlias(String alias) {
-      return this.spi.engineContainsAlias(alias);
+    public boolean engineContainsAlias(final String alias) {
+      try {
+        return this.ks.containsAlias(alias);
+      }
+      catch (final KeyStoreException e) {
+        return false;
+      }
     }
 
     @Override
     public int engineSize() {
-      return this.spi.engineSize();
+      try {
+        return this.ks.size();
+      }
+      catch (final KeyStoreException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     @Override
-    public boolean engineIsKeyEntry(String alias) {
-      return this.spi.engineIsKeyEntry(alias);
+    public boolean engineIsKeyEntry(final String alias) {
+      try {
+        return this.ks.isKeyEntry(alias);
+      }
+      catch (final KeyStoreException e) {
+        return false;
+      }
     }
 
     @Override
-    public boolean engineIsCertificateEntry(String alias) {
-      return this.spi.engineIsCertificateEntry(alias);
+    public boolean engineIsCertificateEntry(final String alias) {
+      try {
+        return this.ks.isCertificateEntry(alias);
+      }
+      catch (final KeyStoreException e) {
+        return false;
+      }
     }
 
     @Override
-    public String engineGetCertificateAlias(Certificate cert) {
-      return this.spi.engineGetCertificateAlias(cert);
+    public String engineGetCertificateAlias(final Certificate cert) {
+      try {
+        return this.ks.getCertificateAlias(cert);
+      }
+      catch (final KeyStoreException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     @Override
-    public void engineStore(OutputStream stream, char[] password) throws IOException, NoSuchAlgorithmException, CertificateException {
+    public void engineStore(final OutputStream stream, final char[] password)
+        throws IOException, NoSuchAlgorithmException, CertificateException {
       throw new IOException("Not allowed for PKCS11");
     }
 

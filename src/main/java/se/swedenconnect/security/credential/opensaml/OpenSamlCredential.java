@@ -33,7 +33,7 @@ import se.swedenconnect.security.credential.ReloadablePkiCredential;
  * {@link PkiCredential}. This enables us to make use of features such as testing and re-loading (see
  * {@link ReloadablePkiCredential}), but most importantly, it gives use a smooth way of instantiating OpenSAML
  * credentials.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -43,15 +43,8 @@ public class OpenSamlCredential extends BasicX509Credential {
   private PkiCredential credential = null;
 
   /**
-   * Default constructor.
-   */
-  public OpenSamlCredential() {
-    super(null);
-  }
-
-  /**
    * Constructor setting up the credential by explicitly assigning the certificate and private key.
-   * 
+   *
    * @param entityCertificate the certificate
    * @param privateKey the private key
    */
@@ -63,24 +56,29 @@ public class OpenSamlCredential extends BasicX509Credential {
    * Constructor setting up the OpenSAML credential by assigning a {@link PkiCredential} instance. This type of setting
    * up the {@code OpenSamlCredential} is recommended since it gives the benefits of monitoring (and reloading)
    * credentials as well as a simple way to use hardware based keys (e.g. {@link Pkcs11Credential}).
-   * 
+   *
    * @param credential the credential to wrap in a OpenSAML credential
    */
   public OpenSamlCredential(final PkiCredential credential) {
-    super(null);
-    this.credential = Objects.requireNonNull(credential, "Credential cannot be null");
+    super(Objects.requireNonNull(credential, "Credential cannot be null").getCertificate(),
+        credential.getPrivateKey());
+    this.credential = credential;
   }
 
   /** {@inheritDoc} */
   @Override
   public PublicKey getPublicKey() {
-    return Optional.ofNullable(this.credential).map(PkiCredential::getPublicKey).orElse(super.getPublicKey());
+    return Optional.ofNullable(this.credential)
+        .map(PkiCredential::getPublicKey)
+        .orElseGet(() -> super.getPublicKey());
   }
 
   /** {@inheritDoc} */
   @Override
   public PrivateKey getPrivateKey() {
-    return Optional.ofNullable(this.credential).map(PkiCredential::getPrivateKey).orElse(super.getPrivateKey());
+    return Optional.ofNullable(this.credential)
+        .map(PkiCredential::getPrivateKey)
+        .orElseGet(() -> super.getPrivateKey());
   }
 
   /** {@inheritDoc} */
@@ -96,7 +94,9 @@ public class OpenSamlCredential extends BasicX509Credential {
   /** {@inheritDoc} */
   @Override
   public X509Certificate getEntityCertificate() {
-    return Optional.ofNullable(this.credential).map(PkiCredential::getCertificate).orElse(super.getEntityCertificate());
+    return Optional.ofNullable(this.credential)
+        .map(PkiCredential::getCertificate)
+        .orElseGet(() -> super.getEntityCertificate());
   }
 
   /** {@inheritDoc} */
@@ -130,25 +130,6 @@ public class OpenSamlCredential extends BasicX509Credential {
           "Entity certificate chain may not be installed when object is created using a PkiCredential");
     }
     super.setEntityCertificateChain(certificateChain);
-  }
-
-  /**
-   * Assigns a {@link PkiCredential} instance. This type of setting up the {@code OpenSamlCredential} is recommended
-   * since it gives the benefits of monitoring (and reloading) credentials as well as a simple way to use hardware based
-   * keys.
-   * 
-   * @param credential the credential to wrap in a OpenSAML credential
-   */
-  public void setCredential(final PkiCredential credential) {
-    if (super.getEntityCertificate() != null) {
-      throw new IllegalArgumentException(
-          "Credential can not be assigned since certificate has already been assigned");
-    }
-    if (super.getPrivateKey() != null) {
-      throw new IllegalArgumentException(
-          "Credential can not be assigned since private key has already been assigned");
-    }
-    this.credential = Objects.requireNonNull(credential, "Credential cannot be null");
   }
 
 }

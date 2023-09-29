@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import se.swedenconnect.security.credential.ReloadablePkiCredential;
  * <li><b>DSA</b> - {@code SHA256withDSA} is the default algorithm when signing.</li>
  * <li><b>EC</b> - {@code SHA256withECDSA} is the default algorithm when signing.</li>
  * </ul>
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -99,7 +99,7 @@ public class DefaultCredentialTestFunction implements Function<ReloadablePkiCred
 
   /**
    * The name for a specific security {@link Provider} to use.
-   * 
+   *
    * @param provider
    *          provider name
    */
@@ -109,7 +109,7 @@ public class DefaultCredentialTestFunction implements Function<ReloadablePkiCred
 
   /**
    * Assigns the RSA signature algorithm to use. Defaults to SHA256withRSA.
-   * 
+   *
    * @param rsaSignatureAlgorithm
    *          the JCA algorithm name
    */
@@ -121,7 +121,7 @@ public class DefaultCredentialTestFunction implements Function<ReloadablePkiCred
 
   /**
    * Assigns the DSA signature algorithm to use. Defaults to SHA256withDSA.
-   * 
+   *
    * @param dsaSignatureAlgorithm
    *          the JCA algorithm name
    */
@@ -133,7 +133,7 @@ public class DefaultCredentialTestFunction implements Function<ReloadablePkiCred
 
   /**
    * Assigns the EC signature algorithm to use. Defaults to SHA256withECDSA.
-   * 
+   *
    * @param ecSignatureAlgorithm
    *          the JCA algorithm name
    */

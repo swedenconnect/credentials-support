@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import se.swedenconnect.security.credential.ReloadablePkiCredential;
  * either (bacause of a connection failure). In this case we save computing power and keep testing only one credential,
  * and if that one fails, reloads not only the failing credential but the other ones as well.
  * </p>
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -82,7 +82,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
   /**
    * Constructor setting up monitoring of a single credential. If the test for this credential fails a reload attempt
    * will be made ({@link ReloadablePkiCredential#reload()}).
-   * 
+   *
    * @param credential
    *          the credential to monitor, and possible reload
    */
@@ -95,7 +95,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * device it may in some cases be efficient to only test one credential, and if that fails reload multiple credentials
    * (residing on the same device). The {@code additionalForReload} contains additional credentials to reload if the
    * test of {@code credential} fails.
-   * 
+   *
    * @param credential
    *          the credential to monitor, and possible reload
    * @param additionalForReload
@@ -113,7 +113,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
   /**
    * Constructor setting up monitoring of the supplied credentials. If the test call for any credential fails, a reload
    * attempt will be made ({@link ReloadablePkiCredential#reload()}) for this credential.
-   * 
+   *
    * @param credentials
    *          the credentials to monitor, and possible reload
    */
@@ -161,10 +161,10 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
           this.reload(cred);
           if (!additionalReloaded) {
             if (this.additionalForReload != null) {
-              this.additionalForReload.forEach((c) -> this.reload(c));              
+              this.additionalForReload.forEach((c) -> this.reload(c));
             }
             additionalReloaded = true;
-          }          
+          }
         }
       }
     }
@@ -172,7 +172,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
 
   /**
    * Performs reloading of the supplied credential. If the reload is successful, the credential is tested again.
-   * 
+   *
    * @param credential
    *          the credential to reload
    */
@@ -224,7 +224,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
 
   /**
    * Assigns the credential that should be monitored.
-   * 
+   *
    * @param credential
    *          the credential to be monitored
    */
@@ -234,7 +234,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
 
   /**
    * Assigns the credentials that should be monitored.
-   * 
+   *
    * @param credentials
    *          the credentials to be monitored
    */
@@ -244,7 +244,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
 
   /**
    * Assigns the a list of additional credentials that should be reloaded if a test fails.
-   * 
+   *
    * @param additionalForReload
    *          additional credentials for reload
    */
@@ -260,7 +260,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * The default is to not have a callback. In those case the failure is logged (at error level) and the credential is
    * reloaded. Otherwise, the implementation assumes that the callback handles logging.
    * </p>
-   * 
+   *
    * @param failureCallback
    *          callback function
    */
@@ -270,7 +270,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
 
   /**
    * Assigns a callback function that is invoked if the reloading of a failed credential was successful.
-   * 
+   *
    * @param reloadSuccessCallback
    *          callback function
    */
@@ -285,7 +285,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * The default is to not have a callback. In those case the failure is logged (at error level). Otherwise, the
    * implementation assumes that the callback handles logging.
    * </p>
-   * 
+   *
    * @param reloadFailureCallback
    *          callback function
    */

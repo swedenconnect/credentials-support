@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2023 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ package se.swedenconnect.security.credential.container;
 public class PkiCredentialContainerException extends Exception {
 
   /** For serializing. */
-  private static final long serialVersionUID = -5077131594969640553L;
+  private static final long serialVersionUID = -7559559631022224457L;
 
   /**
    * Constructor.
