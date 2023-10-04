@@ -34,7 +34,7 @@ import se.swedenconnect.security.credential.pkcs11conf.Pkcs11ConfigurationExcept
 
 /**
  * A PKCS#11 credential implementation of the {@link PkiCredential} and {@link ReloadablePkiCredential} interfaces.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -61,7 +61,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
 
   /**
    * Constructor.
-   * 
+   *
    * @param configuration the PKCS#11 configuration
    * @param alias the token entry from where to load the private key and certificate
    * @param pin the PIN to unlock the token
@@ -77,7 +77,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
   /**
    * Constructor that takes a X.509 certificate as an argument. This constructor should be used if we know that the
    * certificate is not placed on the device (only the private key).
-   * 
+   *
    * @param configuration the PKCS#11 configuration
    * @param alias the token entry from where to load the private key
    * @param pin the PIN to unlock the token
@@ -95,7 +95,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
   /**
    * Constructor that takes a list of X.509 certificates as an argument. This constructor should be used if we know that
    * the certificate chain is not placed on the device (only the private key).
-   * 
+   *
    * @param configuration the PKCS#11 configuration
    * @param alias the token entry from where to load the private key
    * @param pin the PIN to unlock the token
@@ -138,7 +138,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
 
   /**
    * Loads the credential.
-   * 
+   *
    * @throws IllegalArgumentException for missing properties
    * @throws SecurityException for errors loading the credential
    */
@@ -250,7 +250,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
 
   /**
    * Assigns the PKCS#11 configuration for the token that holds this credential.
-   * 
+   *
    * @param configuration the configuration
    */
   public void setConfiguration(final Pkcs11Configuration configuration) {
@@ -263,7 +263,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
    * Note: An instance of {@link DefaultPkcs11Configuration} will be created. This assumes the use of the SunPKCS11
    * security provider. If another provider is desired, use the {@link #setConfiguration(Pkcs11Configuration)} instead.
    * </p>
-   * 
+   *
    * @param configurationFile complete path to the PKCS#11 configuration file
    * @throws Pkcs11ConfigurationException if the configuration file is invalid
    */
@@ -275,7 +275,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
 
   /**
    * Assigns the alias of the key pair on the token.
-   * 
+   *
    * @param alias the alias
    */
   public void setAlias(final String alias) {
@@ -284,7 +284,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
 
   /**
    * Assigns the PIN (key password) needed to unlock the token.
-   * 
+   *
    * @param pin the PIN
    */
   public void setPin(final char[] pin) {

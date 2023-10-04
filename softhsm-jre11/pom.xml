@@ -5,18 +5,18 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>se.swedenconnect.security</groupId>
-  <artifactId>credentials-support-test</artifactId>
+  <artifactId>credentials-support-test-jre11</artifactId>
   <version>1.3.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Sweden Connect :: PKI credentials support library (test)</name>
+  <name>Sweden Connect :: PKI credentials support library (test) JRE11</name>
   <description>Test application for PKCS#11 credentials</description>
   <url>https://github.com/swedenconnect/credentials-support</url>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.4</version>    
+    <version>2.7.16</version>    
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -30,8 +30,7 @@
 
   <scm>
     <connection>scm:https://github.com/swedenconnect/credentials-support.git</connection>
-    <developerConnection>
-      scm:https://github.com/swedenconnect/credentials-support.git</developerConnection>
+    <developerConnection>scm:https://github.com/swedenconnect/credentials-support.git</developerConnection>
     <url>https://github.com/swedenconnect/credentials-support/tree/master</url>
   </scm>
 
@@ -58,7 +57,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>17</java.version>
+    <java.version>11</java.version>
   </properties>
 
   <repositories>
@@ -101,14 +100,13 @@
     <dependency>
       <groupId>se.swedenconnect.security</groupId>
       <artifactId>credentials-support</artifactId>
-      <!--<version>${project.version}</version>-->
-      <version>1.3.0</version>
+      <version>1.2.6</version>
     </dependency>
 
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-security-api</artifactId>
-      <version>5.0.0</version>
+      <version>4.2.0</version>
     </dependency>
 
     <dependency>
@@ -121,8 +119,8 @@
 
   <build>
 
-    <finalName>credentials-support-test</finalName>
-
+    <finalName>credentials-support-test-jre11</finalName>
+    
     <plugins>
 
       <plugin>

@@ -1,13 +1,12 @@
-FROM docker.sunet.se/openjdk-jre-luna:luna7.4-jre17
-#FROM docker.sunet.se/openjdk-jre-luna:luna7.4-jre11
+FROM docker.sunet.se/openjdk-jre-luna:luna7.4-jre11
 
 # Install pkcs11-tool
 #
 RUN apt-get update && apt-get install -y pcscd libccid libpcsclite-dev libssl-dev libreadline-dev autoconf automake build-essential docbook-xsl xsltproc libtool pkg-config && \
-    wget https://github.com/OpenSC/OpenSC/releases/download/0.23.0/opensc-0.23.0.tar.gz && \
+    wget https://github.com/OpenSC/OpenSC/releases/download/0.19.0/opensc-0.19.0.tar.gz && \
     tar xfvz opensc-*.tar.gz && \
-    cd opensc-0.23.0 && \    
-    ./bootstrap && ./configure --disable-strict --prefix=/usr --sysconfdir=/etc/opensc && \
+    cd opensc-0.19.0 && \    
+    ./bootstrap && ./configure --prefix=/usr --sysconfdir=/etc/opensc && \
     make && make install && \
     cd .. && rm -rf opensc*
 
@@ -29,7 +28,7 @@ COPY src/main/resources/conf*.cfg /opt/credentials-test/
 
 # Copy Spring Boot jar and setup Java
 #
-ADD target/credentials-support-test.jar /opt/credentials-test/credentials-support-test.jar
+ADD target/credentials-support-test-jre11.jar /opt/credentials-test/credentials-support-test.jar
 
 ENV JAVA_OPTS="-Djava.security.egd=file:/cfg/./urandom -Dtest.pkcs11.enabled=true"
   
