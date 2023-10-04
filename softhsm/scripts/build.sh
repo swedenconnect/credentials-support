@@ -4,7 +4,10 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 docker rm credentials-support-test --force
 
-cd $SCRIPT_DIR/..
-mvn clean install dockerfile:build
+pushd $SCRIPT_DIR/..
+
+mvn clean install
+docker build -t credentials-support-test:latest --platform linux/amd64 .
+
 
 

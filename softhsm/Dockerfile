@@ -1,4 +1,4 @@
-FROM docker.sunet.se/openjdk-jre-luna:luna7.4-jre11
+FROM docker.sunet.se/openjdk-jre-luna:luna7.4-jre17
 
 # Install pkcs11-tool
 #

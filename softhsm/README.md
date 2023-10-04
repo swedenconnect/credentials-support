@@ -8,8 +8,6 @@ Example application of how to use SoftHSM to test your PKCS#11 credentials.
 
 ---
 
-NOTE: Currently not working. We are awaiting a new an updated Luna Docker image.
-
 * [Dockerfile](Dockerfile) - Example Docker file illustrating on how to install the pkcs11-tool and how to copy software based keys to the "device".
 
 * [setup-tokens.sh](scripts/setup-tokens.sh) - Example script that initializes the device and copies credentials.
