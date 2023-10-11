@@ -1,15 +1,13 @@
 FROM docker.sunet.se/openjdk-jre-luna:luna7.4-jre17
-#FROM docker.sunet.se/openjdk-jre-luna:luna7.4-jre11
 
+# Make softhsm2 available for install
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN apt-get -q update
+RUN apt-get -y upgrade
+# Install softhsm2
+RUN apt-get install -y procps softhsm2
 # Install pkcs11-tool
-#
-RUN apt-get update && apt-get install -y pcscd libccid libpcsclite-dev libssl-dev libreadline-dev autoconf automake build-essential docbook-xsl xsltproc libtool pkg-config && \
-    wget https://github.com/OpenSC/OpenSC/releases/download/0.23.0/opensc-0.23.0.tar.gz && \
-    tar xfvz opensc-*.tar.gz && \
-    cd opensc-0.23.0 && \    
-    ./bootstrap && ./configure --disable-strict --prefix=/usr --sysconfdir=/etc/opensc && \
-    make && make install && \
-    cd .. && rm -rf opensc*
+RUN apt-get -y install opensc
 
 # Setup softhsm
 RUN rm -rf /var/lib/softhsm/tokens && mkdir /var/lib/softhsm/tokens
@@ -21,7 +19,7 @@ RUN mkdir /opt/credentials-test
 #
 COPY scripts/setup-tokens.sh /opt/credentials-test
 COPY src/main/resources/credentials /opt/credentials-test/credentials
-RUN chmod a+x /opt/credentials-test/setup-tokens.sh && /opt/credentials-test/setup-tokens.sh 
+RUN chmod a+x /opt/credentials-test/setup-tokens.sh && bash /opt/credentials-test/setup-tokens.sh
 
 # Copy the PKCS#11 configuration files. Normally we would use a volume and not copy the files
 #
