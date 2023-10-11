@@ -1,5 +1,4 @@
 FROM docker.sunet.se/openjdk-jre-luna:luna7.4-jre17
-#FROM docker.sunet.se/openjdk-jre-luna:luna7.4-jre11
 
 # Make softhsm2 available for install
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
