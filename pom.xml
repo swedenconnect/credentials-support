@@ -6,7 +6,7 @@
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support</artifactId>
-  <version>1.3.0</version>
+  <version>1.3.1-SNAPSHOT</version>
 
   <name>Sweden Connect :: PKI credentials support library</name>
   <description>Support for credentials (including PKCS11 based keys and HSM:s)</description>
@@ -15,7 +15,7 @@
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -31,13 +31,13 @@
       <name>Martin Lindström</name>
       <email>martin@idsec.se</email>
       <organization>IDsec Solutions AB</organization>
-      <organizationUrl>http://www.idsec.se</organizationUrl>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
     </developer>
     <developer>
       <name>Stefan Santesson</name>
       <email>stefan@idsec.se</email>
       <organization>IDsec Solutions AB</organization>
-      <organizationUrl>http://www.idsec.se</organizationUrl>
+      <organizationUrl>https://www.idsec.se</organizationUrl>
     </developer>
   </developers>
 
@@ -51,13 +51,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>17</java.version>
 
-    <slf4j.version>2.0.7</slf4j.version>
-    <bc.version>1.76</bc.version>
+    <bc.version>1.78</bc.version>
     
-    <spring.version>6.0.12</spring.version>
-    <spring.boot.version>3.1.4</spring.boot.version>
+    <spring.version>6.1.6</spring.version>
+    <spring.boot.version>3.2.5</spring.boot.version>
     <opensaml.version>5.0.0</opensaml.version>
-    <slf4j.version>2.0.9</slf4j.version>
+    <slf4j.version>2.0.13</slf4j.version>
 
   </properties>
 
@@ -105,7 +104,19 @@
       <dependency>
         <groupId>org.apache.httpcomponents.core5</groupId>
         <artifactId>httpcore5</artifactId>
-        <version>5.2.2</version>
+        <version>5.2.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+        <version>${bc.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpkix-jdk18on</artifactId>
+        <version>${bc.version}</version>
       </dependency>
             
     </dependencies>
@@ -149,7 +160,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.30</version>
+      <version>1.18.32</version>
       <scope>provided</scope>
     </dependency>
 
@@ -157,14 +168,14 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>5.10.0</version>
+      <version>5.10.2</version>
       <scope>test</scope>
     </dependency>
     
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.5.0</version>
+      <version>5.11.0</version>
       <scope>test</scope>
     </dependency>
 

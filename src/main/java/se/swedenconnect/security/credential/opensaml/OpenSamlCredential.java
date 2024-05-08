@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class OpenSamlCredential extends BasicX509Credential {
   public PublicKey getPublicKey() {
     return Optional.ofNullable(this.credential)
         .map(PkiCredential::getPublicKey)
-        .orElseGet(() -> super.getPublicKey());
+        .orElseGet(super::getPublicKey);
   }
 
   /** {@inheritDoc} */
@@ -78,7 +78,7 @@ public class OpenSamlCredential extends BasicX509Credential {
   public PrivateKey getPrivateKey() {
     return Optional.ofNullable(this.credential)
         .map(PkiCredential::getPrivateKey)
-        .orElseGet(() -> super.getPrivateKey());
+        .orElseGet(super::getPrivateKey);
   }
 
   /** {@inheritDoc} */
@@ -96,7 +96,7 @@ public class OpenSamlCredential extends BasicX509Credential {
   public X509Certificate getEntityCertificate() {
     return Optional.ofNullable(this.credential)
         .map(PkiCredential::getCertificate)
-        .orElseGet(() -> super.getEntityCertificate());
+        .orElseGet(super::getEntityCertificate);
   }
 
   /** {@inheritDoc} */
@@ -130,6 +130,15 @@ public class OpenSamlCredential extends BasicX509Credential {
           "Entity certificate chain may not be installed when object is created using a PkiCredential");
     }
     super.setEntityCertificateChain(certificateChain);
+  }
+
+  /**
+   * Predicate that tells whether this credential resides in a hardware module.
+   *
+   * @return {@code true} if the credential resides in a hardware module and {@code false} otherwise
+   */
+  boolean isHardwareCredential() {
+    return this.credential != null && this.credential.isHardwareCredential();
   }
 
 }
