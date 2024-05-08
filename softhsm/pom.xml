@@ -6,7 +6,7 @@
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support-test</artifactId>
-  <version>1.3.1-SNAPSHOT</version>
+  <version>1.3.1</version>
   <packaging>jar</packaging>
 
   <name>Sweden Connect :: PKI credentials support library (test)</name>
