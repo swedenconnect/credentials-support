@@ -6,7 +6,7 @@
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support</artifactId>
-  <version>1.3.1</version>
+  <version>1.3.2</version>
 
   <name>Sweden Connect :: PKI credentials support library</name>
   <description>Support for credentials (including PKCS11 based keys and HSM:s)</description>
@@ -51,11 +51,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>17</java.version>
 
-    <bc.version>1.78</bc.version>
+    <bc.version>1.78.1</bc.version>
     
-    <spring.version>6.1.6</spring.version>
+    <spring.version>6.1.7</spring.version>
     <spring.boot.version>3.2.5</spring.boot.version>
-    <opensaml.version>5.0.0</opensaml.version>
+    <opensaml.version>5.1.2</opensaml.version>
     <slf4j.version>2.0.13</slf4j.version>
 
   </properties>
@@ -175,7 +175,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.11.0</version>
+      <version>5.12.0</version>
       <scope>test</scope>
     </dependency>
 
