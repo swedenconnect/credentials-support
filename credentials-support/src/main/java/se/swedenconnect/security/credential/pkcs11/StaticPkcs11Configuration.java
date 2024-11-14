@@ -44,6 +44,15 @@ public class StaticPkcs11Configuration extends AbstractSunPkcs11Configuration {
   }
 
   /**
+   * See {@link AbstractSunPkcs11Configuration#AbstractSunPkcs11Configuration(String)}.
+   *
+   * @param providerName the security provider name (SunPKCS11 is the default)
+   */
+  public StaticPkcs11Configuration(@Nullable final String providerName) {
+    super(providerName);
+  }
+
+  /**
    * Returns {@code null} since this configuration represents a static configuration.
    */
   @Nullable

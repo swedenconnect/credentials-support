@@ -15,13 +15,12 @@
  */
 package se.swedenconnect.security.credential.pkcs11;
 
+import jakarta.annotation.Nonnull;
+import org.cryptacular.io.ClassPathResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.security.Provider;
 import java.security.Security;
 
@@ -60,7 +59,7 @@ public class FilePkcs11ConfigurationTest {
   }
 
   @Test
-  void testCreate() throws Exception {
+  void testCreate() {
 
     final String path = getAbsolutePath("cfg1.txt");
     final TestFilePkcs11Configuration conf = new TestFilePkcs11Configuration(path);
@@ -87,24 +86,20 @@ public class FilePkcs11ConfigurationTest {
 
   @Test
   public void testNotFile() {
-    assertThrows(IllegalArgumentException.class, () -> new TestFilePkcs11Configuration(
-        new ClassPathResource("cfg1.txt").getFile().getAbsoluteFile().getParent()));
+    final String path = System.getProperty("user.dir") + "/src/test/resources";
+    assertThrows(IllegalArgumentException.class, () -> new TestFilePkcs11Configuration(path));
   }
 
-  private static String getAbsolutePath(final String resource) throws IOException {
-    return (new ClassPathResource(resource)).getFile().getAbsolutePath();
+  private static String getAbsolutePath(final String resource) {
+    final String p = resource.startsWith("/") ? "" : "/";
+    return System.getProperty("user.dir") + "/src/test/resources" + p + resource;
   }
 
   // For testing with mocked provider
   private static class TestFilePkcs11Configuration extends FilePkcs11Configuration {
 
     public TestFilePkcs11Configuration(@Nonnull final String configurationFile) {
-      super(configurationFile);
-    }
-
-    @Override
-    protected String getBaseProviderName() {
-      return MockSunPkcs11Provider.PROVIDER_BASE_NAME;
+      super(configurationFile, MockSunPkcs11Provider.PROVIDER_BASE_NAME);
     }
 
     @Nonnull

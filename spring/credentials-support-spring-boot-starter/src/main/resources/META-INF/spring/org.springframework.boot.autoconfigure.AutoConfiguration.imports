@@ -1,0 +1,3 @@
+se.swedenconnect.security.credential.spring.autoconfigure.SpringCredentialBundlesAutoConfiguration
+se.swedenconnect.security.credential.spring.autoconfigure.MonitorSchedulerAutoConfiguration
+se.swedenconnect.security.credential.spring.autoconfigure.ConvertersAutoConfiguration

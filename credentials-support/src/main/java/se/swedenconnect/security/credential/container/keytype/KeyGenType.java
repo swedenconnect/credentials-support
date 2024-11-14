@@ -18,7 +18,7 @@ package se.swedenconnect.security.credential.container.keytype;
 import se.swedenconnect.security.credential.container.PkiCredentialContainer;
 
 /**
- * Key generation static constants and resources for use with the {@link PkiCredentialContainer} key generation
+ * KeyConfiguration generation static constants and resources for use with the {@link PkiCredentialContainer} key generation
  * functions.
  *
  * @author Martin Lindström (martin@idsec.se)
@@ -26,46 +26,46 @@ import se.swedenconnect.security.credential.container.PkiCredentialContainer;
  */
 public class KeyGenType {
 
-  /** Key type identifier for RSA 2048 */
+  /** KeyConfiguration type identifier for RSA 2048 */
   public static final String RSA_2048 = "RSA-2048";
 
-  /** Key type identifier for RSA 3072 */
+  /** KeyConfiguration type identifier for RSA 3072 */
   public static final String RSA_3072 = "RSA-3072";
 
-  /** Key type identifier for RSA 4096 */
+  /** KeyConfiguration type identifier for RSA 4096 */
   public static final String RSA_4096 = "RSA-4096";
 
-  /** Key type identifier for elliptic curve keys with curve P-192 */
+  /** KeyConfiguration type identifier for elliptic curve keys with curve P-192 */
   public static final String EC_P192 = "EC-192";
 
-  /** Key type identifier for elliptic curve keys with curve P-224 */
+  /** KeyConfiguration type identifier for elliptic curve keys with curve P-224 */
   public static final String EC_P224 = "EC-224";
 
-  /** Key type identifier for elliptic curve keys with curve P-256 */
+  /** KeyConfiguration type identifier for elliptic curve keys with curve P-256 */
   public static final String EC_P256 = "EC-256";
 
-  /** Key type identifier for elliptic curve keys with curve P-384 */
+  /** KeyConfiguration type identifier for elliptic curve keys with curve P-384 */
   public static final String EC_P384 = "EC-384";
 
-  /** Key type identifier for elliptic curve keys with curve P-521 */
+  /** KeyConfiguration type identifier for elliptic curve keys with curve P-521 */
   public static final String EC_P521 = "EC-521";
 
-  /** Key type identifier for elliptic curve keys with curve Brainpool P192 R1 */
+  /** KeyConfiguration type identifier for elliptic curve keys with curve Brainpool P192 R1 */
   public static final String EC_BRAINPOOL_192 = "EC-BP-192";
 
-  /** Key type identifier for elliptic curve keys with curve Brainpool P224 R1 */
+  /** KeyConfiguration type identifier for elliptic curve keys with curve Brainpool P224 R1 */
   public static final String EC_BRAINPOOL_224 = "EC-BP-224";
 
-  /** Key type identifier for elliptic curve keys with curve Brainpool P256 R1 */
+  /** KeyConfiguration type identifier for elliptic curve keys with curve Brainpool P256 R1 */
   public static final String EC_BRAINPOOL_256 = "EC-BP-256";
 
-  /** Key type identifier for elliptic curve keys with curve Brainpool P320 R1 */
+  /** KeyConfiguration type identifier for elliptic curve keys with curve Brainpool P320 R1 */
   public static final String EC_BRAINPOOL_320 = "EC-BP-320";
 
-  /** Key type identifier for elliptic curve keys with curve Brainpool P384 R1 */
+  /** KeyConfiguration type identifier for elliptic curve keys with curve Brainpool P384 R1 */
   public static final String EC_BRAINPOOL_384 = "EC-BP-384";
 
-  /** Key type identifier for elliptic curve keys with curve Brainpool P512 R1 */
+  /** KeyConfiguration type identifier for elliptic curve keys with curve Brainpool P512 R1 */
   public static final String EC_BRAINPOOL_512 = "EC-BP-512";
 
 }

@@ -15,7 +15,6 @@
  */
 package se.swedenconnect.security.credential;
 
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.util.function.Function;
@@ -56,7 +55,7 @@ public abstract class AbstractReloadablePkiCredential extends AbstractPkiCredent
    *
    * @param testFunction the function
    */
-  public void setTestFunction(@Nonnull final Function<ReloadablePkiCredential, Exception> testFunction) {
+  public void setTestFunction(@Nullable final Function<ReloadablePkiCredential, Exception> testFunction) {
     this.testFunction = testFunction;
   }
 

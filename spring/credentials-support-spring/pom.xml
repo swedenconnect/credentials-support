@@ -14,7 +14,7 @@
   </parent>
 
   <name>Sweden Connect :: Credentials Support :: Spring Library</name>
-  <description>Sweden Connect Spring Credentials Support Library</description>
+  <description>Sweden Connect Credentials Spring Support Library</description>
   <url>https://github.com/swedenconnect/credentials-support</url>
 
   <licenses>
@@ -74,6 +74,31 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
+    </dependency>
+
+    <!-- For testing -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <version>${spring.boot.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <version>${spring.boot.version}</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

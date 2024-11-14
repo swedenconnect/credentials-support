@@ -49,7 +49,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -227,17 +226,14 @@ public class PkiCredentialContainerTest {
 
   @Test
   void nullProviderTest() {
-    assertThatThrownBy(() -> new SoftPkiCredentialContainer((Provider) null, "Test1234")).isInstanceOf(
-            NullPointerException.class)
-        .hasMessage("provider must not be null");
+    Assertions.assertThrows(NullPointerException.class,
+        () -> new SoftPkiCredentialContainer((Provider) null, "Test1234"));
   }
 
   @Test
   void nullHsmPinTest() {
     final Provider dummyProvider = Mockito.mock(Provider.class);
-    assertThatThrownBy(() -> new HsmPkiCredentialContainer(dummyProvider, null)).isInstanceOf(
-            NullPointerException.class)
-        .hasMessage("hsmPin must not be null");
+    Assertions.assertThrows(NullPointerException.class, () -> new HsmPkiCredentialContainer(dummyProvider, null));
   }
 
   @Test
@@ -251,33 +247,33 @@ public class PkiCredentialContainerTest {
   @Test
   void unsupportedAlgoTest() throws Exception {
     final AbstractKeyStorePkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
-    assertThatThrownBy(() -> container.generateCredential("DUMMY")).isInstanceOf(NoSuchAlgorithmException.class);
+    Assertions.assertThrows(NoSuchAlgorithmException.class, () -> container.generateCredential("DUMMY"));
   }
 
   @Test
   void excludedAlgoTest() throws Exception {
     final AbstractKeyStorePkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
-    assertThatThrownBy(() -> container.generateCredential(KeyGenType.EC_BRAINPOOL_192)).isInstanceOf(
-            NoSuchAlgorithmException.class)
-        .hasMessageContaining("is not supported by this container");
+    final Exception exc = Assertions.assertThrows(NoSuchAlgorithmException.class,
+        () -> container.generateCredential(KeyGenType.EC_BRAINPOOL_192));
+    Assertions.assertTrue(exc.getMessage().contains("is not supported by this container"));
   }
 
   @Test
   void unknownKeyTest() throws Exception {
     final AbstractKeyStorePkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
-    assertThatThrownBy(() -> container.getCredential("unknown")).isInstanceOf(PkiCredentialContainerException.class);
+    Assertions.assertThrows(PkiCredentialContainerException.class, () -> container.getCredential("unknown"));
   }
 
   @Test
   void unknownKeyExpiryTest() throws Exception {
     final AbstractKeyStorePkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
-    assertThatThrownBy(() -> container.getExpiryTime("unknown")).isInstanceOf(PkiCredentialContainerException.class);
+    Assertions.assertThrows(PkiCredentialContainerException.class, () -> container.getExpiryTime("unknown"));
   }
 
   @Test
   void deleteUnknownKeyTest() throws Exception {
     final AbstractKeyStorePkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
-    assertThatThrownBy(() -> container.getCredential("unknown")).isInstanceOf(PkiCredentialContainerException.class);
+    Assertions.assertThrows(PkiCredentialContainerException.class, () -> container.getCredential("unknown"));
   }
 
   private List<String> getFullKeyTypeList() {

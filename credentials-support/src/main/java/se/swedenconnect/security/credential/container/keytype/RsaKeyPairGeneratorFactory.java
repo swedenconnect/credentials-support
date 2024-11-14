@@ -29,7 +29,7 @@ import java.security.Provider;
  */
 public class RsaKeyPairGeneratorFactory extends AbstractKeyPairGeneratorFactory {
 
-  /** Key size for the generated RSA key */
+  /** KeyConfiguration size for the generated RSA key */
   private final int keySize;
 
   /**

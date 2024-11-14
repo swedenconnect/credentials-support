@@ -50,14 +50,21 @@ public class CustomPkcs11Configuration extends AbstractSunPkcs11Configuration {
 
   /**
    * Constructor setting the library, name, slot and slotListIndex individually.
+   * <p>
+   * The {@code baseProviderName} is the name of the security provider that we use to create new instances that have
+   * names according to {@code <base-provider-name>-<instance-name>}, where 'instance-name' is gotten from the
+   * configuration. Implementations wishing to use another provider than "SunPKCS11" should supply this provider name.
+   * </p>
    *
    * @param library the PKCS#11 library path
    * @param name the name of the HSM slot
    * @param slot the slot number/id (may be {@code null})
    * @param slotListIndex the slot index (may be {@code null})
+   * @param baseProviderName the base provider name (if not given, SunPKCS11 is assumed)
    */
   public CustomPkcs11Configuration(@Nonnull final String library, @Nonnull final String name,
-      @Nullable final String slot, @Nullable final Integer slotListIndex) {
+      @Nullable final String slot, @Nullable final Integer slotListIndex, @Nullable final String baseProviderName) {
+    super(baseProviderName);
     this.library = Objects.requireNonNull(library, "library must not be null").trim();
     if (this.library.isEmpty()) {
       throw new IllegalArgumentException("library must be assigned");

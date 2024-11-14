@@ -15,11 +15,11 @@
  */
 package se.swedenconnect.security.credential.utils;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.cryptacular.EncodingException;
 import org.cryptacular.util.KeyPairUtil;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyException;
@@ -32,6 +32,18 @@ import java.security.PrivateKey;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class PrivateKeyUtils {
+
+  /**
+   * When configuring the use of credentials and when a private key is configured, normally, the location of the key
+   * file is given. But we also allow to give the key "inline", i.e., to enter its PEM-encoding. This method can be used
+   * to find out whether a location string holds an inlined PEM-encoded private key.
+   *
+   * @param location location configuration setting
+   * @return {@code true} if the given string holds a PEM-encoding and {@code false} otherwise
+   */
+  public static boolean isInlinedPem(@Nonnull final String location) {
+    return X509Utils.isInlinedPem(location);
+  }
 
   /**
    * Decodes a private key in DER, PEM, and unencrypted PKCS#8 formats.
@@ -66,7 +78,7 @@ public class PrivateKeyUtils {
       return decodePrivateKey(bytes);
     }
     try {
-      return KeyPairUtil.decodePrivateKey(bytes);
+      return KeyPairUtil.decodePrivateKey(bytes, password);
     }
     catch (final EncodingException e) {
       throw new KeyException(e.getMessage(), e);

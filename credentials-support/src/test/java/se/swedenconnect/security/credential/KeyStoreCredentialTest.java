@@ -15,24 +15,31 @@
  */
 package se.swedenconnect.security.credential;
 
+import org.cryptacular.io.ClassPathResource;
+import org.cryptacular.io.Resource;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import org.springframework.core.io.ClassPathResource;
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
 import se.swedenconnect.security.credential.pkcs11.FilePkcs11Configuration;
 import se.swedenconnect.security.credential.pkcs11.MockSunPkcs11Provider;
 import se.swedenconnect.security.credential.pkcs11.Pkcs11CredentialTest;
+import se.swedenconnect.security.credential.pkcs11.Pkcs11KeyStoreReloader;
+import se.swedenconnect.security.credential.utils.X509Utils;
 
-import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Test cases for KeyStoreCredential.
@@ -40,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class KeyStoreCredentialTest {
+class KeyStoreCredentialTest {
 
   private final static char[] PW = "secret".toCharArray();
   private final static String ALIAS = "test";
@@ -48,6 +55,7 @@ public class KeyStoreCredentialTest {
   private final KeyStore keyStore;
   private final PrivateKey privateKey;
   private final X509Certificate cert;
+  private final X509Certificate cert2;
 
   public KeyStoreCredentialTest() throws Exception {
     try (final InputStream is = new ClassPathResource("rsa1.jks").getInputStream()) {
@@ -55,6 +63,23 @@ public class KeyStoreCredentialTest {
     }
     this.cert = (X509Certificate) this.keyStore.getCertificate(ALIAS);
     this.privateKey = (PrivateKey) this.keyStore.getKey(ALIAS, PW);
+
+    final Resource res = new ClassPathResource("rsa2.crt");
+    try (final InputStream is = res.getInputStream()) {
+      this.cert2 = X509Utils.decodeCertificate(is);
+    }
+  }
+
+  @Test
+  void testExtraCerts() {
+    assertDoesNotThrow(() -> new KeyStoreCredential(this.keyStore, ALIAS, PW, List.of(this.cert)));
+    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+        new KeyStoreCredential(this.keyStore, ALIAS, PW, List.of(this.cert2)));
+    assertEquals("Public key from entity certificate and private key do not make up a valid key pair", ex.getMessage());
+
+    final IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () ->
+        new KeyStoreCredential(this.keyStore, ALIAS, PW, List.of()));
+    assertEquals("certificateChain must not be empty", ex2.getMessage());
   }
 
   @Test
@@ -62,6 +87,7 @@ public class KeyStoreCredentialTest {
     final KeyStoreCredential cred = new KeyStoreCredential(this.keyStore, ALIAS, PW);
 
     assertEquals("RSA-" + ALIAS, cred.getName());
+    assertNull(cred.getTestFunction());
   }
 
   @Test
@@ -100,7 +126,7 @@ public class KeyStoreCredentialTest {
       initPkcs11Mock();
 
       final String path = Pkcs11CredentialTest.getAbsolutePath("cfg1.txt");
-      final TestFilePkcs11Configuration conf = new TestFilePkcs11Configuration(path);
+      final FilePkcs11Configuration conf = new FilePkcs11Configuration(path, MockSunPkcs11Provider.PROVIDER_BASE_NAME);
       conf.init();
 
       final KeyStore p11KeyStore = KeyStoreFactory.loadPkcs11KeyStore(conf, PW);
@@ -108,6 +134,9 @@ public class KeyStoreCredentialTest {
 
       final KeyStoreCredential cred = new KeyStoreCredential(spyKeystore, ALIAS, PW);
       cred.setName("mock");
+      cred.setReloader(new Pkcs11KeyStoreReloader(PW));
+
+      assertNotNull(cred.getTestFunction());
 
       Mockito.verify(spyKeystore, Mockito.times(1)).getKey(Mockito.any(), Mockito.any());
 
@@ -143,25 +172,6 @@ public class KeyStoreCredentialTest {
 
     MockSunPkcs11Provider.MockedPkcs11ResourceHolder.getInstance().setResource(null);
     MockSunPkcs11Provider.MockedPkcs11ResourceHolder.getInstance().setMockNoCertificate(false);
-  }
-
-  // For testing with mocked provider
-  private static class TestFilePkcs11Configuration extends FilePkcs11Configuration {
-
-    public TestFilePkcs11Configuration(@Nonnull final String configurationFile) {
-      super(configurationFile);
-    }
-
-    @Override
-    protected String getBaseProviderName() {
-      return MockSunPkcs11Provider.PROVIDER_BASE_NAME;
-    }
-
-    @Nonnull
-    @Override
-    public String getConfigurationData() {
-      return super.getConfigurationData();
-    }
   }
 
 }

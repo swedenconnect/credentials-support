@@ -40,4 +40,5 @@ public final class LibraryVersion {
     return MAJOR + "." + MINOR + "." + PATCH;
   }
 
+  private LibraryVersion() {}
 }

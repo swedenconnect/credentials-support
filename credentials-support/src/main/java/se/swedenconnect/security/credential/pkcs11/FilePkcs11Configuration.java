@@ -15,7 +15,9 @@
  */
 package se.swedenconnect.security.credential.pkcs11;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 import java.io.File;
 import java.util.Objects;
 
@@ -43,6 +45,22 @@ public class FilePkcs11Configuration extends AbstractSunPkcs11Configuration {
    * @param configurationFile complete path to the PKCS#11 configuration file
    */
   public FilePkcs11Configuration(@Nonnull final String configurationFile) {
+    this(configurationFile, null);
+  }
+
+  /**
+   * Constructor assigning the external PKCS#11 configuration file and a "base provider name".
+   * <p>
+   * The {@code baseProviderName} is the name of the security provider that we use to create new instances that have
+   * names according to {@code <base-provider-name>-<instance-name>}, where 'instance-name' is gotten from the
+   * configuration. Implementations wishing to use another provider than "SunPKCS11" should supply this provider name.
+   * </p>
+   *
+   * @param configurationFile complete path to the PKCS#11 configuration file
+   * @param baseProviderName base provider name
+   */
+  public FilePkcs11Configuration(@Nonnull final String configurationFile, @Nullable final String baseProviderName) {
+    super(baseProviderName);
     this.configurationFile = validateConfigurationFile(
         Objects.requireNonNull(configurationFile, "configurationFile must not be null"));
   }

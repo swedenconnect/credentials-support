@@ -206,7 +206,7 @@ them and give some information that is useful to know about:
 
 **KeyStoreFactoryBean**
 
-Basically the same as [se.swedenconnect.security.credential.factory.KeyStoreFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/factory/KeyStoreFactoryBean.java). The only difference is that the Shibboleth implementations doesn't let you create a PKCS#11 KeyStore instance. 
+Basically the same as [se.swedenconnect.security.credential.spring.factory.KeyStoreFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/factory/KeyStoreFactoryBean.java). The only difference is that the Shibboleth implementations doesn't let you create a PKCS#11 KeyStore instance. 
 
 > This is probably an oversight from the Shib-team. The `resource` property is checked so that it is non-null, but in the case when loading a PKCS#11 KeyStore you don't need an input stream but supply `null`.
 
@@ -220,7 +220,7 @@ Also, by using the credentials support in **credentials-support** you also have 
 
 **X509CertificateFactoryBean**
 
-Basically identical to [se.swedenconnect.security.credential.factory.X509CertificateFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/factory/X509CertificateFactoryBean.java). 
+Basically identical to [se.swedenconnect.security.credential.spring.factory.X509CertificateFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/src/main/java/se/swedenconnect/security/credential/factory/X509CertificateFactoryBean.java). 
 
 So, the `X509CertificateFactoryBean` of the **credentials-support** library is really indented for those that don't use Shibboleth.
 

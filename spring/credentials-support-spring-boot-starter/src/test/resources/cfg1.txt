@@ -1,0 +1,5 @@
+# Sample file no 1
+name = Foo
+library=/opt/foo/lib/libpkcs11.so
+#slot = 1
+

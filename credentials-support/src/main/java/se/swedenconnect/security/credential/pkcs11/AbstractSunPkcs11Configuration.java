@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.security.InvalidParameterException;
 import java.security.Provider;
 import java.security.Security;
+import java.util.Optional;
 
 /**
  * Abstract base class for PKCS#11 configuration.
@@ -53,6 +54,29 @@ public abstract class AbstractSunPkcs11Configuration implements Pkcs11Configurat
 
   /** The security provider for this configuration. */
   private Provider provider;
+
+  private final String baseProviderName;
+
+  /**
+   * Default constructor.
+   */
+  protected AbstractSunPkcs11Configuration() {
+    this(DEFAULT_PROVIDER_NAME);
+  }
+
+  /**
+   * Constructor setting the "base provider name".
+   * <p>
+   * Assigns the name of the security provider that we use to create new instances that have names according to
+   * {@code <base-provider-name>-<instance-name>}, where 'instance-name' is gotten from the configuration.
+   * Implementations wishing to use another provider than "SunPKCS11" should supply this provider name.
+   * </p>
+   *
+   * @param baseProviderName the base provider name
+   */
+  protected AbstractSunPkcs11Configuration(@Nullable final String baseProviderName) {
+    this.baseProviderName = Optional.ofNullable(baseProviderName).orElse(DEFAULT_PROVIDER_NAME);
+  }
 
   /**
    * An init method that should be called to fully initialize the configuration object.
@@ -115,13 +139,11 @@ public abstract class AbstractSunPkcs11Configuration implements Pkcs11Configurat
   /**
    * Gets the name of the security provider that we use to create new instances that have names according to
    * {@code <base-provider-name>-<instance-name>}, where 'instance-name' is gotten from the configuration.
-   * <p>
-   * Implementations wishing to use another provider than "SunPKCS11" may override this method.
    *
    * @return the provider name (SunPKCS11 is used for the default implementation)
    */
-  protected String getBaseProviderName() {
-    return DEFAULT_PROVIDER_NAME;
+  protected final String getBaseProviderName() {
+    return this.baseProviderName;
   }
 
   /**

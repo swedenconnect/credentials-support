@@ -15,8 +15,8 @@
   <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
     <property name="converters">
       <list>
-        <bean class="se.swedenconnect.security.credential.converters.PropertyToPrivateKeyConverter" />
-        <bean class="se.swedenconnect.security.credential.converters.PropertyToX509CertificateConverter" />
+        <bean class="se.swedenconnect.security.credential.spring.converters.PropertyToPrivateKeyConverter" />
+        <bean class="se.swedenconnect.security.credential.spring.converters.PropertyToX509CertificateConverter" />
       </list>
     </property>
   </bean>
@@ -63,7 +63,7 @@
     <property name="name" value="Credential-2b" />
   </bean>
 
-  <bean id="keyStoreFactory" class="se.swedenconnect.security.credential.factory.KeyStoreFactoryBean">
+  <bean id="keyStoreFactory" class="se.swedenconnect.security.credential.spring.factory.KeyStoreFactoryBean">
     <property name="resource" value="${credential2.resource}" />
     <property name="password" value="${credential2.password}" />
   </bean>
@@ -107,13 +107,13 @@
       </list>
     </property>
     <property name="failureCallback">
-      <util:constant static-field="se.swedenconnect.security.credential.spring.TestMonitorCallbacks.TEST_FAILURE_CALLBACK"/>
+      <util:constant static-field="se.swedenconnect.security.credential.factory.TestMonitorCallbacks.TEST_FAILURE_CALLBACK"/>
     </property>
     <property name="reloadSuccessCallback">
-      <util:constant static-field="se.swedenconnect.security.credential.spring.TestMonitorCallbacks.RELOAD_SUCCESS_CALLBACK"/>
+      <util:constant static-field="se.swedenconnect.security.credential.factory.TestMonitorCallbacks.RELOAD_SUCCESS_CALLBACK"/>
     </property>
     <property name="reloadFailureCallback">
-      <util:constant static-field="se.swedenconnect.security.credential.spring.TestMonitorCallbacks.RELOAD_FAILURE_CALLBACK"/>
+      <util:constant static-field="se.swedenconnect.security.credential.factory.TestMonitorCallbacks.RELOAD_FAILURE_CALLBACK"/>
     </property>
   </bean>
 

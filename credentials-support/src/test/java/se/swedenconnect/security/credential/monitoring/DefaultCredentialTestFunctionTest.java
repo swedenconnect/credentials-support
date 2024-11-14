@@ -15,14 +15,16 @@
  */
 package se.swedenconnect.security.credential.monitoring;
 
+import org.cryptacular.io.ClassPathResource;
+import org.cryptacular.io.Resource;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.core.io.ClassPathResource;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
-import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
+import se.swedenconnect.security.credential.factory.KeyStoreFactory;
 import se.swedenconnect.security.credential.monitoring.DefaultCredentialMonitorBeanTest.TestCredential;
 
+import java.io.InputStream;
 import java.security.KeyException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
@@ -61,13 +63,13 @@ public class DefaultCredentialTestFunctionTest {
    * @throws Exception for errors setting up test data
    */
   public DefaultCredentialTestFunctionTest() throws Exception {
-    final KeyStoreFactoryBean factory = new KeyStoreFactoryBean(new ClassPathResource("rsa-dsa-ec.jks"), password);
-    factory.afterPropertiesSet();
-    final KeyStore store = factory.getObject();
-
-    this.rsaCred = new KeyStoreCredential(store, "rsa", password);
-    this.dsaCred = new KeyStoreCredential(store, "dsa", password);
-    this.ecCred = new KeyStoreCredential(store, "ec", password);
+    final Resource resource = new ClassPathResource("rsa-dsa-ec.jks");
+    try (final InputStream is = resource.getInputStream()) {
+      final KeyStore store = KeyStoreFactory.loadKeyStore(is, password, null, null);
+      this.rsaCred = new KeyStoreCredential(store, "rsa", password);
+      this.dsaCred = new KeyStoreCredential(store, "dsa", password);
+      this.ecCred = new KeyStoreCredential(store, "ec-nist", password);
+    }
   }
 
   /**

@@ -15,9 +15,12 @@
  */
 package se.swedenconnect.security.credential.utils;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.cryptacular.EncodingException;
 import org.cryptacular.StreamException;
 import org.cryptacular.util.CertUtil;
+import org.cryptacular.util.PemUtil;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.InputStream;
@@ -37,17 +40,34 @@ import java.util.Optional;
 public class X509Utils {
 
   /**
+   * When configuring the use of credentials and when a certificate is configured, normally, the location of the
+   * certificate is given. But we also allow to give the certificate "inline", i.e., to enter its PEM-encoding. This
+   * method can be used to find out whether a location string holds an inlined PEM-encoded certificate.
+   *
+   * @param location location configuration setting
+   * @return {@code true} if the given string holds a PEM-encoding and {@code false} otherwise
+   */
+  public static boolean isInlinedPem(@Nonnull final String location) {
+    if (location.length() <= PemUtil.HEADER_BEGIN.length()) {
+      // We'll get StringIndexOutOfBoundsException otherwise ...
+      return false;
+    }
+    return PemUtil.isPem(location.getBytes());
+  }
+
+  /**
    * Decodes a {@link X509Certificate} from its encoding.
    *
    * @param encoding the certificate encoding (PEM or DER encoded)
    * @return a X509Certificate object
    * @throws CertificateException for decoding errors
    */
-  public static X509Certificate decodeCertificate(final byte[] encoding) throws CertificateException {
+  @Nonnull
+  public static X509Certificate decodeCertificate(@Nonnull final byte[] encoding) throws CertificateException {
     try {
       return CertUtil.decodeCertificate(encoding);
     }
-    catch (final EncodingException e) {
+    catch (final EncodingException | StreamException e) {
       throw new CertificateException("Failed to decode certificate", e);
     }
   }
@@ -62,7 +82,8 @@ public class X509Utils {
    * @return a X509Certificate object
    * @throws CertificateException for decoding errors
    */
-  public static X509Certificate decodeCertificate(final InputStream stream) throws CertificateException {
+  @Nonnull
+  public static X509Certificate decodeCertificate(@Nonnull final InputStream stream) throws CertificateException {
     try {
       return CertUtil.readCertificate(stream);
     }
@@ -79,11 +100,13 @@ public class X509Utils {
    * @return a list of {@link X509Certificate} objects
    * @throws CertificateException for decoding errors
    */
-  public static List<X509Certificate> decodeCertificateChain(final byte[] encoding) throws CertificateException {
+  @Nonnull
+  public static List<X509Certificate> decodeCertificateChain(@Nonnull final byte[] encoding)
+      throws CertificateException {
     try {
       return Arrays.asList(CertUtil.decodeCertificateChain(encoding));
     }
-    catch (final EncodingException e) {
+    catch (final EncodingException | StreamException e) {
       throw new CertificateException("Failed to decode certificate chain", e);
     }
   }
@@ -99,7 +122,9 @@ public class X509Utils {
    * @return a list of {@link X509Certificate} objects
    * @throws CertificateException for decoding errors
    */
-  public static List<X509Certificate> decodeCertificateChain(final InputStream stream) throws CertificateException {
+  @Nonnull
+  public static List<X509Certificate> decodeCertificateChain(@Nonnull final InputStream stream)
+      throws CertificateException {
     try {
       return Arrays.asList(CertUtil.readCertificateChain(stream));
     }
@@ -115,7 +140,8 @@ public class X509Utils {
    * @param certificate the certificate to log
    * @return a log string
    */
-  public static String toLogString(final X509Certificate certificate) {
+  @Nonnull
+  public static String toLogString(@Nullable final X509Certificate certificate) {
     if (certificate == null) {
       return "null";
     }

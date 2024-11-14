@@ -17,23 +17,23 @@ package se.swedenconnect.security.credential.pkcs11;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PreDestroy;
+import se.swedenconnect.security.credential.KeyStoreReloader;
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
 
 import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * When a {@link se.swedenconnect.security.credential.KeyStoreCredential KeyStoreCredential} is used with an underlying
- * PKCS#11 {@link }KeyStore} the implementation may want to reload the {@link KeyStore}. This class provides this
- * function.
+ * The default implementation of the {@link KeyStoreReloader} interface.
  *
  * @author Martin Lindström
  */
-public class Pkcs11KeyStoreReloader {
+public class Pkcs11KeyStoreReloader implements KeyStoreReloader {
 
   /** The PIN needed to reload the Keystore. */
   private final char[] pin;
@@ -52,15 +52,19 @@ public class Pkcs11KeyStoreReloader {
    * Reloads a PKCS#11 {@link KeyStore}.
    *
    * @param keyStore the PKCS#11 {@link KeyStore}
-   * @throws CertificateException for certificate related errors
-   * @throws IOException for errors loading the store
-   * @throws NoSuchAlgorithmException algorithm errors
+   * @throws KeyStoreException for error reloading the keystore
    */
-  public void reload(final KeyStore keyStore) throws CertificateException, IOException, NoSuchAlgorithmException {
+  @Override
+  public void reload(@Nonnull final KeyStore keyStore) throws KeyStoreException {
     if (!KeyStoreFactory.PKCS11_KEYSTORE_TYPE.equalsIgnoreCase(keyStore.getType())) {
       throw new IllegalArgumentException("Not a PKCS11 keystore: " + keyStore.getType());
     }
-    keyStore.load(null, this.pin);
+    try {
+      keyStore.load(null, this.pin);
+    }
+    catch (final CertificateException | IOException | NoSuchAlgorithmException e) {
+      throw new KeyStoreException(e.getMessage(), e);
+    }
   }
 
   /**

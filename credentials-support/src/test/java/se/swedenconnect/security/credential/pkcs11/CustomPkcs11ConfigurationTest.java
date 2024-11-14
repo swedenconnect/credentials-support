@@ -15,14 +15,14 @@
  */
 package se.swedenconnect.security.credential.pkcs11;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.cryptacular.io.ClassPathResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 
-import javax.annotation.Nonnull;
 import java.security.Provider;
 import java.security.Security;
 
@@ -104,12 +104,7 @@ public class CustomPkcs11ConfigurationTest {
 
     public TestCustomPkcs11Configuration(@Nonnull final String library, @Nonnull final String name,
         @Nullable final String slot, @Nullable final Integer slotListIndex) {
-      super(library, name, slot, slotListIndex);
-    }
-
-    @Override
-    protected String getBaseProviderName() {
-      return MockSunPkcs11Provider.PROVIDER_BASE_NAME;
+      super(library, name, slot, slotListIndex, MockSunPkcs11Provider.PROVIDER_BASE_NAME);
     }
 
     @Nonnull

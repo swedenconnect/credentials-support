@@ -15,7 +15,7 @@
  */
 package se.swedenconnect.security.credential.pkcs11;
 
-import org.springframework.core.io.Resource;
+import org.cryptacular.io.Resource;
 import se.swedenconnect.security.credential.LibraryVersion;
 
 import java.io.ByteArrayInputStream;

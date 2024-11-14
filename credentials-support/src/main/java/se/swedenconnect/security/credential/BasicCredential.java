@@ -145,10 +145,7 @@ public class BasicCredential extends AbstractPkiCredential {
       return cert.getSubjectX500Principal().getName();
     }
     final PublicKey key = this.getPublicKey();
-    if (key != null) {
-      return String.format("%s-%s", key.getAlgorithm(), UUID.randomUUID());
-    }
-    return "BasicCredential-" + UUID.randomUUID().toString();
+    return String.format("%s-%s", key.getAlgorithm(), UUID.randomUUID());
   }
 
 }

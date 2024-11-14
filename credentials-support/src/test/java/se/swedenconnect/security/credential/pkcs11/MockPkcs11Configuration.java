@@ -15,10 +15,10 @@
  */
 package se.swedenconnect.security.credential.pkcs11;
 
-import org.springframework.core.io.Resource;
+import jakarta.annotation.Nonnull;
+import org.cryptacular.io.Resource;
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
 
-import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.Provider;

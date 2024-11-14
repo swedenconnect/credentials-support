@@ -63,60 +63,14 @@
   <dependencies>
 
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <version>${spring.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-beans</artifactId>
-      <version>${spring.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>${spring.version}</version>
+      <groupId>org.cryptacular</groupId>
+      <artifactId>cryptacular</artifactId>
     </dependency>
 
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
       <version>${bc.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opensaml</groupId>
-      <artifactId>opensaml-security-api</artifactId>
-      <version>${opensaml.version}</version>
-      <type>jar</type>
-    </dependency>
-
-    <!-- For testing -->
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <version>${spring.boot.version}</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>ch.qos.logback</groupId>
-          <artifactId>logback-classic</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
-      <version>${spring.boot.version}</version>
-      <scope>test</scope>
     </dependency>
 
   </dependencies>
@@ -136,6 +90,22 @@
         <filtering>false</filtering>
       </testResource>
     </testResources>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
 
   </build>
 
@@ -168,9 +138,6 @@
               <doclint>all,-missing</doclint>
               <links>
                 <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
-                <!--
-                <link>https://build.shibboleth.net/nexus/content/sites/site/java-opensaml/${opensaml.version}/apidocs/</link>
-                -->
               </links>
             </configuration>
           </plugin>

@@ -53,6 +53,7 @@
 
   <modules>
     <module>credentials-support-spring</module>
+    <module>credentials-support-spring-boot-starter</module>
   </modules>
 
   <dependencyManagement>
@@ -75,6 +76,15 @@
       <groupId>se.swedenconnect.security</groupId>
       <artifactId>credentials-support</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>se.swedenconnect.security</groupId>
+      <artifactId>credentials-support</artifactId>
+      <version>${project.version}</version>
+      <classifier>tests</classifier>
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

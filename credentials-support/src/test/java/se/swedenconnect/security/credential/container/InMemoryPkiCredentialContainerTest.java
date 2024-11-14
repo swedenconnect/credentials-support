@@ -26,8 +26,6 @@ import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 import java.security.Security;
 import java.time.Instant;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 /**
  * Test cases for InMemoryPkiCredentialContainer.
  */
@@ -90,22 +88,22 @@ public class InMemoryPkiCredentialContainerTest {
   @Test
   public void testNotFound() {
     final InMemoryPkiCredentialContainer container = new InMemoryPkiCredentialContainer("BC");
-    assertThatThrownBy(() -> container.getCredential("not-found")).isInstanceOf(PkiCredentialContainerException.class)
-        .hasMessageContaining("was not found");
+    final Exception exc =
+        Assertions.assertThrows(PkiCredentialContainerException.class, () -> container.getCredential("not-found"));
+    Assertions.assertTrue(exc.getMessage().contains("was not found"));
   }
 
   @Test
   public void testCredentialName() throws Exception {
     final InMemoryPkiCredentialContainer container = new InMemoryPkiCredentialContainer("BC");
     final String alias = container.generateCredential(KeyGenType.EC_P256);
-    final PkiCredential cred = container.getCredential(alias);
+    final AbstractPkiCredential cred = container.getCredential(alias);
     Assertions.assertNotNull(cred);
     Assertions.assertEquals(alias, cred.getName());
 
     // Set name should not be allowed
-    assertThatThrownBy(() -> ((AbstractPkiCredential) cred).setName("new-name")).isInstanceOf(
-            IllegalArgumentException.class)
-        .hasMessage("The credential name can not be set");
+    final Exception exc = Assertions.assertThrows(IllegalArgumentException.class, () -> cred.setName("new-name"));
+    Assertions.assertTrue(exc.getMessage().equals("The credential name can not be set"));
   }
 
 }

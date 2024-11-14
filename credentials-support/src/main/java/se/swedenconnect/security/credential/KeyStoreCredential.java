@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
 import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunction;
-import se.swedenconnect.security.credential.pkcs11.Pkcs11KeyStoreReloader;
 
 import java.security.Key;
 import java.security.KeyStore;
@@ -71,7 +70,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   private final boolean residesInHardware;
 
   /** For reloading the keystore. */
-  private Pkcs11KeyStoreReloader reloader;
+  private KeyStoreReloader reloader;
 
   /**
    * Constructor taking a {@link KeyStore} and the key entry alias and a key password.
@@ -207,16 +206,17 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   }
 
   /**
-   * Assigns a {@link Pkcs11KeyStoreReloader} for supporting reload of a hardware based credential.
+   * Assigns a {@link KeyStoreReloader} for supporting reload of a hardware based credential.
    *
    * @param reloader the reloader instance
    */
-  public void setReloader(@Nonnull final Pkcs11KeyStoreReloader reloader) {
+  public void setReloader(@Nonnull final KeyStoreReloader reloader) {
     this.reloader = reloader;
   }
 
   /**
-   * If the {@code KeyStoreCredential} is of PKCS#11 type, the method will reload the private key.
+   * If the {@code KeyStoreCredential} is of PKCS#11 type, and a {@link KeyStoreReloader} has been installed, the method
+   * will reload the private key.
    */
   @Override
   public synchronized void reload() throws Exception {
@@ -225,25 +225,24 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
     // for the actual logging.
     //
     if (this.isHardwareCredential()) {
-      try {
-        log.trace("Reloading private key of credential '{}' ...", this.getName());
-
-        // Reload ...
-        if (this.reloader != null) {
+      // Reload ...
+      if (this.reloader != null) {
+        try {
+          log.trace("Reloading private key of credential '{}' ...", this.getName());
           this.reloader.reload(this.keyStore);
-        }
-        else {
-          this.keyStore.load(null, this.keyPassword);
-        }
 
-        // Now, access the private key ...
-        this.getPrivateKey();
+          // Now, access the private key ...
+          this.getPrivateKey();
 
-        log.trace("Reloading private key of credential '{}' successful", this.getName());
+          log.trace("Reloading private key of credential '{}' successful", this.getName());
+        }
+        catch (final Exception e) {
+          log.trace("Failed to reload private key - {}", e.getMessage(), e);
+          throw e;
+        }
       }
-      catch (final Exception e) {
-        log.trace("Failed to reload private key - {}", e.getMessage(), e);
-        throw e;
+      else {
+        throw new SecurityException("No reload function installed for credential '%s'".formatted(this.getName()));
       }
     }
   }

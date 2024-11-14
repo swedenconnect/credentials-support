@@ -15,15 +15,14 @@
  */
 package se.swedenconnect.security.credential.pkcs11;
 
+import jakarta.annotation.Nonnull;
+import org.cryptacular.io.ClassPathResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.Provider;
@@ -78,7 +77,7 @@ public class Pkcs11CredentialTest {
   }
 
   @Test
-  void testCreateAndUse() throws Exception {
+  void testCreateAndUse() {
     final FilePkcs11Configuration configuration = new TestFilePkcs11Configuration(getAbsolutePath("cfg1.txt"));
     configuration.init();
     final String providerName = configuration.getProvider().getName();
@@ -90,20 +89,16 @@ public class Pkcs11CredentialTest {
     // TODO: more
   }
 
-  public static String getAbsolutePath(final String resource) throws IOException {
-    return (new ClassPathResource(resource)).getFile().getAbsolutePath();
+  public static String getAbsolutePath(final String resource) {
+    final String p = resource.startsWith("/") ? "" : "/";
+    return System.getProperty("user.dir") + "/src/test/resources" + p + resource;
   }
 
   // For testing with mocked provider
   private static class TestFilePkcs11Configuration extends FilePkcs11Configuration {
 
     public TestFilePkcs11Configuration(@Nonnull final String configurationFile) {
-      super(configurationFile);
-    }
-
-    @Override
-    protected String getBaseProviderName() {
-      return MockSunPkcs11Provider.PROVIDER_BASE_NAME;
+      super(configurationFile, MockSunPkcs11Provider.PROVIDER_BASE_NAME);
     }
 
     @Nonnull

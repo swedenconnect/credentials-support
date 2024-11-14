@@ -15,13 +15,13 @@
  */
 package se.swedenconnect.security.credential.monitoring;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class DefaultCredentialMonitorBeanTest {
 
   @Test
-  public void testReloadSuccess() throws Exception {
+  void testReloadSuccess() {
     TestFunction tf1 = new TestFunction();
     tf1.setError(new SecurityException("1 failed"), true);
     TestCredential cred = new TestCredential("1");
@@ -59,11 +59,11 @@ public class DefaultCredentialMonitorBeanTest {
     cred2.setTestFunction(tf2);
 
     TestCredential cred3 = new TestCredential("3");
+    cred3.setTestFunction(new TestFunction());
 
     SuccessConsumer successConsumer = new SuccessConsumer();
     DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean(cred, Arrays.asList(cred2, cred3));
     monitor.setReloadSuccessCallback(successConsumer);
-    monitor.afterPropertiesSet();
 
     monitor.test();
 
@@ -88,14 +88,12 @@ public class DefaultCredentialMonitorBeanTest {
     cred2.setTestFunction(tf2);
 
     cred3 = new TestCredential("3");
+    cred3.setTestFunction(new TestFunction());
 
     successConsumer = new SuccessConsumer();
 
-    monitor = new DefaultCredentialMonitorBean();
-    monitor.setCredential(cred);
-    monitor.setAdditionalForReload(Arrays.asList(cred2, cred3));
+    monitor = new DefaultCredentialMonitorBean(cred, List.of(cred2, cred3));
     monitor.setReloadSuccessCallback(successConsumer);
-    monitor.afterPropertiesSet();
 
     monitor.test();
 
@@ -111,7 +109,7 @@ public class DefaultCredentialMonitorBeanTest {
   }
 
   @Test
-  public void testReloadSuccessMultiple() throws Exception {
+  void testReloadSuccessMultiple() {
     final TestFunction tf1 = new TestFunction();
     tf1.setError(new SecurityException("1 failed"), true);
     final TestCredential cred = new TestCredential("1");
@@ -123,10 +121,8 @@ public class DefaultCredentialMonitorBeanTest {
     cred2.setTestFunction(tf2);
 
     final SuccessConsumer successConsumer = new SuccessConsumer();
-    final DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean();
-    monitor.setCredentials(Arrays.asList(cred, cred2));
+    final DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean(Arrays.asList(cred, cred2));
     monitor.setReloadSuccessCallback(successConsumer);
-    monitor.afterPropertiesSet();
 
     monitor.test();
 
@@ -140,7 +136,7 @@ public class DefaultCredentialMonitorBeanTest {
   }
 
   @Test
-  public void testTestSuccess() throws Exception {
+  void testTestSuccess() {
     final TestFunction tf1 = new TestFunction();
     final TestCredential cred = new TestCredential("1");
     cred.setTestFunction(tf1);
@@ -152,7 +148,6 @@ public class DefaultCredentialMonitorBeanTest {
     final DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean(Arrays.asList(cred, cred2));
     final SuccessConsumer successConsumer = new SuccessConsumer();
     monitor.setReloadSuccessCallback(successConsumer);
-    monitor.afterPropertiesSet();
 
     monitor.test();
 
@@ -166,7 +161,7 @@ public class DefaultCredentialMonitorBeanTest {
   }
 
   @Test
-  public void testReloadFailbackNoReload() throws Exception {
+  void testReloadFailbackNoReload() {
     TestFunction tf1 = new TestFunction();
     tf1.setError(new SecurityException("1 failed"), true);
 
@@ -175,7 +170,6 @@ public class DefaultCredentialMonitorBeanTest {
 
     DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean(cred);
     monitor.setFailureCallback((c, e) -> Boolean.FALSE);
-    monitor.afterPropertiesSet();
     monitor.test();
 
     assertEquals(0, cred.getReloadCalled());
@@ -189,14 +183,13 @@ public class DefaultCredentialMonitorBeanTest {
 
     monitor = new DefaultCredentialMonitorBean(cred);
     monitor.setFailureCallback((c, e) -> null);
-    monitor.afterPropertiesSet();
     monitor.test();
 
     assertEquals(0, cred.getReloadCalled());
   }
 
   @Test
-  public void testReloadFailbackOrderedReload() throws Exception {
+  void testReloadFailbackOrderedReload() {
     final TestFunction tf1 = new TestFunction();
     tf1.setError(new SecurityException("1 failed"), true);
 
@@ -205,14 +198,13 @@ public class DefaultCredentialMonitorBeanTest {
 
     final DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean(cred);
     monitor.setFailureCallback((c, e) -> Boolean.TRUE);
-    monitor.afterPropertiesSet();
     monitor.test();
 
     assertEquals(1, cred.getReloadCalled());
   }
 
   @Test
-  public void testReloadFailure() throws Exception {
+  void testReloadFailure() {
 
     final TestCredential cred = new TestCredential();
     final TestFunction tf1 = new TestFunction();
@@ -222,10 +214,8 @@ public class DefaultCredentialMonitorBeanTest {
 
     final ReloadFailureCallback rfc = new ReloadFailureCallback();
 
-    final DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean();
-    monitor.setCredential(cred);
+    final DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean(cred);
     monitor.setReloadFailureCallback(rfc);
-    monitor.afterPropertiesSet();
 
     monitor.test();
 
@@ -237,7 +227,7 @@ public class DefaultCredentialMonitorBeanTest {
   }
 
   @Test
-  public void testTestAfterReloadFails() throws Exception {
+  void testTestAfterReloadFails() {
     final TestCredential cred = new TestCredential();
     final TestFunction tf1 = new TestFunction();
     tf1.setError(new KeyStoreException("1 failed"), false);
@@ -245,10 +235,8 @@ public class DefaultCredentialMonitorBeanTest {
 
     final ReloadFailureCallback rfc = new ReloadFailureCallback();
 
-    final DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean();
-    monitor.setCredential(cred);
+    final DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean(cred);
     monitor.setReloadFailureCallback(rfc);
-    monitor.afterPropertiesSet();
 
     monitor.test();
 
@@ -260,18 +248,14 @@ public class DefaultCredentialMonitorBeanTest {
   }
 
   @Test
-  public void testMissingCredential() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      final DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean(null, List.of());
-      monitor.afterPropertiesSet();
-    });
+  void testMissingCredential() {
+    assertThrows(NullPointerException.class, () -> new DefaultCredentialMonitorBean(null, List.of()));
   }
 
   @Test
-  public void testNoTestFunction() throws Exception {
+  void testNoTestFunction() {
     final TestCredential cred = new TestCredential();
     final DefaultCredentialMonitorBean monitor = new DefaultCredentialMonitorBean(cred);
-    monitor.afterPropertiesSet();
     monitor.test();
 
     assertEquals(0, cred.getReloadCalled());
@@ -313,7 +297,6 @@ public class DefaultCredentialMonitorBeanTest {
       }
       return ret;
     }
-
   }
 
   public static class ReloadFailureCallback implements BiConsumer<ReloadablePkiCredential, Exception> {
@@ -325,7 +308,6 @@ public class DefaultCredentialMonitorBeanTest {
     public void accept(final ReloadablePkiCredential t, final Exception u) {
       this.receivedException = u;
     }
-
   }
 
   public static class TestCredential implements ReloadablePkiCredential {
@@ -399,7 +381,6 @@ public class DefaultCredentialMonitorBeanTest {
     public String getName() {
       return this.name;
     }
-
   }
 
 }

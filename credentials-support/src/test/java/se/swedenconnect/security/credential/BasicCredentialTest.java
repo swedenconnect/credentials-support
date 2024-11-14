@@ -15,8 +15,8 @@
  */
 package se.swedenconnect.security.credential;
 
+import org.cryptacular.io.ClassPathResource;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
 
 import java.io.InputStream;
@@ -24,10 +24,12 @@ import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -36,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class BasicCredentialTest {
+class BasicCredentialTest {
 
   private final PrivateKey privateKey;
   private final X509Certificate cert;
@@ -78,6 +80,34 @@ public class BasicCredentialTest {
   void testDefaultNamePubKeySet() {
     final BasicCredential cred = new BasicCredential(this.cert.getPublicKey(), this.privateKey);
     assertTrue(cred.getName().startsWith("RSA-"));
+  }
+
+  @Test
+  void testBadKeyPair() {
+    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        () -> new BasicCredential(this.cert.getPublicKey(), this.privateKey2));
+    assertEquals("Public and private key do not make up a valid key pair", ex.getMessage());
+  }
+
+  @Test
+  void testBadKeyPair2() {
+    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        () -> new BasicCredential(this.cert, this.privateKey2));
+    assertEquals("Public key from certificate and private key do not make up a valid key pair", ex.getMessage());
+  }
+
+  @Test
+  void testBadKeyPair3() {
+    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        () -> new BasicCredential(List.of(this.cert), this.privateKey2));
+    assertEquals("Public key from entity certificate and private key do not make up a valid key pair", ex.getMessage());
+  }
+
+  @Test
+  void testEmptyChain() {
+    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        () -> new BasicCredential(List.of(), this.privateKey));
+    assertEquals("certificates must not be empty", ex.getMessage());
   }
 
 }

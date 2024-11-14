@@ -15,13 +15,15 @@
  */
 package se.swedenconnect.security.credential.monitoring;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -43,25 +45,31 @@ import java.util.function.Supplier;
  * </p>
  * <p>
  * Since testing a credential, especially those residing on hardware devices, may be a relatively costly operation, the
- * monitor bean also supports configuring "additional credentials for reload" ({@link #setAdditionalForReload(List)}).
- * The use case here is that one credential is configured to be monitored (tested), and if this test fails, we try to
- * reload this credential, but also the "additional credentials for reload". This case may be used if we know that we
- * have a set of credentials that all reside on the same device, and if one is non-functional the others will not work
- * either (bacause of a connection failure). In this case we save computing power and keep testing only one credential,
- * and if that one fails, reloads not only the failing credential but the other ones as well.
+ * monitor bean also supports configuring "additional credentials for reload"
+ * ({@link #DefaultCredentialMonitorBean(ReloadablePkiCredential, List)}). The use case here is that one credential is
+ * configured to be monitored (tested), and if this test fails, we try to reload this credential, but also the
+ * "additional credentials for reload". This case may be used if we know that we have a set of credentials that all
+ * reside on the same device, and if one is non-functional the others will not work either (bacause of a connection
+ * failure). In this case we save computing power and keep testing only one credential, and if that one fails, reloads
+ * not only the failing credential but the other ones as well.
  * </p>
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Slf4j
-public class DefaultCredentialMonitorBean implements CredentialMonitorBean, InitializingBean {
+public class DefaultCredentialMonitorBean implements CredentialMonitorBean {
+
+  /** Logging instance. */
+  private static final Logger log = LoggerFactory.getLogger(DefaultCredentialMonitorBean.class);
 
   /** The credentials that should be monitored. */
-  private List<ReloadablePkiCredential> credentials;
+  private final List<ReloadablePkiCredential> credentials;
 
   /** A list of additional credentials that should be reloaded if a test fails. */
-  private List<ReloadablePkiCredential> additionalForReload;
+  private final List<ReloadablePkiCredential> additionalForReload;
+
+  /** A callback for successful tests. */
+  private Consumer<ReloadablePkiCredential> testSuccessCallback;
 
   /** A callback function that is invoked if the test of a credential fails. */
   private BiFunction<ReloadablePkiCredential, Exception, Boolean> failureCallback;
@@ -73,18 +81,12 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
   private BiConsumer<ReloadablePkiCredential, Exception> reloadFailureCallback;
 
   /**
-   * Default constructor.
-   */
-  public DefaultCredentialMonitorBean() {
-  }
-
-  /**
    * Constructor setting up monitoring of a single credential. If the test for this credential fails a reload attempt
    * will be made ({@link ReloadablePkiCredential#reload()}).
    *
    * @param credential the credential to monitor, and possible reload
    */
-  public DefaultCredentialMonitorBean(final ReloadablePkiCredential credential) {
+  public DefaultCredentialMonitorBean(@Nonnull final ReloadablePkiCredential credential) {
     this(credential, null);
   }
 
@@ -97,13 +99,25 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * @param credential the credential to monitor, and possible reload
    * @param additionalForReload credentials to reload (in addition to the supplied credential)
    */
-  public DefaultCredentialMonitorBean(final ReloadablePkiCredential credential,
-      final List<ReloadablePkiCredential> additionalForReload) {
-    if (credential != null) {
-      this.credentials = List.of(credential);
+  public DefaultCredentialMonitorBean(@Nonnull final ReloadablePkiCredential credential,
+      @Nullable final List<ReloadablePkiCredential> additionalForReload) {
+
+    this.credentials = List.of(Objects.requireNonNull(credential, "credential must not be null"));
+    if (credential.getTestFunction() == null) {
+      log.warn("Configured credential '{}' has no test function associated - no montoring will be performed",
+          credential.getName());
     }
-    if (additionalForReload != null && !additionalForReload.isEmpty()) {
-      this.additionalForReload = additionalForReload;
+    this.additionalForReload = Optional.ofNullable(additionalForReload)
+        .filter(a -> !a.isEmpty())
+        .map(Collections::unmodifiableList)
+        .orElse(null);
+    if (this.additionalForReload != null) {
+      this.additionalForReload.forEach(c -> {
+        if (c.getTestFunction() == null) {
+          log.warn("Credential '{}' was configured to be reloaded, but has not support for reloading",
+              credential.getName());
+        }
+      });
     }
   }
 
@@ -114,7 +128,20 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    * @param credentials the credentials to monitor, and possible reload
    */
   public DefaultCredentialMonitorBean(final List<ReloadablePkiCredential> credentials) {
-    this.credentials = credentials;
+    this.credentials = Optional.of(Objects.requireNonNull(credentials, "credentials must not be null"))
+        .filter(a -> !a.isEmpty())
+        .map(Collections::unmodifiableList)
+        .orElseGet(() -> {
+          log.info("Monitor bean initialized with empty list of credentials - no montoring will be performed");
+          return Collections.emptyList();
+        });
+    this.additionalForReload = null;
+    this.credentials.forEach(c -> {
+      if (c.getTestFunction() == null) {
+        log.warn("Configured credential '{}' has no test function associated - no montoring will be performed",
+            c.getName());
+      }
+    });
   }
 
   /** {@inheritDoc} */
@@ -134,6 +161,7 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
 
       if (testResult == null) {
         log.trace("Test of credential '{}' was successful", cred.getName());
+        Optional.ofNullable(this.testSuccessCallback).ifPresent(callback -> callback.accept(cred));
       }
       else {
         Boolean reload = true;
@@ -174,6 +202,11 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    */
   protected void reload(final ReloadablePkiCredential credential) {
     try {
+      if (credential.getTestFunction() == null) {
+        log.warn("Credential '{}' has no test function installed - cannot reload", credential.getName());
+        return;
+      }
+
       log.debug("Reloading credential '{}' ...", credential.getName());
       credential.reload();
       log.debug("Credential '{}' successfully reloaded, will test again ...", credential.getName());
@@ -181,69 +214,30 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
       // OK, we have reloaded the credential. See if it is functional after the reload ...
       //
       final Supplier<Exception> testFunction = credential.getTestFunction();
-      Exception testResult = null;
-      if (testFunction == null) {
-        log.trace("Credential '{}' can not be tested - it has no test function installed", credential.getName());
-      }
-      else {
-        testResult = testFunction.get();
-      }
+      final Exception testResult = testFunction.get();
       if (testResult == null) {
         log.debug("Credential '{}' was reloaded and is now functional again ...", credential.getName());
-        if (this.reloadSuccessCallback != null) {
-          this.reloadSuccessCallback.accept(credential);
-        }
+        Optional.ofNullable(this.reloadSuccessCallback).ifPresent(callback -> callback.accept(credential));
       }
       else {
-        if (this.reloadFailureCallback != null) {
-          log.debug("Test of credential '{}' after it was reloaded failed - {}",
-              credential.getName(), testResult.getMessage(), testResult);
-          this.reloadFailureCallback.accept(credential, testResult);
-        }
-        else {
-          log.error("Test of credential '{}' after it was reloaded failed - {}", credential.getName(),
-              testResult.getMessage());
-          log.debug("Credential failure details", testResult);
-        }
+        log.debug("Test of credential '{}' after it was reloaded failed - {}",
+            credential.getName(), testResult.getMessage(), testResult);
+        Optional.ofNullable(this.reloadFailureCallback).ifPresent(callback -> callback.accept(credential, testResult));
       }
     }
     catch (final Exception e) {
-      if (this.reloadFailureCallback != null) {
-        log.debug("Reloading of credential '{}' failed - {}", credential.getName(), e.getMessage(), e);
-        this.reloadFailureCallback.accept(credential, e);
-      }
-      else {
-        log.error("Reloading of credential '{}' failed - {}", credential.getName(), e.getMessage());
-        log.debug("Credential failure details", e);
-      }
+      log.info("Reloading of credential '{}' failed - {}", credential.getName(), e.getMessage(), e);
+      Optional.ofNullable(this.reloadFailureCallback).ifPresent(callback -> callback.accept(credential, e));
     }
   }
 
   /**
-   * Assigns the credential that should be monitored.
+   * Assigns a callback function that is invoked if the credential is successfully tested.
    *
-   * @param credential the credential to be monitored
+   * @param testSuccessCallback callback
    */
-  public void setCredential(final ReloadablePkiCredential credential) {
-    this.credentials = Optional.ofNullable(credential).map(Arrays::asList).orElse(null);
-  }
-
-  /**
-   * Assigns the credentials that should be monitored.
-   *
-   * @param credentials the credentials to be monitored
-   */
-  public void setCredentials(final List<ReloadablePkiCredential> credentials) {
-    this.credentials = credentials;
-  }
-
-  /**
-   * Assigns the list of additional credentials that should be reloaded if a test fails.
-   *
-   * @param additionalForReload additional credentials for reload
-   */
-  public void setAdditionalForReload(final List<ReloadablePkiCredential> additionalForReload) {
-    this.additionalForReload = additionalForReload;
+  public void setTestSuccessCallback(final Consumer<ReloadablePkiCredential> testSuccessCallback) {
+    this.testSuccessCallback = testSuccessCallback;
   }
 
   /**
@@ -282,18 +276,6 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean, Init
    */
   public void setReloadFailureCallback(final BiConsumer<ReloadablePkiCredential, Exception> reloadFailureCallback) {
     this.reloadFailureCallback = reloadFailureCallback;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    Assert.notEmpty(this.credentials, "No credentials to monitor supplied");
-    for (final ReloadablePkiCredential c : this.credentials) {
-      if (c.getTestFunction() == null) {
-        log.warn("Configured credential '{}' has no test function associated - no montoring will be performed",
-            c.getName());
-      }
-    }
   }
 
 }
