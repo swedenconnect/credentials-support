@@ -19,10 +19,12 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import se.swedenconnect.security.credential.AbstractPkiCredential;
 import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.KeyStoreReloader;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.config.BaseCredentialConfiguration;
 import se.swedenconnect.security.credential.config.ConfigurationResourceLoader;
 import se.swedenconnect.security.credential.config.DefaultConfigurationResourceLoader;
 import se.swedenconnect.security.credential.config.PemCredentialConfiguration;
@@ -30,7 +32,7 @@ import se.swedenconnect.security.credential.config.PkiCredentialConfiguration;
 import se.swedenconnect.security.credential.config.StoreCredentialConfiguration;
 import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunction;
 import se.swedenconnect.security.credential.pkcs11.Pkcs11KeyStoreReloader;
-import se.swedenconnect.security.credential.utils.PrivateKeyUtils;
+import se.swedenconnect.security.credential.utils.KeyUtils;
 import se.swedenconnect.security.credential.utils.X509Utils;
 
 import java.io.ByteArrayInputStream;
@@ -41,6 +43,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -119,22 +122,42 @@ public class PkiCredentialFactory {
     final ConfigurationResourceLoader rl = Optional.ofNullable(resourceLoader)
         .orElseGet(DefaultConfigurationResourceLoader::new);
 
-    // First handle the certificate(s) ...
+    // First handle the certificate(s)/public keys...
     //
-    if (configuration.certificates() == null) {
-      throw new IllegalArgumentException("No certificate/s assigned");
+    if (configuration.certificates().isPresent() && configuration.publicKey().isPresent()) {
+      throw new IllegalArgumentException("Certificate(s) and public key must not both be present");
     }
 
     final List<X509Certificate> chain;
-    if (X509Utils.isInlinedPem(configuration.certificates())) {
-      try (final InputStream is = new ByteArrayInputStream(configuration.certificates().getBytes())) {
-        chain = X509Utils.decodeCertificateChain(is);
+    final PublicKey publicKey;
+    if (configuration.certificates().isPresent()) {
+      publicKey = null;
+      if (X509Utils.isInlinedPem(configuration.certificates().get())) {
+        try (final InputStream is = new ByteArrayInputStream(configuration.certificates().get().getBytes())) {
+          chain = X509Utils.decodeCertificateChain(is);
+        }
+      }
+      else {
+        try (final InputStream is = rl.getStream(configuration.certificates().get())) {
+          chain = X509Utils.decodeCertificateChain(is);
+        }
+      }
+    }
+    else if (configuration.publicKey().isPresent()) {
+      chain = null;
+      if (KeyUtils.isInlinedPem(configuration.publicKey().get())) {
+        try (final InputStream is = new ByteArrayInputStream(configuration.publicKey().get().getBytes())) {
+          publicKey = KeyUtils.decodePublicKey(is);
+        }
+      }
+      else {
+        try (final InputStream is = rl.getStream(configuration.publicKey().get())) {
+          publicKey = KeyUtils.decodePublicKey(is);
+        }
       }
     }
     else {
-      try (final InputStream is = rl.getStream(configuration.certificates())) {
-        chain = X509Utils.decodeCertificateChain(is);
-      }
+      throw new IllegalArgumentException("Missing Certificate(s) or public key");
     }
 
     // The private key ...
@@ -146,19 +169,22 @@ public class PkiCredentialFactory {
     final char[] keyPassword = configuration.keyPassword()
         .map(String::toCharArray)
         .orElse(null);
-    if (PrivateKeyUtils.isInlinedPem(configuration.privateKey())) {
+    if (KeyUtils.isInlinedPem(configuration.privateKey())) {
       try (final InputStream is = new ByteArrayInputStream(configuration.privateKey().getBytes())) {
-        privateKey = PrivateKeyUtils.decodePrivateKey(is, keyPassword);
+        privateKey = KeyUtils.decodePrivateKey(is, keyPassword);
       }
     }
     else {
       try (final InputStream is = rl.getStream(configuration.privateKey())) {
-        privateKey = PrivateKeyUtils.decodePrivateKey(is, keyPassword);
+        privateKey = KeyUtils.decodePrivateKey(is, keyPassword);
       }
     }
 
-    final BasicCredential credential = new BasicCredential(chain, privateKey);
-    configuration.name().ifPresent(credential::setName);
+    final BasicCredential credential = chain != null
+        ? new BasicCredential(chain, privateKey)
+        : new BasicCredential(publicKey, privateKey);
+
+    assignBaseProperties(configuration, credential);
 
     return credential;
   }
@@ -172,8 +198,8 @@ public class PkiCredentialFactory {
    * @param keyStoreSupplier if store references are used, a function that resolves references to key stores must be
    *     supplied
    * @param keyStoreReloaderSupplier if store references are used, and those key stores are "reloadable", a function
-   *     that resolves references to a {@link KeyStoreReloader} may be supplied. If not, credentials will not be
-   *     reloadable
+   *     that resolves references to a {@link KeyStoreReloader} may be supplied. If not, it will be assumed that the key
+   *     store may be reloaded using the key password (which then must be the same as the store password)
    * @return a {@link PkiCredential}
    * @throws IllegalArgumentException for invalid configuration settings
    * @throws IOException if a referenced file can not be read
@@ -201,7 +227,9 @@ public class PkiCredentialFactory {
         throw new IllegalArgumentException("Both store and store-reference can not be set");
       }
       keyStore = KeyStoreFactory.loadKeyStore(configuration.store().get(), rl);
-      keyStoreReloader = new Pkcs11KeyStoreReloader(configuration.store().get().password().toCharArray());
+      if (KeyStoreFactory.PKCS11_KEYSTORE_TYPE.equalsIgnoreCase(keyStore.getType())) {
+        keyStoreReloader = new Pkcs11KeyStoreReloader(configuration.store().get().password().toCharArray());
+      }
     }
     else if (configuration.storeReference().isPresent()) {
       if (keyStoreSupplier == null) {
@@ -262,26 +290,40 @@ public class PkiCredentialFactory {
     }
 
     final KeyStoreCredential credential = new KeyStoreCredential(keyStore, alias, keyPassword, chain);
-    configuration.name().ifPresent(credential::setName);
+    assignBaseProperties(configuration, credential);
 
     final boolean monitor = configuration.monitor()
         .orElseGet(() -> KeyStoreFactory.PKCS11_KEYSTORE_TYPE.equalsIgnoreCase(keyStore.getType()));
 
     if (monitor) {
-      if (keyStoreReloader != null) {
-        credential.setTestFunction(new DefaultCredentialTestFunction());
-        credential.setReloader(keyStoreReloader);
-      }
-      else {
-        credential.setTestFunction(null);
-        log.warn("Credential '{}' was configured to be monitored, but no reloader is present", credential.getName());
-      }
+      credential.setTestFunction(new DefaultCredentialTestFunction());
+      Optional.ofNullable(keyStoreReloader).ifPresent(credential::setReloader);
     }
     else {
       credential.setTestFunction(null);
     }
 
     return credential;
+  }
+
+  /**
+   * Assigns common credential properties.
+   *
+   * @param configuration the configuration
+   * @param credential the credential to update
+   * @param <T> the credential type
+   */
+  private static <T extends AbstractPkiCredential> void assignBaseProperties(
+      @Nonnull final BaseCredentialConfiguration configuration, @Nonnull final T credential) {
+    configuration.name().ifPresent(credential::setName);
+    configuration.metadata().ifPresent(
+        c -> c.forEach((key, value) -> credential.getMetadata().getProperties().put(key, value)));
+    configuration.keyId().ifPresent(
+        c -> credential.getMetadata().getProperties().put(PkiCredential.Metadata.KEY_ID_PROPERTY, c));
+    configuration.issuedAt().ifPresent(
+        c -> credential.getMetadata().getProperties().put(PkiCredential.Metadata.ISSUED_AT_PROPERTY, c));
+    configuration.expiresAt().ifPresent(
+        c -> credential.getMetadata().getProperties().put(PkiCredential.Metadata.EXPIRES_AT_PROPERTY, c));
   }
 
   // Hidden constructor

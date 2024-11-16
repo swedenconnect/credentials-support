@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import lombok.Setter;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Application main.
@@ -31,6 +32,7 @@ import lombok.Setter;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @SpringBootApplication
+@EnableScheduling
 public class TestApplication implements CommandLineRunner {
 
   @Setter

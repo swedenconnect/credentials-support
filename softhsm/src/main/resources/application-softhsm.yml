@@ -1,0 +1,47 @@
+#
+# Registered key stores and credentials
+#
+credential:
+  bundles:
+    key-store:
+      p11-store:
+        type: PKCS11
+        provider: SunPKCS11
+        password: 1234
+        pkcs11:
+          configuration-file: /opt/credentials-test/conf1.cfg
+    jks:
+      rsa1:
+        name: RSA1
+        store-reference: p11-store
+        monitor: true
+        key:
+          alias: rsa1
+          key-password: 1234
+          certificates: classpath:credentials/rsa1.crt
+      rsa1b:
+        name: RSA1B
+        store-reference: p11-store
+        monitor: true
+        key:
+          alias: rsa1b
+          key-password: 1234
+
+test:
+  # Example of how we use references to inject key stores and credentials in a configuration properties object.
+  keystore: p11-store
+  rsa1: rsa1
+  rsa1b: rsa1b
+  # Example of how we configure a credential "in-place" and do not use a reference. Not receommended ...
+  rsa2:
+    name: RSA2
+    store:
+      type: PKCS11
+      provider: SunPKCS11
+      password: 1234
+      pkcs11:
+        configuration-file: /opt/credentials-test/conf1.cfg
+    key:
+      alias: rsa2
+      key-password: 1234
+    monitor: true

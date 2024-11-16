@@ -31,9 +31,17 @@ public class PemCredentialConfigurationProperties extends AbstractBaseCredential
     PemCredentialConfiguration {
 
   /**
+   * Location or content of the public key in PEM format. This setting is mutually exclusive with the certificates
+   * setting.
+   */
+  @Getter
+  @Setter
+  private String publicKey;
+
+  /**
    * Location or content of the certificate or certificate chain in PEM format. If more than one certificate is
-   * supplied, the entity certificate, i.e., the certificate holding the public key of * the key pair, must be placed
-   * first.
+   * supplied, the entity certificate, i.e., the certificate holding the public key of the key pair, must be placed
+   * first. This setting is mutually exclusive with the public-key setting.
    */
   @Getter
   @Setter
@@ -55,8 +63,14 @@ public class PemCredentialConfigurationProperties extends AbstractBaseCredential
 
   /** {@inheritDoc} */
   @Override
-  public String certificates() {
-    return this.getCertificates();
+  public Optional<String> publicKey() {
+    return Optional.ofNullable(this.publicKey);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Optional<String> certificates() {
+    return Optional.ofNullable(this.certificates);
   }
 
   /** {@inheritDoc} */

@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.security.credential.config;
 
+import jakarta.annotation.Nonnull;
+
 import java.util.Map;
 import java.util.Optional;
 

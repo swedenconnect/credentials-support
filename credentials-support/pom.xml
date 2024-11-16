@@ -73,6 +73,12 @@
       <version>${bc.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>nimbus-jose-jwt</artifactId>
+      <version>9.47</version>
+    </dependency>
+
   </dependencies>
 
   <build>

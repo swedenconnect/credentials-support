@@ -30,6 +30,7 @@ import se.swedenconnect.security.credential.spring.config.SpringConfigurationRes
 
 import java.security.KeyStore;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -68,9 +69,17 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
    * @param configuration the configuration
    */
   public PkiCredentialFactoryBean(@Nonnull final StoreCredentialConfiguration configuration) {
-    this(new PkiCredentialConfigurationProperties());
-    ((PkiCredentialConfigurationProperties) this.configuration).setJks(
-        Objects.requireNonNull(configuration, "configuration must not be null"));
+    this(new PkiCredentialConfiguration() {
+      @Override
+      public Optional<StoreCredentialConfiguration> jks() {
+        return Optional.of(configuration);
+      }
+
+      @Override
+      public Optional<PemCredentialConfiguration> pem() {
+        return Optional.empty();
+      }
+    });
   }
 
   /**
@@ -79,9 +88,18 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
    * @param configuration the configuration
    */
   public PkiCredentialFactoryBean(@Nonnull final PemCredentialConfiguration configuration) {
-    this(new PkiCredentialConfigurationProperties());
-    ((PkiCredentialConfigurationProperties) this.configuration).setPem(
-        Objects.requireNonNull(configuration, "configuration must not be null"));
+    this(new PkiCredentialConfiguration() {
+
+      @Override
+      public Optional<StoreCredentialConfiguration> jks() {
+        return Optional.empty();
+      }
+
+      @Override
+      public Optional<PemCredentialConfiguration> pem() {
+        return Optional.ofNullable(configuration);
+      }
+    });
   }
 
   /**

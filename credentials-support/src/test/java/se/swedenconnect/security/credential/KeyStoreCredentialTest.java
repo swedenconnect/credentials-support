@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-class KeyStoreCredentialTest {
+public class KeyStoreCredentialTest {
 
   private final static char[] PW = "secret".toCharArray();
   private final static String ALIAS = "test";
@@ -153,14 +153,14 @@ class KeyStoreCredentialTest {
     }
   }
 
-  private static void initPkcs11Mock() {
+  public static void initPkcs11Mock() {
     Security.insertProviderAt(new MockSunPkcs11Provider(), 1);
 
     // We let rsa1.jks simulate our PKCS#11 device
     MockSunPkcs11Provider.MockedPkcs11ResourceHolder.getInstance().setResource(new ClassPathResource("rsa1.jks"));
   }
 
-  private static void cleanupPkcs11Mock() {
+  public static void cleanupPkcs11Mock() {
     Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
 
     final Provider[] providers = Security.getProviders();

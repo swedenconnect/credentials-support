@@ -28,7 +28,9 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -312,6 +314,8 @@ public class DefaultCredentialMonitorBeanTest {
 
   public static class TestCredential implements ReloadablePkiCredential {
 
+    private final Metadata metadata;
+
     @Setter
     private String name = "TestCredential";
 
@@ -324,9 +328,19 @@ public class DefaultCredentialMonitorBeanTest {
     private Function<ReloadablePkiCredential, Exception> testFunction;
 
     public TestCredential() {
+      this.metadata = new Metadata() {
+        private final Map<String, Object> properties = new HashMap<>();
+
+        @Nonnull
+        @Override
+        public Map<String, Object> getProperties() {
+          return this.properties;
+        }
+      };
     }
 
     public TestCredential(final String name) {
+      this();
       this.name = name;
     }
 
@@ -374,6 +388,12 @@ public class DefaultCredentialMonitorBeanTest {
     @Nonnull
     public PrivateKey getPrivateKey() {
       return null;
+    }
+
+    @Nonnull
+    @Override
+    public Metadata getMetadata() {
+      return this.metadata;
     }
 
     @Override

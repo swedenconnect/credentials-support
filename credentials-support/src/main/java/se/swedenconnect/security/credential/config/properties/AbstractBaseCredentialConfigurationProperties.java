@@ -19,6 +19,9 @@ import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.security.credential.config.BaseCredentialConfiguration;
 
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -35,10 +38,61 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
   @Getter
   private String name;
 
+  /**
+   * Key identifier metadata property.
+   */
+  @Setter
+  @Getter
+  private String keyId;
+
+  /**
+   * Issued-at metadata property.
+   */
+  @Setter
+  @Getter
+  private Instant issuedAt;
+
+  /**
+   * Expires-at metadata property.
+   */
+  @Setter
+  @Getter
+  private Instant expiresAt;
+
+  /**
+   * Metadata properties.
+   */
+  @Getter
+  private final Map<String, String> metadata = new HashMap<>();
+
   /** {@inheritDoc} */
   @Override
   public Optional<String> name() {
     return Optional.ofNullable(this.getName());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Optional<String> keyId() {
+    return Optional.ofNullable(this.getKeyId());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Optional<Instant> issuedAt() {
+    return Optional.ofNullable(this.getIssuedAt());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Optional<Instant> expiresAt() {
+    return Optional.ofNullable(this.getExpiresAt());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Optional<Map<String, String>> metadata() {
+    return Optional.of(this.getMetadata());
   }
 
 }

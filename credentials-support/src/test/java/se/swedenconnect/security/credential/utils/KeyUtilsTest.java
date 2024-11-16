@@ -34,11 +34,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Test cases for PrivateKeyUtils.
+ * Test cases for KeyUtils.
  *
  * @author Martin Lindström
  */
-class PrivateKeyUtilsTest {
+class KeyUtilsTest {
 
   @BeforeAll
   static void setUp() {
@@ -49,96 +49,140 @@ class PrivateKeyUtilsTest {
 
   @Test
   void testIsInlinedPem() throws Exception {
-    assertFalse(PrivateKeyUtils.isInlinedPem("classpath:file.key"));
-    assertTrue(PrivateKeyUtils.isInlinedPem(new String(getResourceBytes(new ClassPathResource("rsa1.openssl.key")))));
+    assertFalse(KeyUtils.isInlinedPem("classpath:file.key"));
+    assertTrue(KeyUtils.isInlinedPem(new String(getResourceBytes(new ClassPathResource("rsa1.openssl.key")))));
+  }
+
+  @Test
+  void testRsaPemPublicKey() throws Exception {
+    final byte[] contents = getResourceBytes(new ClassPathResource("rsa1.pubkey.pem"));
+    try (final InputStream is = new ByteArrayInputStream(contents)) {
+      assertNotNull(KeyUtils.decodePublicKey(is));
+    }
+    assertNotNull(KeyUtils.decodePublicKey(contents));
+  }
+
+  @Test
+  void testRsaDerPublicKey() throws Exception {
+    final byte[] contents = getResourceBytes(new ClassPathResource("rsa1.pubkey.der"));
+    try (final InputStream is = new ByteArrayInputStream(contents)) {
+      assertNotNull(KeyUtils.decodePublicKey(is));
+    }
+    assertNotNull(KeyUtils.decodePublicKey(contents));
+  }
+
+  @Test
+  void testEcPemPublicKey() throws Exception {
+    final byte[] contents = getResourceBytes(new ClassPathResource("ec.pubkey.pem"));
+    try (final InputStream is = new ByteArrayInputStream(contents)) {
+      assertNotNull(KeyUtils.decodePublicKey(is));
+    }
+    assertNotNull(KeyUtils.decodePublicKey(contents));
+  }
+
+  @Test
+  void testEcDerPublicKey() throws Exception {
+    final byte[] contents = getResourceBytes(new ClassPathResource("ec.pubkey.der"));
+    try (final InputStream is = new ByteArrayInputStream(contents)) {
+      assertNotNull(KeyUtils.decodePublicKey(is));
+    }
+    assertNotNull(KeyUtils.decodePublicKey(contents));
   }
 
   @Test
   void testOpenSslRsaKey() throws Exception {
     final byte[] contents = getResourceBytes(new ClassPathResource("rsa1.openssl.key"));
     try (final InputStream is = new ByteArrayInputStream(contents)) {
-      assertNotNull(PrivateKeyUtils.decodePrivateKey(is));
+      assertNotNull(KeyUtils.decodePrivateKey(is));
     }
-    assertNotNull(PrivateKeyUtils.decodePrivateKey(contents));
+    assertNotNull(KeyUtils.decodePrivateKey(contents));
   }
 
   @Test
   void testEncryptedOpenSslRsaKey() throws Exception {
     final byte[] contents = getResourceBytes(new ClassPathResource("rsa1.openssl.enc.key"));
     try (final InputStream is = new ByteArrayInputStream(contents)) {
-      assertNotNull(PrivateKeyUtils.decodePrivateKey(is, "secret".toCharArray()));
+      assertNotNull(KeyUtils.decodePrivateKey(is, "secret".toCharArray()));
     }
-    assertNotNull(PrivateKeyUtils.decodePrivateKey(contents, "secret".toCharArray()));
+    assertNotNull(KeyUtils.decodePrivateKey(contents, "secret".toCharArray()));
   }
 
   @Test
   void testPkcs8RsaKey() throws Exception {
     final byte[] contents = getResourceBytes(new ClassPathResource("rsa1.pkcs8.key"));
     try (final InputStream is = new ByteArrayInputStream(contents)) {
-      assertNotNull(PrivateKeyUtils.decodePrivateKey(is));
+      assertNotNull(KeyUtils.decodePrivateKey(is));
     }
-    assertNotNull(PrivateKeyUtils.decodePrivateKey(contents));
+    assertNotNull(KeyUtils.decodePrivateKey(contents));
   }
 
   @Test
   void testEncryptedPkcs8RsaKey() throws Exception {
     final byte[] contents = getResourceBytes(new ClassPathResource("rsa1.pkcs8.enc.key"));
     try (final InputStream is = new ByteArrayInputStream(contents)) {
-      assertNotNull(PrivateKeyUtils.decodePrivateKey(is, "secret".toCharArray()));
+      assertNotNull(KeyUtils.decodePrivateKey(is, "secret".toCharArray()));
     }
-    assertNotNull(PrivateKeyUtils.decodePrivateKey(contents, "secret".toCharArray()));
+    assertNotNull(KeyUtils.decodePrivateKey(contents, "secret".toCharArray()));
   }
 
   @Test
   void testOpenSslEcKey() throws Exception {
     final byte[] contents = getResourceBytes(new ClassPathResource("ec.openssl.key"));
     try (final InputStream is = new ByteArrayInputStream(contents)) {
-      assertNotNull(PrivateKeyUtils.decodePrivateKey(is));
+      assertNotNull(KeyUtils.decodePrivateKey(is));
     }
-    assertNotNull(PrivateKeyUtils.decodePrivateKey(contents));
+    assertNotNull(KeyUtils.decodePrivateKey(contents));
   }
 
   @Test
   void testEncryptedOpenSslEcKey() throws Exception {
     final byte[] contents = getResourceBytes(new ClassPathResource("ec.openssl.enc.key"));
     try (final InputStream is = new ByteArrayInputStream(contents)) {
-      assertNotNull(PrivateKeyUtils.decodePrivateKey(is, "secret".toCharArray()));
+      assertNotNull(KeyUtils.decodePrivateKey(is, "secret".toCharArray()));
     }
-    assertNotNull(PrivateKeyUtils.decodePrivateKey(contents, "secret".toCharArray()));
+    assertNotNull(KeyUtils.decodePrivateKey(contents, "secret".toCharArray()));
   }
 
   @Test
   void testPkcs8EcKey() throws Exception {
     final byte[] contents = getResourceBytes(new ClassPathResource("ec.pkcs8.key"));
     try (final InputStream is = new ByteArrayInputStream(contents)) {
-      assertNotNull(PrivateKeyUtils.decodePrivateKey(is));
+      assertNotNull(KeyUtils.decodePrivateKey(is));
     }
-    assertNotNull(PrivateKeyUtils.decodePrivateKey(contents));
+    assertNotNull(KeyUtils.decodePrivateKey(contents));
   }
 
   @Test
   void testEncryptedPkcs8EcKey() throws Exception {
     final byte[] contents = getResourceBytes(new ClassPathResource("ec.pkcs8.enc.key"));
     try (final InputStream is = new ByteArrayInputStream(contents)) {
-      assertNotNull(PrivateKeyUtils.decodePrivateKey(is, "secret".toCharArray()));
+      assertNotNull(KeyUtils.decodePrivateKey(is, "secret".toCharArray()));
     }
-    assertNotNull(PrivateKeyUtils.decodePrivateKey(contents, "secret".toCharArray()));
+    assertNotNull(KeyUtils.decodePrivateKey(contents, "secret".toCharArray()));
   }
 
   @Test
   void testEncodingError() throws Exception {
-    assertThrows(KeyException.class, () -> PrivateKeyUtils.decodePrivateKey("NOT A KEY".getBytes()));
+    assertThrows(KeyException.class, () -> KeyUtils.decodePrivateKey("NOT A KEY".getBytes()));
     try (final InputStream is = new ByteArrayInputStream("not a key".getBytes())) {
-      assertThrows(KeyException.class, () -> PrivateKeyUtils.decodePrivateKey(is));
+      assertThrows(KeyException.class, () -> KeyUtils.decodePrivateKey(is));
+    }
+  }
+
+  @Test
+  void testEncodingError2() throws Exception {
+    assertThrows(KeyException.class, () -> KeyUtils.decodePublicKey("NOT A KEY".getBytes()));
+    try (final InputStream is = new ByteArrayInputStream("not a key".getBytes())) {
+      assertThrows(KeyException.class, () -> KeyUtils.decodePrivateKey(is));
     }
   }
 
   @Test
   void testBadPassword() throws Exception {
     final byte[] contents = getResourceBytes(new ClassPathResource("ec.pkcs8.enc.key"));
-    assertThrows(KeyException.class, () -> PrivateKeyUtils.decodePrivateKey(contents, "bad".toCharArray()));
+    assertThrows(KeyException.class, () -> KeyUtils.decodePrivateKey(contents, "bad".toCharArray()));
     try (final InputStream is = new ByteArrayInputStream("not a key".getBytes())) {
-      assertThrows(KeyException.class, () -> PrivateKeyUtils.decodePrivateKey(is));
+      assertThrows(KeyException.class, () -> KeyUtils.decodePrivateKey(is));
     }
   }
 
@@ -146,12 +190,20 @@ class PrivateKeyUtilsTest {
   void testIoError() throws Exception {
     try (final InputStream is = Mockito.mock(InputStream.class)) {
       Mockito.when(is.readAllBytes()).thenThrow(new IOException("test"));
-      Exception e = assertThrows(KeyException.class, () -> PrivateKeyUtils.decodePrivateKey(is));
+      Exception e = assertThrows(KeyException.class, () -> KeyUtils.decodePrivateKey(is));
       assertTrue(e.getCause() instanceof IOException);
-      e = assertThrows(KeyException.class, () -> PrivateKeyUtils.decodePrivateKey(is, "bad".toCharArray()));
+      e = assertThrows(KeyException.class, () -> KeyUtils.decodePrivateKey(is, "bad".toCharArray()));
       assertTrue(e.getCause() instanceof IOException);
     }
+  }
 
+  @Test
+  void testIoError2() throws Exception {
+    try (final InputStream is = Mockito.mock(InputStream.class)) {
+      Mockito.when(is.readAllBytes()).thenThrow(new IOException("test"));
+      final Exception e = assertThrows(KeyException.class, () -> KeyUtils.decodePublicKey(is));
+      assertTrue(e.getCause() instanceof IOException);
+    }
   }
 
   private static byte[] getResourceBytes(final Resource resource) throws IOException {

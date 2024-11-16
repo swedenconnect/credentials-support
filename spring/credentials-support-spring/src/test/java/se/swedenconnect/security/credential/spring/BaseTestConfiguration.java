@@ -19,6 +19,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesBindin
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import se.swedenconnect.security.credential.spring.converters.PropertyToPrivateKeyConverter;
+import se.swedenconnect.security.credential.spring.converters.PropertyToPublicKeyConverter;
 import se.swedenconnect.security.credential.spring.converters.PropertyToX509CertificateConverter;
 
 /**
@@ -33,6 +34,12 @@ public class BaseTestConfiguration {
   @ConfigurationPropertiesBinding
   public PropertyToPrivateKeyConverter propertyToPrivateKeyConverter() {
     return new PropertyToPrivateKeyConverter();
+  }
+
+  @Bean
+  @ConfigurationPropertiesBinding
+  public PropertyToPublicKeyConverter propertyToPublicKeyConverter() {
+    return new PropertyToPublicKeyConverter();
   }
 
   @Bean

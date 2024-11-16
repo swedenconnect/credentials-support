@@ -1,0 +1,37 @@
+#
+# Registered key stores and credentials
+#
+credential:
+  bundles:
+    key-store:
+      rsa-store:
+        location: classpath:credentials/credentials.jks
+        type: JKS
+        password: secret
+    pem:
+      rsa1:
+        name: RSA1
+        certificates: classpath:credentials/rsa1.crt
+        private-key: classpath:credentials/rsa1.key
+    jks:
+      rsa1b:
+        name: RSA1B
+        store-reference: rsa-store
+        key:
+          alias: rsa1b
+          key-password: secret
+
+test:
+  # Example of how we use references to inject key stores and credentials in a configuration properties object.
+  keystore: rsa-store
+  rsa1: rsa1
+  rsa1b: rsa1b
+  # Example of how we configure a credential "in-place" and do not use a reference. Not receommended ...
+  rsa2:
+    jks:
+      name: RSA2
+      store:
+        location: classpath:credentials/credentials.jks
+        password: secret
+      key:
+        alias: rsa2

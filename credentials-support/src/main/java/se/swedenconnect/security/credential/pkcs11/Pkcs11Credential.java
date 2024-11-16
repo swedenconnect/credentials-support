@@ -109,6 +109,10 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
     final DefaultCredentialTestFunction testFunction = new DefaultCredentialTestFunction();
     testFunction.setProvider(provider.getName());
     this.setTestFunction(testFunction);
+
+    // Finally, update metadata properties with settings for issued-at and expires-at ...
+    //
+    this.updateMetadataValidityProperties();
   }
 
   /**

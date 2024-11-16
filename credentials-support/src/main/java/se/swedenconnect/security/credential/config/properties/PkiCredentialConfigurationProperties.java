@@ -39,14 +39,14 @@ public class PkiCredentialConfigurationProperties implements PkiCredentialConfig
    */
   @Getter
   @Setter
-  private StoreCredentialConfiguration jks;
+  private StoreCredentialConfigurationProperties jks;
 
   /**
    * Configuration for a PEM-based credential.
    */
   @Getter
   @Setter
-  private PemCredentialConfiguration pem;
+  private PemCredentialConfigurationProperties pem;
 
   /** {@inheritDoc} */
   @Override

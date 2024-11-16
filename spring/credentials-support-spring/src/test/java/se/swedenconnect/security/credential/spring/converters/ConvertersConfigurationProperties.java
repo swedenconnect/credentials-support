@@ -19,6 +19,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 /**
@@ -35,4 +36,8 @@ public class ConvertersConfigurationProperties {
   private PrivateKey opensslKey;
 
   private X509Certificate cert;
+
+  private PublicKey publicKey;
+
+  private PublicKey publicKey2;
 }

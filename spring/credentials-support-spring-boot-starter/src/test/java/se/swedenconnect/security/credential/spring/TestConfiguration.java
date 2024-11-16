@@ -39,4 +39,9 @@ public class TestConfiguration {
     return new TestObject(this.properties.getObject1());
   }
 
+  @Bean("testobject3b")
+  TestObject testObject3b() {
+    return new TestObject(this.properties.getObject3b());
+  }
+
 }

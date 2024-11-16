@@ -48,11 +48,13 @@ import se.swedenconnect.security.credential.spring.converters.PropertyToX509Cert
 import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
+import java.time.Instant;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * @author Martin Lindström
@@ -133,6 +135,10 @@ class ApplicationTest {
     final PkiCredential test3 = bundles.getCredential("test3");
     assertEquals("Test3", test3.getName());
 
+    final PkiCredential test3b = bundles.getCredential("test3b");
+    assertEquals("Test3b", test3b.getName());
+    assertNull(test3b.getCertificate());
+
     final PkiCredential test4 = bundles.getCredential("test4");
     assertEquals("Test4", test4.getName());
 
@@ -142,6 +148,17 @@ class ApplicationTest {
     final PkiCredential testP11 = bundles.getCredential("testP11");
     assertEquals("TestPkcs11", testP11.getName());
 
+  }
+
+  @DisplayName("Tests that metadata properties are assigned")
+  @Test
+  void testMetadata() {
+    final CredentialBundles bundles = this.applicationContext.getBean(CredentialBundles.class);
+    final PkiCredential test1 = bundles.getCredential("test1");
+
+    assertEquals("123456", test1.getMetadata().getKeyId());
+    assertEquals("RSA", test1.getMetadata().getProperties().get("algorithm"));
+    assertEquals(Instant.parse("2024-11-15T14:08:26Z"), test1.getMetadata().getIssuedAt());
   }
 
   @DisplayName("Tests that monitoring and health endpoint handles test failures")

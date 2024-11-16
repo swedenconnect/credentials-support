@@ -91,6 +91,7 @@ public class BasicCredential extends AbstractPkiCredential {
     if (!KeyPairUtil.isKeyPair(this.getCertificate().getPublicKey(), privateKey)) {
       throw new IllegalArgumentException("Public key from certificate and private key do not make up a valid key pair");
     }
+    this.updateMetadataValidityProperties();
   }
 
   /**
@@ -112,6 +113,7 @@ public class BasicCredential extends AbstractPkiCredential {
       throw new IllegalArgumentException(
           "Public key from entity certificate and private key do not make up a valid key pair");
     }
+    this.updateMetadataValidityProperties();
   }
 
   /** {@inheritDoc} */

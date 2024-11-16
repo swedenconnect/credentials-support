@@ -56,7 +56,7 @@ class PkiCredentialFactoryBeanTest {
     final PkiCredentialConfigurationProperties cp = new PkiCredentialConfigurationProperties();
     cp.setPem(properties);
 
-    final PkiCredentialFactoryBean factory2 = new PkiCredentialFactoryBean(properties);
+    final PkiCredentialFactoryBean factory2 = new PkiCredentialFactoryBean(cp);
     factory2.afterPropertiesSet();
 
     final PkiCredential credential2 = factory2.getObject();

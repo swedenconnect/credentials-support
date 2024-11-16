@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,111 +15,62 @@
  */
 package se.swedenconnect.security.credential.test;
 
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-
-import lombok.Setter;
-import se.swedenconnect.security.credential.BasicCredential;
-import se.swedenconnect.security.credential.KeyStoreCredential;
-import se.swedenconnect.security.credential.Pkcs11Credential;
 import se.swedenconnect.security.credential.PkiCredential;
-import se.swedenconnect.security.credential.converters.PropertyToPrivateKeyConverter;
-import se.swedenconnect.security.credential.converters.PropertyToX509CertificateConverter;
-import se.swedenconnect.security.credential.factory.KeyStoreFactoryBean;
+import se.swedenconnect.security.credential.bundle.CredentialBundles;
+import se.swedenconnect.security.credential.config.ConfigurationResourceLoader;
+import se.swedenconnect.security.credential.factory.PkiCredentialFactory;
 import se.swedenconnect.security.credential.opensaml.OpenSamlCredential;
+
+import java.security.KeyStore;
 
 /**
  * Configuration of credentials ...
  *
  * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
  */
 @Configuration
+@EnableConfigurationProperties(TestConfigurationProperties.class)
 public class TestConfiguration {
 
-  /**
-   * Gets the {@link PropertyToX509CertificateConverter} that enables us to point to a certificate on file from a
-   * properties file and get a {@link X509Certificate} injected.
-   *
-   * @return the PropertyToX509CertificateConverter bean
-   */
-  @Bean
-  @ConfigurationPropertiesBinding
-  PropertyToX509CertificateConverter propertyToX509CertificateConverter() {
-    return new PropertyToX509CertificateConverter();
+  private final TestConfigurationProperties properties;
+  private final ConfigurationResourceLoader resourceLoader;
+  private final CredentialBundles credentialBundles;
+
+  public TestConfiguration(final TestConfigurationProperties properties,
+      final ConfigurationResourceLoader resourceLoader, final CredentialBundles credentialBundles) {
+    this.properties = properties;
+    this.resourceLoader = resourceLoader;
+    this.credentialBundles = credentialBundles;
   }
 
-  /**
-   * Gets the {@link PropertyToPrivateKeyConverter} that enables us to point to a (non-encrypted) private key of file
-   * from a properties file and get a {@link PrivateKey} injected.
-   *
-   * @return a PropertyToPrivateKeyConverter bean
-   */
-  @Bean
-  @ConfigurationPropertiesBinding
-  PropertyToPrivateKeyConverter propertyToPrivateKeyConverter() {
-    return new PropertyToPrivateKeyConverter();
-  }
-
-  @Configuration
-  @Profile("!softhsm")
-  @ConfigurationProperties("test.credential")
-  public static class DefaultConfiguration {
-
-    @Setter
-    private BasicCredential rsa1;
-
-    @Bean("rsa1")
-    PkiCredential rsa1() {
-      return this.rsa1;
-    }
-  }
-
-  @Configuration
-  @Profile("softhsm")
-  @ConfigurationProperties("test.credential")
-  public static class Pkcs11Configuration {
-
-    @Setter
-    private Pkcs11Credential rsa1;
-
-    @Bean("rsa1")
-    PkiCredential rsa1() {
-      return this.rsa1;
-    }
+  @Bean("rsa1")
+  PkiCredential rsa1() {
+    return this.properties.getRsa1().get();
   }
 
   @Bean("rsa1_OpenSaml")
-  OpenSamlCredential rsa1OpenSaml(@Qualifier("rsa1") final PkiCredential credential) {
+  OpenSamlCredential rsa1OpenSaml(@Qualifier(value = "rsa1") final PkiCredential credential) {
     return new OpenSamlCredential(credential);
   }
 
   @Bean("rsa1b")
-  @ConfigurationProperties("test.credential.rsa1b")
   PkiCredential rsa1b() {
-    return new KeyStoreCredential();
+    return this.properties.getRsa1b().get();
   }
 
-  @Bean("rsa1bb")
-  @ConfigurationProperties("test.credential.rsa1bb")
-  PkiCredential rsa1bb(final KeyStore keyStore) {
-    KeyStoreCredential cred = new KeyStoreCredential();
-    cred.setKeyStore(keyStore);
-    return cred;
+  @Bean("rsa2")
+  PkiCredential rsa2() throws Exception {
+    return PkiCredentialFactory.createCredential(this.properties.getRsa2(), this.resourceLoader,
+        this.credentialBundles::getKeyStore, null);
   }
 
   @Bean("keyStore")
-  @ConfigurationProperties("test.keystore")
-  KeyStoreFactoryBean keyStore() {
-    return new KeyStoreFactoryBean();
+  KeyStore keyStore() {
+    return this.properties.getKeystore().get();
   }
 
 }

@@ -24,6 +24,7 @@ import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,6 +68,32 @@ class BasicCredentialTest {
     assertNotNull(cred.getPrivateKey());
     assertNotNull(cred.getPublicKey());
     assertNull(cred.getCertificate());
+    assertTrue(cred.getMetadata().getProperties().isEmpty());
+  }
+
+  @Test
+  void testCertificate() {
+    final BasicCredential cred = new BasicCredential(this.cert, this.privateKey);
+    assertNotNull(cred.getPrivateKey());
+    assertNotNull(cred.getPublicKey());
+    assertNotNull(cred.getCertificate());
+    assertEquals(2, cred.getMetadata().getProperties().size());
+  }
+
+  @Test
+  void testMetadata() {
+    final BasicCredential cred = new BasicCredential(this.cert, this.privateKey);
+    final Instant issuedAt = Instant.ofEpochMilli(1668521306L);
+    final Instant expiresAt = Instant.ofEpochMilli(1794751706L);
+    cred.getMetadata().getProperties().put(PkiCredential.Metadata.ISSUED_AT_PROPERTY, issuedAt);
+    cred.getMetadata().getProperties().put(PkiCredential.Metadata.EXPIRES_AT_PROPERTY, expiresAt);
+    cred.getMetadata().getProperties().put(PkiCredential.Metadata.KEY_ID_PROPERTY, "12345");
+    cred.getMetadata().getProperties().put("foo", "ABC");
+
+    assertEquals("12345", cred.getMetadata().getKeyId());
+    assertEquals(issuedAt, cred.getMetadata().getIssuedAt());
+    assertEquals(expiresAt, cred.getMetadata().getExpiresAt());
+    assertEquals("ABC", cred.getMetadata().getProperties().get("foo"));
   }
 
   @Test

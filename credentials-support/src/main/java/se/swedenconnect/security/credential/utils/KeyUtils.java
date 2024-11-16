@@ -24,25 +24,63 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
- * Utility methods for handling private keys.
+ * Utility methods for handling public and private keys.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class PrivateKeyUtils {
+public class KeyUtils {
 
   /**
-   * When configuring the use of credentials and when a private key is configured, normally, the location of the key
-   * file is given. But we also allow to give the key "inline", i.e., to enter its PEM-encoding. This method can be used
-   * to find out whether a location string holds an inlined PEM-encoded private key.
+   * When configuring the use of credentials and when a key is configured, normally, the location of the key file is
+   * given. But we also allow to give the key "inline", i.e., to enter its PEM-encoding. This method can be used to find
+   * out whether a location string holds an inlined PEM-encoded key.
    *
    * @param location location configuration setting
    * @return {@code true} if the given string holds a PEM-encoding and {@code false} otherwise
    */
   public static boolean isInlinedPem(@Nonnull final String location) {
     return X509Utils.isInlinedPem(location);
+  }
+
+  /**
+   * Decodes a public key in DER or PEM format.
+   *
+   * @param bytes the key bytes
+   * @return the decoded public key
+   * @throws KeyException for decoding errors
+   */
+  @Nonnull
+  public static PublicKey decodePublicKey(@Nonnull final byte[] bytes) throws KeyException {
+    try {
+      return KeyPairUtil.decodePublicKey(bytes);
+    }
+    catch (final Exception e) {
+      throw new KeyException(e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Decodes a public key in DER or PEM format.
+   * <p>
+   * The method does not close the input stream.
+   * </p>
+   *
+   * @param stream the input stream
+   * @return the decoded public key
+   * @throws KeyException for decoding errors
+   */
+  @Nonnull
+  public static PublicKey decodePublicKey(@Nonnull final InputStream stream) throws KeyException {
+    try {
+      return decodePublicKey(stream.readAllBytes());
+    }
+    catch (final IOException e) {
+      throw new KeyException("IO error", e);
+    }
   }
 
   /**
@@ -57,7 +95,7 @@ public class PrivateKeyUtils {
     try {
       return KeyPairUtil.decodePrivateKey(bytes);
     }
-    catch (final EncodingException e) {
+    catch (final Exception e) {
       throw new KeyException(e.getMessage(), e);
     }
   }
@@ -80,7 +118,7 @@ public class PrivateKeyUtils {
     try {
       return KeyPairUtil.decodePrivateKey(bytes, password);
     }
-    catch (final EncodingException e) {
+    catch (final Exception e) {
       throw new KeyException(e.getMessage(), e);
     }
   }
@@ -128,7 +166,7 @@ public class PrivateKeyUtils {
   }
 
   // Hidden
-  private PrivateKeyUtils() {
+  private KeyUtils() {
   }
 
 }

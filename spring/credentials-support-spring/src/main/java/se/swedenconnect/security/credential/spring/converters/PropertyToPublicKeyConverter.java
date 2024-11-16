@@ -22,14 +22,11 @@ import se.swedenconnect.security.credential.utils.KeyUtils;
 
 import java.io.InputStream;
 import java.security.KeyException;
-import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
- * A {@link Converter} that gets the property value (e.g., {@code classpath:signing.key}) and instantiates a
- * {@link PrivateKey} object.
- * <p>
- * Note: The converter only handles non-encrypted private keys in DER, PEM, and PKCS#8 formats.
- * </p>
+ * A {@link Converter} that gets the property value (e.g., {@code classpath:trust.key}) and instantiates a
+ * {@link PublicKey} object.
  * <p>
  * To use this converter it has to be instantiated as a bean and then registered in the registry using
  * {@link ConverterRegistry#addConverter(Converter)}.
@@ -41,21 +38,21 @@ import java.security.PrivateKey;
  * <pre>
  * &#64;Bean
  * &#64;ConfigurationPropertiesBinding
- * public PropertyToPrivateKeyConverter propertyToPrivateKeyConverter() {
- *   return new PropertyToPrivateKeyConverter();
+ * public PropertyToPublicKeyConverter propertyToPublicKeyConverter() {
+ *   return new PropertyToPublicKeyConverter();
  * }
  * </pre>
  *
  * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
  */
-public class PropertyToPrivateKeyConverter extends AbstractResourcePropertyConverter<PrivateKey> {
+public class PropertyToPublicKeyConverter extends AbstractResourcePropertyConverter<PublicKey>
+    implements Converter<String, PublicKey> {
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public PrivateKey convert(@Nonnull final InputStream inputStream) throws KeyException {
-    return KeyUtils.decodePrivateKey(inputStream);
+  public PublicKey convert(@Nonnull final InputStream inputStream) throws KeyException {
+    return KeyUtils.decodePublicKey(inputStream);
   }
 
 }

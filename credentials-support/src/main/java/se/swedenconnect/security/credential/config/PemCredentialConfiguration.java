@@ -15,15 +15,27 @@
  */
 package se.swedenconnect.security.credential.config;
 
+import jakarta.annotation.Nonnull;
+
 import java.util.Optional;
 
 /**
  * Configuration interface for creating a {@link se.swedenconnect.security.credential.PkiCredential PkiCredential} using
- * PEM-encoded certificate(s) and private keys.
+ * PEM-encoded certificate(s)/public keys and private keys.
  *
  * @author Martin Lindström
  */
 public interface PemCredentialConfiguration extends BaseCredentialConfiguration {
+
+  /**
+   * Location or content of the public key in PEM format.
+   * <p>
+   * This setting is mutually exclusive with the {@link #certificates()} setting.
+   * </p>
+   *
+   * @return the location or content of the public key
+   */
+  Optional<String> publicKey();
 
   /**
    * Location or content of the certificate or certificate chain in PEM format.
@@ -31,10 +43,13 @@ public interface PemCredentialConfiguration extends BaseCredentialConfiguration 
    * If more than one certificate is supplied, the entity certificate, i.e., the certificate holding the public key of
    * the key pair, must be placed first.
    * </p>
+   * <p>
+   * This setting is mutually exclusive with the {@link #publicKey()} setting.
+   * </p>
    *
    * @return the location or content of the certificate or certificate chain in PEM format
    */
-  String certificates();
+  Optional<String> certificates();
 
   /**
    * Location or content of the private key in PEM format.

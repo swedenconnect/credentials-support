@@ -15,6 +15,8 @@
  */
 package se.swedenconnect.security.credential.config;
 
+import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -31,5 +33,33 @@ public interface BaseCredentialConfiguration {
    * @return the name of the credential
    */
   Optional<String> name();
+
+  /**
+   * Metadata property for key identifier.
+   *
+   * @return property for key identifier
+   */
+  Optional<String> keyId();
+
+  /**
+   * Metadata property for issued-at.
+   *
+   * @return property for issued-at
+   */
+  Optional<Instant> issuedAt();
+
+  /**
+   * Metadata property for expires-at.
+   *
+   * @return property for expires-at
+   */
+  Optional<Instant> expiresAt();
+
+  /**
+   * Additional metadata properties.
+   *
+   * @return additional metadata properties
+   */
+  Optional<Map<String, String>> metadata();
 
 }

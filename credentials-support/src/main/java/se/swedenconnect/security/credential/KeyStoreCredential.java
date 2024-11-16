@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
 import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunction;
+import se.swedenconnect.security.credential.pkcs11.Pkcs11KeyStoreReloader;
 
 import java.security.Key;
 import java.security.KeyStore;
@@ -39,11 +40,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * A {@link KeyStore} implementation of the {@link se.swedenconnect.security.credential.PkiCredential} and
+ * A {@link java.security.KeyStore} implementation of the {@link se.swedenconnect.security.credential.PkiCredential} and
  * {@link se.swedenconnect.security.credential.ReloadablePkiCredential} interfaces.
  * <p>
- * The constructors expect a loaded, and unlocked, {@link KeyStore}. See {@link KeyStoreFactory} for methods to load a
- * {@link KeyStore}.
+ * The constructors expect a loaded, and unlocked, {@link java.security.KeyStore}. See
+ * {@link se.swedenconnect.security.credential.factory.KeyStoreFactory} for methods to load a {@link KeyStore}.
  * </p>
  *
  * @author Martin Lindström (martin@idsec.se)
@@ -140,6 +141,10 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
             "Public key from entity certificate and private key do not make up a valid key pair");
       }
     }
+
+    // Finally, update metadata properties with settings for issued-at and expires-at ...
+    //
+    this.updateMetadataValidityProperties();
   }
 
   /** {@inheritDoc} */
@@ -215,6 +220,18 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   }
 
   /**
+   * Returns the key store reloader and creates a default one if it has not been installed (for hardware tokens).
+   *
+   * @return the {@link KeyStoreReloader}
+   */
+  private synchronized KeyStoreReloader getReloader() {
+    if (this.reloader == null && this.isHardwareCredential()) {
+      this.reloader = new Pkcs11KeyStoreReloader(this.keyPassword);
+    }
+    return this.reloader;
+  }
+
+  /**
    * If the {@code KeyStoreCredential} is of PKCS#11 type, and a {@link KeyStoreReloader} has been installed, the method
    * will reload the private key.
    */
@@ -224,26 +241,26 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
     // Note: We log only on trace level since the monitor driving the reloading is responsible
     // for the actual logging.
     //
-    if (this.isHardwareCredential()) {
-      // Reload ...
-      if (this.reloader != null) {
-        try {
-          log.trace("Reloading private key of credential '{}' ...", this.getName());
-          this.reloader.reload(this.keyStore);
+    // Reload ...
+    //
+    final KeyStoreReloader keyStoreReloader = this.getReloader();
+    if (keyStoreReloader != null) {
+      try {
+        log.trace("Reloading private key of credential '{}' ...", this.getName());
+        keyStoreReloader.reload(this.keyStore);
 
-          // Now, access the private key ...
-          this.getPrivateKey();
+        // Now, access the private key ...
+        this.getPrivateKey();
 
-          log.trace("Reloading private key of credential '{}' successful", this.getName());
-        }
-        catch (final Exception e) {
-          log.trace("Failed to reload private key - {}", e.getMessage(), e);
-          throw e;
-        }
+        log.trace("Reloading private key of credential '{}' successful", this.getName());
       }
-      else {
-        throw new SecurityException("No reload function installed for credential '%s'".formatted(this.getName()));
+      catch (final Exception e) {
+        log.trace("Failed to reload private key - {}", e.getMessage(), e);
+        throw e;
       }
+    }
+    else if (this.isHardwareCredential()) {
+      throw new SecurityException("No reload function installed for credential '%s'".formatted(this.getName()));
     }
   }
 

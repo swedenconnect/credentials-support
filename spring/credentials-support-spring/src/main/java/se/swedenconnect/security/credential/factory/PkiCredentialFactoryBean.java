@@ -26,7 +26,7 @@ import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.pkcs11.FilePkcs11Configuration;
-import se.swedenconnect.security.credential.utils.PrivateKeyUtils;
+import se.swedenconnect.security.credential.utils.KeyUtils;
 import se.swedenconnect.security.credential.utils.X509Utils;
 
 import java.io.InputStream;
@@ -147,7 +147,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
     if (!_certificates.isEmpty() && this.privateKey != null) {
       try (final InputStream is = this.privateKey.getInputStream()) {
-        final PrivateKey pk = PrivateKeyUtils.decodePrivateKey(is, this.keyPassword);
+        final PrivateKey pk = KeyUtils.decodePrivateKey(is, this.keyPassword);
         credential = new BasicCredential(_certificates, pk);
       }
     }

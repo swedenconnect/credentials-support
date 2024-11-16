@@ -17,9 +17,13 @@ package se.swedenconnect.security.credential;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -30,13 +34,29 @@ import java.util.Optional;
  */
 public abstract class AbstractPkiCredential implements PkiCredential {
 
+  /** Logger instance. */
+  private static final Logger log = LoggerFactory.getLogger(AbstractPkiCredential.class);
+
   /** The credential name. */
   private String name;
+
+  /** The credential metadata. */
+  private final Metadata metadata;
 
   /**
    * Default constructor.
    */
   public AbstractPkiCredential() {
+    this.metadata = new Metadata() {
+
+      private final Map<String, Object> properties = new HashMap<>();
+
+      @Nonnull
+      @Override
+      public Map<String, Object> getProperties() {
+        return this.properties;
+      }
+    };
   }
 
   /** {@inheritDoc} */
@@ -86,5 +106,35 @@ public abstract class AbstractPkiCredential implements PkiCredential {
    */
   @Nonnull
   protected abstract String getDefaultName();
+
+  /** {@inheritDoc} */
+  @Nonnull
+  @Override
+  public Metadata getMetadata() {
+    return this.metadata;
+  }
+
+  /**
+   * Updates the metadata properties issued-at and expires-at based on the entity certificate of the credential.
+   */
+  protected void updateMetadataValidityProperties() {
+    final X509Certificate certificate = this.getCertificate();
+    if (certificate == null) {
+      log.debug("Credential does not have a certificate - can not update metadata validity properties");
+      return;
+    }
+    if (this.getMetadata().getIssuedAt() == null) {
+      Optional.ofNullable(certificate.getNotBefore())
+          .ifPresent(d -> this.getMetadata().getProperties().put(Metadata.ISSUED_AT_PROPERTY, d.toInstant()));
+      log.debug("Assigned metadata property '{}' with value '{}'",
+          Metadata.ISSUED_AT_PROPERTY, this.getMetadata().getIssuedAt());
+    }
+    if (this.getMetadata().getExpiresAt() == null) {
+      Optional.ofNullable(certificate.getNotAfter())
+          .ifPresent(d -> this.getMetadata().getProperties().put(Metadata.EXPIRES_AT_PROPERTY, d.toInstant()));
+      log.debug("Assigned metadata property '{}' with value '{}'",
+          Metadata.EXPIRES_AT_PROPERTY, this.getMetadata().getExpiresAt());
+    }
+  }
 
 }

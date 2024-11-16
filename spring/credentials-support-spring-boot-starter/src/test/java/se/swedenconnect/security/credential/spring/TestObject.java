@@ -17,8 +17,11 @@ package se.swedenconnect.security.credential.spring;
 
 import lombok.Getter;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.spring.config.KeyStoreReference;
+import se.swedenconnect.security.credential.spring.config.PkiCredentialReference;
 
 import java.security.KeyStore;
+import java.util.Optional;
 
 /**
  * For testing.
@@ -28,14 +31,14 @@ import java.security.KeyStore;
 public class TestObject {
 
   @Getter
-  private KeyStore keyStore;
+  private final KeyStore keyStore;
 
   @Getter
-  private PkiCredential credential;
+  private final PkiCredential credential;
 
   public TestObject(final TestConfigurationProperties.TestObjectProperties properties) {
-    this.keyStore = properties.getKeyStore().get();
-    this.credential = properties.getCredential().get();
+    this.keyStore = Optional.ofNullable(properties.getKeyStore()).map(KeyStoreReference::get).orElse(null);
+    this.credential = Optional.ofNullable(properties.getCredential()).map(PkiCredentialReference::get).orElse(null);
   }
 
 }

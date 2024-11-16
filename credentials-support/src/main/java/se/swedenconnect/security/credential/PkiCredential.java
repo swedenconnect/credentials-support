@@ -21,7 +21,9 @@ import jakarta.annotation.Nullable;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A representation of a PKI key pair that holds a private key and an X.509 certificate (or just a public key).
@@ -70,6 +72,14 @@ public interface PkiCredential {
   PrivateKey getPrivateKey();
 
   /**
+   * Gets the credential metadata.
+   *
+   * @return a (potentially empty) credential metadata object
+   */
+  @Nonnull
+  Metadata getMetadata();
+
+  /**
    * Gets the name of the credential.
    *
    * @return the name
@@ -90,6 +100,69 @@ public interface PkiCredential {
    * Optional destroy method for credentials that need to perform cleaning up.
    */
   default void destroy() {
+  }
+
+  /**
+   * Metadata associated with a {@link PkiCredential}.
+   */
+  interface Metadata {
+
+    /** Property name for the key identifier metadata property. */
+    String KEY_ID_PROPERTY = "key-id";
+
+    /** Property name for the issued-at metadata property. */
+    String ISSUED_AT_PROPERTY = "issued-at";
+
+    /** Property name for the expires-at metadata property. */
+    String EXPIRES_AT_PROPERTY = "expires-at";
+
+    /**
+     * An assigned, or calculated, key identifier for the credential.
+     *
+     * @return the credential key identifier, or {@code null}, if not assigned/calculated
+     */
+    @Nullable
+    default String getKeyId() {
+      return (String) this.getProperties().get(KEY_ID_PROPERTY);
+    }
+
+    /**
+     * The instant for when the key pair/credential was issued.
+     * <p>
+     * If not explicitly assigned, implementations may use the {@code notBefore} property from the credential entity
+     * certificate.
+     * </p>
+     *
+     * @return an instant for when the credential was issued/created, or {@code null} if this information is not
+     *     available
+     */
+    @Nullable
+    default Instant getIssuedAt() {
+      return (Instant) this.getProperties().get(ISSUED_AT_PROPERTY);
+    }
+
+    /**
+     * The instant for when the key pair/credential "expires".
+     * <p>
+     * If not explicitly assigned, implementations may use the {@code notAfter} property from the credential entity
+     * certificate.
+     * </p>
+     *
+     * @return an instant for when the credential expires, or {@code null} if this information is not available
+     */
+    @Nullable
+    default Instant getExpiresAt() {
+      return (Instant) this.getProperties().get(EXPIRES_AT_PROPERTY);
+    }
+
+    /**
+     * Gets a live map of the additional metadata properties.
+     *
+     * @return a (possibly empty) map of additional metadata properties
+     */
+    @Nonnull
+    Map<String, Object> getProperties();
+
   }
 
 }

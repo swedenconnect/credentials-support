@@ -90,6 +90,7 @@
     <module>credentials-support</module>
     <module>opensaml</module>
     <module>spring</module>
+    <module>softhsm</module>
   </modules>
 
   <dependencyManagement>

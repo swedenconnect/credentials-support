@@ -22,6 +22,11 @@ credential:
           alias: test1
           key-password: secret
         monitor: true
+        key-id: 123456
+        issued-at: "2024-11-15T14:08:26Z"
+        metadata:
+          algorithm: RSA
+          keyuse: sign
       test2:
         store:
           location: classpath:test-2.p12
@@ -42,6 +47,10 @@ credential:
         certificates: classpath:test3.pem.crt
         private-key: classpath:test3.pkcs8.key
         name: "Test3"
+      test3b:
+        public-key: classpath:test3.pubkey.pem
+        private-key: classpath:test3.pkcs8.key
+        name: "Test3b"
       test4:
         certificates: classpath:test4.pem.crt
         private-key: classpath:test4.pkcs8.enc.key
@@ -98,6 +107,7 @@ credential:
           6gE2jgKrhq3F/BbqbDEk7mTfHw==
           -----END PRIVATE KEY-----
         name: "Test5"
+
     monitoring:
       enabled: true
       test-interval: 10m
@@ -107,3 +117,5 @@ test:
   object1:
     key-store: keystore1
     credential: test1
+  object3b:
+    credential: test3b

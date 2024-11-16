@@ -19,11 +19,10 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.spring.config.KeyStoreReference;
 import se.swedenconnect.security.credential.spring.config.PkiCredentialReference;
 
-import java.security.KeyStore;
+import java.util.Optional;
 
 /**
  * @author Martin Lindström
@@ -37,6 +36,13 @@ public class TestConfigurationProperties {
   @Getter
   @Setter
   private TestObjectProperties object1;
+
+  /**
+   * Object 3b.
+   */
+  @Getter
+  @Setter
+  private TestObjectProperties object3b;
 
   public static class TestObjectProperties {
 
@@ -57,16 +63,10 @@ public class TestConfigurationProperties {
     @PostConstruct
     public void init() {
       if (this.keyStore != null) {
-        final KeyStore ks = this.keyStore.get();
-        if (ks == null) {
-          throw new RuntimeException("error");
-        }
+        Optional.ofNullable(this.keyStore.get()).orElseThrow(() -> new RuntimeException("Keystore not set"));
       }
       if (this.credential != null) {
-        final PkiCredential cred = this.credential.get();
-        if (cred == null) {
-          throw new RuntimeException("error");
-        }
+        Optional.ofNullable(this.credential.get()).orElseThrow(() -> new RuntimeException("Credential not set"));
       }
     }
   }
