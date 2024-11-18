@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.security.credential.factory;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.core.io.Resource;
@@ -33,6 +34,14 @@ import java.util.List;
  */
 @Deprecated(since = "2.0.0", forRemoval = true)
 public class PkiCredentialConfigurationProperties {
+
+  /**
+   * A reference to a registered credential, and accessible from a CredentialsBundles bean. If set, no other properties
+   * must be assigned.
+   */
+  @Getter
+  @Setter
+  private String bundle;
 
   /**
    * The name of the credential.
@@ -114,7 +123,7 @@ public class PkiCredentialConfigurationProperties {
   private char[] keyPassword;
 
   /**
-   * Assigns the PIN (which is the same as {@code keyPassword}. Used mainly for PKCS#11.
+   * Assigns the PIN (which is the same as {@code keyPassword}). Used mainly for PKCS#11.
    *
    * @param pin the PIN
    */
@@ -132,12 +141,13 @@ public class PkiCredentialConfigurationProperties {
   }
 
   /**
-   * Predicate that returns {@code true} if this object is "empty", meaning that no settings have been applied.
+   * Predicate that returns {@code true} if this object is "empty", meaning that no settings have been applied.
    *
    * @return true if empty and false otherwise
    */
   public boolean isEmpty() {
-    return !StringUtils.hasText(this.name)
+    return !StringUtils.hasText(this.bundle)
+        && !StringUtils.hasText(this.name)
         && this.certificate == null
         && (this.certificates == null || this.certificates.isEmpty())
         && this.privateKey == null
@@ -145,6 +155,13 @@ public class PkiCredentialConfigurationProperties {
         && !StringUtils.hasText(this.type) && !StringUtils.hasText(this.provider)
         && !StringUtils.hasText(this.pkcs11Configuration) && !StringUtils.hasText(this.alias)
         && (this.keyPassword == null || this.keyPassword.length == 0);
+  }
+
+  @PostConstruct
+  public void afterPropertiesSet() throws IllegalArgumentException {
+    if (this.isEmpty()) {
+      throw new IllegalArgumentException("Missing configuration");
+    }
   }
 
 }

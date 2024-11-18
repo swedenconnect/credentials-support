@@ -25,14 +25,21 @@ import java.util.Optional;
 
 /**
  * Configuration properties for configuring a stand-alone
- * {@link se.swedenconnect.security.credential.PkiCredential PkiCredential} (i.e., outside a bundle configuration).
+ * {@link se.swedenconnect.security.credential.PkiCredential PkiCredential}.
  * <p>
- * Note: One, and exactly one, of {@link #jks()} and {@link #pem()} must be supplied.
+ * Note: One, and exactly one, of {@link #bundle()}, {@link #jks()} or {@link #pem()} must be supplied.
  * </p>
  *
  * @author Martin Lindström
  */
 public class PkiCredentialConfigurationProperties implements PkiCredentialConfiguration {
+
+  /**
+   * Pointer to a PkiCredential accessible via the CredentialBundles bean.
+   */
+  @Getter
+  @Setter
+  private String bundle;
 
   /**
    * Configuration for a JKS (Java KeyStore) based credential.
@@ -47,6 +54,12 @@ public class PkiCredentialConfigurationProperties implements PkiCredentialConfig
   @Getter
   @Setter
   private PemCredentialConfigurationProperties pem;
+
+  /** {@inheritDoc} */
+  @Override
+  public Optional<String> bundle() {
+    return Optional.ofNullable(this.getBundle());
+  }
 
   /** {@inheritDoc} */
   @Override

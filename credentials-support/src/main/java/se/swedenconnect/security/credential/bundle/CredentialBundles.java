@@ -20,6 +20,7 @@ import se.swedenconnect.security.credential.PkiCredential;
 
 import java.security.KeyStore;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * An interface for accessing registered credentials and key stores.
@@ -39,6 +40,23 @@ public interface CredentialBundles {
   PkiCredential getCredential(@Nonnull final String id) throws NoSuchCredentialException;
 
   /**
+   * Gets a function that provides a credential based on an identifier.
+   *
+   * @return a function to resolve a {@link PkiCredential} based on a supplied identifier
+   */
+  @Nonnull
+  default Function<String, PkiCredential> getCredentialProvider() {
+    return id -> {
+      try {
+        return this.getCredential(id);
+      }
+      catch (final NoSuchCredentialException e) {
+        return null;
+      }
+    };
+  }
+
+  /**
    * Gets a list of all ID:s for registered credentials.
    *
    * @return a list of all ID:s for registered credentials
@@ -55,6 +73,23 @@ public interface CredentialBundles {
    */
   @Nonnull
   KeyStore getKeyStore(@Nonnull final String id) throws NoSuchKeyStoreException;
+
+  /**
+   * Gets a function that provides a key store based on an identifier.
+   *
+   * @return a function to resolve a {@link KeyStore} based on a supplied identifier
+   */
+  @Nonnull
+  default Function<String, KeyStore> getKeyStoreProvider() {
+    return id -> {
+      try {
+        return this.getKeyStore(id);
+      }
+      catch (final NoSuchKeyStoreException e) {
+        return null;
+      }
+    };
+  }
 
   /**
    * Gets a list of all ID:s for registered key stores.

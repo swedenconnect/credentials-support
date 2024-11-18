@@ -16,6 +16,7 @@
 package se.swedenconnect.security.credential.factory;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
@@ -25,6 +26,7 @@ import se.swedenconnect.security.credential.AbstractPkiCredential;
 import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.bundle.CredentialBundles;
 import se.swedenconnect.security.credential.pkcs11.FilePkcs11Configuration;
 import se.swedenconnect.security.credential.utils.KeyUtils;
 import se.swedenconnect.security.credential.utils.X509Utils;
@@ -55,6 +57,12 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
   /** Logger instance. */
   private static final Logger log = LoggerFactory.getLogger(PkiCredentialFactoryBean.class);
+
+  /** For resolving references to bundles. */
+  private final CredentialBundles credentialBundles;
+
+  /** The bundle. */
+  private String bundle;
 
   /** The name of the credential. */
   private String name;
@@ -99,6 +107,16 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
    * Default constructor.
    */
   public PkiCredentialFactoryBean() {
+    this.credentialBundles = null;
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param credentialBundles for resolving references to registered credentials
+   */
+  public PkiCredentialFactoryBean(@Nullable final CredentialBundles credentialBundles) {
+    this.credentialBundles = credentialBundles;
   }
 
   /**
@@ -106,7 +124,10 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
    *
    * @param properties credential configuration properties
    */
-  public PkiCredentialFactoryBean(final PkiCredentialConfigurationProperties properties) {
+  public PkiCredentialFactoryBean(@Nonnull final PkiCredentialConfigurationProperties properties,
+      @Nullable final CredentialBundles credentialBundles) {
+    this(credentialBundles);
+    this.setBundle(properties.getBundle());
     this.setName(properties.getName());
     if (properties.getCertificate() != null) {
       this.setCertificate(properties.getCertificate());
@@ -128,6 +149,10 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   @Override
   @Nonnull
   protected PkiCredential createInstance() throws Exception {
+
+    if (StringUtils.hasText(this.bundle)) {
+      return this.credentialBundles.getCredential(this.bundle);
+    }
 
     AbstractPkiCredential credential = null;
 
@@ -186,6 +211,15 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   @Override
   public Class<?> getObjectType() {
     return PkiCredential.class;
+  }
+
+  /**
+   * Assigns a bundle name to a registered credential.
+   *
+   * @param bundle bundle
+   */
+  public void setBundle(final String bundle) {
+    this.bundle = bundle;
   }
 
   /**
@@ -308,20 +342,27 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   /** {@inheritDoc} */
   @Override
   public void afterPropertiesSet() throws Exception {
-    if ((this.certificate != null || (this.certificates != null && !this.certificates.isEmpty()))
-        && this.privateKey != null) {
-      log.debug("A BasicCredential will be created");
-    }
-    else if (StringUtils.hasText(this.pkcs11Configuration) && StringUtils.hasText(this.alias)
-        && this.keyPassword != null
-        && (!StringUtils.hasText(this.type) || "PKCS11".equalsIgnoreCase(this.type))) {
-      log.debug("A Pkcs11Credential will be created");
-    }
-    else if (this.resource != null && this.password != null && this.alias != null) {
-      log.debug("A KeyStoreCredential will be created");
+    if (StringUtils.hasText(this.bundle)) {
+      if (this.credentialBundles == null) {
+        throw new IllegalArgumentException("A CredentialBundles bean must be supplied");
+      }
     }
     else {
-      throw new IllegalArgumentException("Missing credential configuration - cannot create");
+      if ((this.certificate != null || (this.certificates != null && !this.certificates.isEmpty()))
+          && this.privateKey != null) {
+        log.debug("A BasicCredential will be created");
+      }
+      else if (StringUtils.hasText(this.pkcs11Configuration) && StringUtils.hasText(this.alias)
+          && this.keyPassword != null
+          && (!StringUtils.hasText(this.type) || "PKCS11".equalsIgnoreCase(this.type))) {
+        log.debug("A Pkcs11Credential will be created");
+      }
+      else if (this.resource != null && this.password != null && this.alias != null) {
+        log.debug("A KeyStoreCredential will be created");
+      }
+      else {
+        throw new IllegalArgumentException("Missing credential configuration - cannot create");
+      }
     }
     super.afterPropertiesSet();
   }

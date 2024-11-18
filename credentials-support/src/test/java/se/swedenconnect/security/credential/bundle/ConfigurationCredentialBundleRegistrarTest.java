@@ -27,6 +27,7 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -72,8 +73,16 @@ class ConfigurationCredentialBundleRegistrarTest {
     final CredentialBundles bundles = (CredentialBundles) registry;
 
     assertNotNull(bundles.getCredential("pemcred"));
+    assertThrows(NoSuchCredentialException.class, () -> bundles.getCredential("pemcred2"));
+    assertNotNull(bundles.getCredentialProvider().apply("pemcred"));
+    assertNull(bundles.getCredentialProvider().apply("pemcred2"));
+
     assertNotNull(bundles.getCredential("jkscred"));
+
     assertNotNull(bundles.getKeyStore("ks"));
+    assertThrows(NoSuchKeyStoreException.class, () -> bundles.getKeyStore("ks2"));
+    assertNotNull(bundles.getKeyStoreProvider().apply("ks"));
+    assertNull(bundles.getKeyStoreProvider().apply("ks2"));
   }
 
   @Test

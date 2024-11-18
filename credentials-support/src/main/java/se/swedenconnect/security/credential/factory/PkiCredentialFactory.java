@@ -24,6 +24,8 @@ import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.KeyStoreReloader;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.bundle.NoSuchCredentialException;
+import se.swedenconnect.security.credential.bundle.NoSuchKeyStoreException;
 import se.swedenconnect.security.credential.config.BaseCredentialConfiguration;
 import se.swedenconnect.security.credential.config.ConfigurationResourceLoader;
 import se.swedenconnect.security.credential.config.DefaultConfigurationResourceLoader;
@@ -66,14 +68,18 @@ public class PkiCredentialFactory {
    * @param configuration the configuration
    * @param resourceLoader loader for readning files, if {@code null}, a {@link DefaultConfigurationResourceLoader}
    *     will be used
-   * @param keyStoreSupplier if store references are used, a function that resolves references to key stores must be
-   *     supplied
-   * @param keyStoreReloaderSupplier if store references are used, and those key stores are "reloadable", a function
+   * @param credentialProvider if the supplied configuration object contains a credential bundle reference, this
+   *     provider must be supplied
+   * @param keyStoreProvider if the supplied configuration object contains a key store reference, this provider must
+   *     be supplied
+   * @param keyStoreReloaderProvider if store references are used, and those key stores are "reloadable", a function
    *     that resolves references to a {@link KeyStoreReloader} may be supplied. If not, credentials will not be
    *     reloadable
    * @return a {@link PkiCredential}
    * @throws IllegalArgumentException for invalid configuration settings
    * @throws IOException if a referenced file can not be read
+   * @throws NoSuchCredentialException if a bundle is used in the supplied configuration, and it does not exist
+   * @throws NoSuchKeyStoreException if a reference to a key store can not be found
    * @throws CertificateException for certificate decoding errors
    * @throws KeyException for key decoding errors
    * @throws KeyStoreException for errors unlocking the key store
@@ -83,16 +89,29 @@ public class PkiCredentialFactory {
   public static PkiCredential createCredential(
       @Nonnull final PkiCredentialConfiguration configuration,
       @Nullable final ConfigurationResourceLoader resourceLoader,
-      @Nullable final Function<String, KeyStore> keyStoreSupplier,
-      @Nullable final Function<String, KeyStoreReloader> keyStoreReloaderSupplier)
-      throws IllegalArgumentException, IOException, CertificateException, KeyException, KeyStoreException,
-      NoSuchProviderException {
+      @Nullable final Function<String, PkiCredential> credentialProvider,
+      @Nullable final Function<String, KeyStore> keyStoreProvider,
+      @Nullable final Function<String, KeyStoreReloader> keyStoreReloaderProvider)
+      throws IllegalArgumentException, IOException, NoSuchCredentialException, NoSuchKeyStoreException,
+      CertificateException, KeyException, KeyStoreException, NoSuchProviderException {
 
-    if (configuration.jks().isPresent()) {
+    if (configuration.bundle().isPresent()) {
+      if (configuration.jks().isPresent() || configuration.pem().isPresent()) {
+        throw new IllegalArgumentException(
+            "Invalid credential configuration - if bundle is used, jks or pem can not be present");
+      }
+      if (credentialProvider == null) {
+        throw new IllegalArgumentException("Missing credentialProvider - can not resolve reference");
+      }
+      final String credentialReference = configuration.bundle().get();
+      return Optional.ofNullable(credentialProvider.apply(credentialReference))
+          .orElseThrow(() -> new NoSuchCredentialException(credentialReference, "Referenced bundle not found"));
+    }
+    else if (configuration.jks().isPresent()) {
       if (configuration.pem().isPresent()) {
         throw new IllegalArgumentException("Invalid credential configuration - both jks and pem can not be present");
       }
-      return createCredential(configuration.jks().get(), resourceLoader, keyStoreSupplier, keyStoreReloaderSupplier);
+      return createCredential(configuration.jks().get(), resourceLoader, keyStoreProvider, keyStoreReloaderProvider);
     }
     else if (configuration.pem().isPresent()) {
       return createCredential(configuration.pem().get(), resourceLoader);
@@ -195,14 +214,15 @@ public class PkiCredentialFactory {
    * @param configuration the configuration
    * @param resourceLoader loader for readning files, if {@code null}, a {@link DefaultConfigurationResourceLoader}
    *     will be used
-   * @param keyStoreSupplier if store references are used, a function that resolves references to key stores must be
+   * @param keyStoreProvider if store references are used, a function that resolves references to key stores must be
    *     supplied
-   * @param keyStoreReloaderSupplier if store references are used, and those key stores are "reloadable", a function
+   * @param keyStoreReloaderProvider if store references are used, and those key stores are "reloadable", a function
    *     that resolves references to a {@link KeyStoreReloader} may be supplied. If not, it will be assumed that the key
    *     store may be reloaded using the key password (which then must be the same as the store password)
    * @return a {@link PkiCredential}
    * @throws IllegalArgumentException for invalid configuration settings
    * @throws IOException if a referenced file can not be read
+   * @throws NoSuchKeyStoreException if a reference to a key store can not be found
    * @throws KeyStoreException for errors unlocking the key store
    * @throws NoSuchProviderException if a referenced provider does not exist
    * @throws CertificateException for certificate decoding errors
@@ -211,9 +231,10 @@ public class PkiCredentialFactory {
   public static PkiCredential createCredential(
       @Nonnull final StoreCredentialConfiguration configuration,
       @Nullable final ConfigurationResourceLoader resourceLoader,
-      @Nullable final Function<String, KeyStore> keyStoreSupplier,
-      @Nullable final Function<String, KeyStoreReloader> keyStoreReloaderSupplier)
-      throws IllegalArgumentException, IOException, KeyStoreException, NoSuchProviderException, CertificateException {
+      @Nullable final Function<String, KeyStore> keyStoreProvider,
+      @Nullable final Function<String, KeyStoreReloader> keyStoreReloaderProvider)
+      throws IllegalArgumentException, IOException, NoSuchKeyStoreException, KeyStoreException, NoSuchProviderException,
+      CertificateException {
 
     final ConfigurationResourceLoader rl = Optional.ofNullable(resourceLoader)
         .orElseGet(DefaultConfigurationResourceLoader::new);
@@ -232,16 +253,16 @@ public class PkiCredentialFactory {
       }
     }
     else if (configuration.storeReference().isPresent()) {
-      if (keyStoreSupplier == null) {
-        throw new IllegalArgumentException("No key store supplier provided - can not resolve store reference");
+      if (keyStoreProvider == null) {
+        throw new IllegalArgumentException("No key store provider provided - can not resolve store reference");
       }
-      keyStore = keyStoreSupplier.apply(configuration.storeReference().get());
+      keyStore = keyStoreProvider.apply(configuration.storeReference().get());
       if (keyStore == null) {
-        throw new IllegalArgumentException(
+        throw new NoSuchKeyStoreException(configuration.storeReference().get(),
             "Referenced store '%s' is not present".formatted(configuration.storeReference().get()));
       }
-      if (keyStoreReloaderSupplier != null) {
-        keyStoreReloader = keyStoreReloaderSupplier.apply(configuration.storeReference().get());
+      if (keyStoreReloaderProvider != null) {
+        keyStoreReloader = keyStoreReloaderProvider.apply(configuration.storeReference().get());
       }
     }
     else {

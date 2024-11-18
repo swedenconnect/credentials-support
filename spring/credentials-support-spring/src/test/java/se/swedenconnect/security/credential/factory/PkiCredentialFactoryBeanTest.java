@@ -15,6 +15,7 @@
  */
 package se.swedenconnect.security.credential.factory;
 
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +23,15 @@ import org.springframework.core.io.ClassPathResource;
 import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.bundle.CredentialBundles;
+import se.swedenconnect.security.credential.bundle.NoSuchCredentialException;
+import se.swedenconnect.security.credential.bundle.NoSuchKeyStoreException;
 import se.swedenconnect.security.credential.pkcs11.MockSunPkcs11Provider;
 
+import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -66,13 +72,13 @@ class PkiCredentialFactoryBeanTest {
   }
 
   @Test
-  public void testObjectType() {
+  void testObjectType() {
     final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
     assertEquals(PkiCredential.class, factory.getObjectType());
   }
 
   @Test
-  public void testMissingConfiguration1() {
+  void testMissingConfiguration1() {
     assertThrows(IllegalArgumentException.class, () -> {
       final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
       factory.setCertificate(new ClassPathResource("rsa1.crt"));
@@ -81,7 +87,7 @@ class PkiCredentialFactoryBeanTest {
   }
 
   @Test
-  public void testMissingConfiguration2() {
+  void testMissingConfiguration2() {
     assertThrows(SecurityException.class, () -> {
       final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
       factory.setCertificate(new ClassPathResource("rsa1.crt"));
@@ -91,7 +97,7 @@ class PkiCredentialFactoryBeanTest {
   }
 
   @Test
-  public void testBasicCredential() throws Exception {
+  void testBasicCredential() throws Exception {
     final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
     factory.setCertificate(new ClassPathResource("rsa1.crt"));
     factory.setPrivateKey(new ClassPathResource("rsa1.pkcs8.key"));
@@ -104,7 +110,7 @@ class PkiCredentialFactoryBeanTest {
   }
 
   @Test
-  public void testKeyStoreCredential() throws Exception {
+  void testKeyStoreCredential() throws Exception {
     PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
     factory.setResource(new ClassPathResource("rsa1.jks"));
     factory.setPassword(PW);
@@ -128,17 +134,80 @@ class PkiCredentialFactoryBeanTest {
   }
 
   @Test
-  public void testPkiCredentialConfigurationProperties() throws Exception {
+  void testPkiCredentialConfigurationProperties() throws Exception {
     final PkiCredentialConfigurationProperties props = new PkiCredentialConfigurationProperties();
     props.setCertificate(new ClassPathResource("rsa1.crt"));
     props.setPrivateKey(new ClassPathResource("rsa1.pkcs8.key"));
     props.setName("name");
 
-    final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean(props);
+    final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean(props, null);
     factory.afterPropertiesSet();
     final PkiCredential credential = factory.getObject();
     assertTrue(credential instanceof BasicCredential);
     factory.destroy();
+  }
+
+  @Test
+  void testBundles() throws Exception {
+    final PkiCredentialConfigurationProperties props = new PkiCredentialConfigurationProperties();
+    props.setCertificate(new ClassPathResource("rsa1.crt"));
+    props.setPrivateKey(new ClassPathResource("rsa1.pkcs8.key"));
+    props.setName("name");
+
+    final PkiCredentialFactoryBean _factory = new PkiCredentialFactoryBean(props, null);
+    _factory.afterPropertiesSet();
+    final PkiCredential credential = _factory.getObject();
+
+    final PkiCredentialFactoryBean factory1 = new PkiCredentialFactoryBean();
+    factory1.setBundle("ref");
+    assertThrows(IllegalArgumentException.class, factory1::afterPropertiesSet);
+
+    final CredentialBundles credentialBundles = new CredentialBundles() {
+      @Nonnull
+      @Override
+      public PkiCredential getCredential(@Nonnull final String id) throws NoSuchCredentialException {
+        if ("ref".equals(id)) {
+          return credential;
+        }
+        throw new NoSuchCredentialException(id, "e");
+      }
+
+      @Nonnull
+      @Override
+      public List<String> getRegisteredCredentials() {
+        return List.of(credential.getName());
+      }
+
+      @Nonnull
+      @Override
+      public KeyStore getKeyStore(@Nonnull final String id) throws NoSuchKeyStoreException {
+        throw new NoSuchKeyStoreException(id, "e");
+      }
+
+      @Nonnull
+      @Override
+      public List<String> getRegisteredKeyStores() {
+        return List.of();
+      }
+    };
+
+    final PkiCredentialFactoryBean factory2 = new PkiCredentialFactoryBean(credentialBundles);
+    factory2.setBundle("ref");
+    factory2.afterPropertiesSet();
+
+    final PkiCredential credential2 = factory2.getObject();
+    assertTrue(credential2 == credential);
+
+    // Test with properties
+    final PkiCredentialConfigurationProperties props3 = new PkiCredentialConfigurationProperties();
+    props3.setBundle("ref");
+
+    final PkiCredentialFactoryBean factory3 = new PkiCredentialFactoryBean(props3, credentialBundles);
+    factory3.afterPropertiesSet();
+
+    final PkiCredential credential3 = factory3.getObject();
+    assertTrue(credential3 == credential);
+
   }
 
 }

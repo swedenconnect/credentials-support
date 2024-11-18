@@ -15,8 +15,12 @@
  */
 package se.swedenconnect.security.credential.spring.factory;
 
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.bundle.CredentialBundles;
+import se.swedenconnect.security.credential.bundle.NoSuchCredentialException;
+import se.swedenconnect.security.credential.bundle.NoSuchKeyStoreException;
 import se.swedenconnect.security.credential.config.properties.PemCredentialConfigurationProperties;
 import se.swedenconnect.security.credential.config.properties.PkiCredentialConfigurationProperties;
 import se.swedenconnect.security.credential.config.properties.StoreConfigurationProperties;
@@ -24,10 +28,12 @@ import se.swedenconnect.security.credential.config.properties.StoreCredentialCon
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
 
 import java.security.KeyStore;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test cases for PkiCredentialFactoryBean.
@@ -101,8 +107,8 @@ class PkiCredentialFactoryBeanTest {
     properties.getKey().setKeyPassword("secret");
 
     final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean(properties);
-    factory.setKeyStoreSupplier(r -> keyStore);
-    factory.setKeyStoreReloaderSupplier(s -> null);
+    factory.setKeyStoreProvider(r -> keyStore);
+    factory.setKeyStoreReloaderProvider(s -> null);
     factory.afterPropertiesSet();
 
     final PkiCredential credential = factory.getObject();
@@ -123,6 +129,81 @@ class PkiCredentialFactoryBeanTest {
     final PkiCredentialConfigurationProperties properties2 = new PkiCredentialConfigurationProperties();
     final PkiCredentialFactoryBean factory2 = new PkiCredentialFactoryBean(properties2);
     assertThrows(IllegalArgumentException.class, factory2::afterPropertiesSet);
+  }
+
+  @Test
+  void testCredentialReference() throws Exception {
+    final PemCredentialConfigurationProperties _properties = new PemCredentialConfigurationProperties();
+    _properties.setName("test");
+    _properties.setCertificates("rsa1.crt");
+    _properties.setPrivateKey("rsa1.pkcs8.key");
+
+    final PkiCredentialFactoryBean _factory = new PkiCredentialFactoryBean(_properties);
+    _factory.afterPropertiesSet();
+
+    final PkiCredential credential = _factory.getObject();
+
+    final PkiCredentialConfigurationProperties properties = new PkiCredentialConfigurationProperties();
+    properties.setBundle("ref");
+
+    final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean(properties);
+    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, factory::afterPropertiesSet);
+    assertEquals("credentialProvider or credentialBundles must be supplied", ex.getMessage());
+
+    factory.setCredentialProvider(id -> credential);
+    factory.afterPropertiesSet();
+
+    final PkiCredential credential2 = factory.getObject();
+    assertTrue(credential2 == credential);
+
+  }
+
+  @Test
+  void testCredentialReferenceWithBundles() throws Exception {
+    final PemCredentialConfigurationProperties _properties = new PemCredentialConfigurationProperties();
+    _properties.setName("test");
+    _properties.setCertificates("rsa1.crt");
+    _properties.setPrivateKey("rsa1.pkcs8.key");
+
+    final PkiCredentialFactoryBean _factory = new PkiCredentialFactoryBean(_properties);
+    _factory.afterPropertiesSet();
+
+    final PkiCredential credential = _factory.getObject();
+
+    final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean("ref");
+    factory.setCredentialBundles(new CredentialBundles() {
+      @Nonnull
+      @Override
+      public PkiCredential getCredential(@Nonnull final String id) throws NoSuchCredentialException {
+        if ("ref".equals(id)) {
+          return credential;
+        }
+        throw new NoSuchCredentialException(id, "e");
+      }
+
+      @Nonnull
+      @Override
+      public List<String> getRegisteredCredentials() {
+        return List.of(credential.getName());
+      }
+
+      @Nonnull
+      @Override
+      public KeyStore getKeyStore(@Nonnull final String id) throws NoSuchKeyStoreException {
+        throw new NoSuchKeyStoreException(id, "e");
+      }
+
+      @Nonnull
+      @Override
+      public List<String> getRegisteredKeyStores() {
+        return List.of();
+      }
+    });
+    factory.afterPropertiesSet();
+
+    final PkiCredential credential2 = factory.getObject();
+    assertTrue(credential2 == credential);
+
   }
 
 }

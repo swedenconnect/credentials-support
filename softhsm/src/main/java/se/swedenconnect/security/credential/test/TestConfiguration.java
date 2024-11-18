@@ -64,7 +64,7 @@ public class TestConfiguration {
 
   @Bean("rsa2")
   PkiCredential rsa2() throws Exception {
-    return PkiCredentialFactory.createCredential(this.properties.getRsa2(), this.resourceLoader,
+    return PkiCredentialFactory.createCredential(this.properties.getRsa2(), this.resourceLoader, null,
         this.credentialBundles::getKeyStore, null);
   }
 

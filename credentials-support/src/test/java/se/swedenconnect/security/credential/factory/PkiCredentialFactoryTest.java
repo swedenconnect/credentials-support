@@ -18,9 +18,12 @@ package se.swedenconnect.security.credential.factory;
 import org.cryptacular.io.ClassPathResource;
 import org.cryptacular.io.Resource;
 import org.junit.jupiter.api.Test;
+import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.KeyStoreCredentialTest;
 import se.swedenconnect.security.credential.KeyStoreReloader;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.bundle.NoSuchCredentialException;
+import se.swedenconnect.security.credential.bundle.NoSuchKeyStoreException;
 import se.swedenconnect.security.credential.config.properties.PemCredentialConfigurationProperties;
 import se.swedenconnect.security.credential.config.properties.PkiCredentialConfigurationProperties;
 import se.swedenconnect.security.credential.config.properties.StoreConfigurationProperties;
@@ -45,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Martin Lindström
  */
-class PkiCredentialFactoryTest {
+public class PkiCredentialFactoryTest {
 
   @Test
   void testInlinedPem() throws Exception {
@@ -66,7 +69,7 @@ class PkiCredentialFactoryTest {
     final PkiCredentialConfigurationProperties pc = new PkiCredentialConfigurationProperties();
     pc.setPem(properties);
 
-    final PkiCredential credential2 = PkiCredentialFactory.createCredential(pc, null, null, null);
+    final PkiCredential credential2 = PkiCredentialFactory.createCredential(pc, null, null, null, null);
     assertNotNull(credential2);
     assertEquals("test", credential2.getName());
     assertEquals(1, credential2.getCertificateChain().size());
@@ -93,7 +96,7 @@ class PkiCredentialFactoryTest {
     final PkiCredentialConfigurationProperties pc = new PkiCredentialConfigurationProperties();
     pc.setPem(properties);
 
-    final PkiCredential credential2 = PkiCredentialFactory.createCredential(pc, null, null, null);
+    final PkiCredential credential2 = PkiCredentialFactory.createCredential(pc, null, null, null, null);
     assertNotNull(credential2);
     assertEquals("test", credential2.getName());
     assertNotNull(credential2.getPublicKey());
@@ -139,7 +142,7 @@ class PkiCredentialFactoryTest {
   }
 
   @Test
-  void testBothCertificateAndKey() throws Exception {
+  void testBothCertificateAndKey() {
     final PemCredentialConfigurationProperties properties = new PemCredentialConfigurationProperties();
     properties.setName("test");
     properties.setCertificates("rsa1.crt");
@@ -160,6 +163,56 @@ class PkiCredentialFactoryTest {
     final IllegalArgumentException ex =
         assertThrows(IllegalArgumentException.class, () -> PkiCredentialFactory.createCredential(properties, null));
     assertEquals("No private key assigned", ex.getMessage());
+  }
+
+  @Test
+  void testCredentialReference() throws Exception {
+    final KeyStore keyStore;
+    try (final InputStream inputStream = new ClassPathResource("rsa1.jks").getInputStream()) {
+      keyStore = KeyStoreFactory.loadKeyStore(inputStream, "secret".toCharArray(), "JKS", null);
+    }
+    final PkiCredential credential = new KeyStoreCredential(keyStore, "test", "secret".toCharArray());
+
+    final PkiCredentialConfigurationProperties configuration = new PkiCredentialConfigurationProperties();
+    configuration.setBundle("bundle");
+
+    final PkiCredential c = PkiCredentialFactory.createCredential(configuration, null, id -> credential, null, null);
+    assertNotNull(c);
+    assertTrue(credential == c);
+  }
+
+  @Test
+  void testCredentialReferenceNotFound() throws Exception {
+    final PkiCredentialConfigurationProperties configuration = new PkiCredentialConfigurationProperties();
+    configuration.setBundle("bundle");
+
+    final NoSuchCredentialException ex = assertThrows(NoSuchCredentialException.class,
+        () -> PkiCredentialFactory.createCredential(configuration, null, (String id) -> null, null, null));
+    assertEquals("bundle", ex.getCredentialId());
+  }
+
+  @Test
+  void testCredentialReferenceNoProvider() throws Exception {
+    final PkiCredentialConfigurationProperties configuration = new PkiCredentialConfigurationProperties();
+    configuration.setBundle("bundle");
+
+    assertThrows(IllegalArgumentException.class,
+        () -> PkiCredentialFactory.createCredential(configuration, null, null, null, null));
+  }
+
+  @Test
+  void testCredentialReferenceOtherAssigned() throws Exception {
+    final PkiCredentialConfigurationProperties configuration = new PkiCredentialConfigurationProperties();
+    configuration.setBundle("bundle");
+    configuration.setJks(new StoreCredentialConfigurationProperties());
+
+    assertThrows(IllegalArgumentException.class,
+        () -> PkiCredentialFactory.createCredential(configuration, null, null, null, null));
+
+    configuration.setJks(null);
+    configuration.setPem(new PemCredentialConfigurationProperties());
+    assertThrows(IllegalArgumentException.class,
+        () -> PkiCredentialFactory.createCredential(configuration, null, null, null, null));
   }
 
   @Test
@@ -186,7 +239,7 @@ class PkiCredentialFactoryTest {
     final PkiCredentialConfigurationProperties pc = new PkiCredentialConfigurationProperties();
     pc.setJks(properties);
 
-    final PkiCredential credential2 = PkiCredentialFactory.createCredential(pc, null,
+    final PkiCredential credential2 = PkiCredentialFactory.createCredential(pc, null, null,
         i -> keyStore, i -> reloader);
     assertNotNull(credential2);
     assertEquals("test", credential2.getName());
@@ -204,7 +257,7 @@ class PkiCredentialFactoryTest {
 
     final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
         PkiCredentialFactory.createCredential(properties, null, null, null));
-    assertEquals("No key store supplier provided - can not resolve store reference", ex.getMessage());
+    assertEquals("No key store provider provided - can not resolve store reference", ex.getMessage());
   }
 
   @Test
@@ -216,8 +269,9 @@ class PkiCredentialFactoryTest {
     properties.getKey().setAlias("test");
     properties.getKey().setKeyPassword("secret");
 
-    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+    final NoSuchKeyStoreException ex = assertThrows(NoSuchKeyStoreException.class, () ->
         PkiCredentialFactory.createCredential(properties, null, r -> null, r -> null));
+    assertEquals("myKeyStore", ex.getKeyStoreId());
     assertEquals("Referenced store 'myKeyStore' is not present", ex.getMessage());
   }
 
@@ -351,12 +405,14 @@ class PkiCredentialFactoryTest {
   @Test
   void testInvalidPkiCredentialConfiguration() {
     final PkiCredentialConfigurationProperties pc = new PkiCredentialConfigurationProperties();
-    assertThrows(IllegalArgumentException.class, () -> PkiCredentialFactory.createCredential(pc, null, null, null));
+    assertThrows(IllegalArgumentException.class,
+        () -> PkiCredentialFactory.createCredential(pc, null, null, null, null));
 
     final PkiCredentialConfigurationProperties pc2 = new PkiCredentialConfigurationProperties();
     pc2.setPem(new PemCredentialConfigurationProperties());
     pc2.setJks(new StoreCredentialConfigurationProperties());
-    assertThrows(IllegalArgumentException.class, () -> PkiCredentialFactory.createCredential(pc2, null, null, null));
+    assertThrows(IllegalArgumentException.class,
+        () -> PkiCredentialFactory.createCredential(pc2, null, null, null, null));
   }
 
   @Test
@@ -421,4 +477,5 @@ class PkiCredentialFactoryTest {
       return new String(is.readAllBytes());
     }
   }
+
 }
