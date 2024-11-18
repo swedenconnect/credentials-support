@@ -83,6 +83,12 @@ public class KeyStoreCredentialTest {
   }
 
   @Test
+  void testKeyStore() throws Exception {
+    final KeyStoreCredential cred = new KeyStoreCredential(this.keyStore, ALIAS, PW);
+    assertNotNull(cred.getKeyStore());
+  }
+
+  @Test
   void testDefaultName() throws Exception {
     final KeyStoreCredential cred = new KeyStoreCredential(this.keyStore, ALIAS, PW);
 

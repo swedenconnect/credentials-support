@@ -24,6 +24,7 @@ import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * A representation of a PKI key pair that holds a private key and an X.509 certificate (or just a public key).
@@ -100,6 +101,17 @@ public interface PkiCredential {
    * Optional destroy method for credentials that need to perform cleaning up.
    */
   default void destroy() {
+  }
+
+  /**
+   * Transforms the credential to another format, for example an JWK or a {@link java.security.KeyPair KeyPair}.
+   *
+   * @param transformFunction the transform function
+   * @param <T> the type of the new format
+   * @return the new format
+   */
+  default <T> T transform(@Nonnull final Function<PkiCredential, T> transformFunction) {
+    return transformFunction.apply(this);
   }
 
   /**

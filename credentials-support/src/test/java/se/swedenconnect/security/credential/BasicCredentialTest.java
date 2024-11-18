@@ -97,6 +97,13 @@ class BasicCredentialTest {
   }
 
   @Test
+  void testTransform() {
+    final BasicCredential cred = new BasicCredential(this.cert, this.privateKey);
+    final KeyPair keyPair = cred.transform(c -> new KeyPair(cred.getPublicKey(), cred.getPrivateKey()));
+    assertNotNull(keyPair);
+  }
+
+  @Test
   void testDefaultNameCertSet() {
     final BasicCredential cred = new BasicCredential(this.cert, this.privateKey);
 

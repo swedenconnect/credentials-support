@@ -147,6 +147,16 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
     this.updateMetadataValidityProperties();
   }
 
+  /**
+   * Returns the underlying {@link KeyStore}.
+   *
+   * @return the {@link KeyStore}
+   */
+  @Nonnull
+  public KeyStore getKeyStore() {
+    return this.keyStore;
+  }
+
   /** {@inheritDoc} */
   @Override
   @Nonnull
