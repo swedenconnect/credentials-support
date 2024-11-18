@@ -89,11 +89,4 @@
 
   </dependencies>
 
-  <!--
-  <modules>
-    <module>credentials-support-spring</module>
-    <module>credentials-support-spring-boot-starter</module>
-  </modules>
-  -->
-
 </project>

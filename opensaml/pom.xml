@@ -45,10 +45,6 @@
     <url>https://swedenconnect.se</url>
   </organization>
 
-  <properties>
-    <opensaml.version>5.1.3</opensaml.version>
-  </properties>
-
   <dependencyManagement>
     <dependencies>
 
@@ -89,5 +85,26 @@
     </dependency>
 
   </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <doctitle>Sweden Connect - PKI Credentials OpenSAML Support Library - ${project.version}</doctitle>
+          <windowtitle>Sweden Connect - PKI Credentials OpenSAML Support Library - ${project.version}</windowtitle>
+          <links>
+            <link>https://shibboleth.net/api/java-opensaml/${opensaml.version}/</link>
+            <link>https://docs.swedenconnect.se/credentials-support/apidoc/</link>
+          </links>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+  </build>
 
 </project>

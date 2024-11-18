@@ -26,12 +26,9 @@ import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.Base64URL;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 
-import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -59,9 +56,6 @@ import java.util.stream.Collectors;
  * @author Martin Lindström
  */
 public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
-
-  /** Logger instance. */
-  private static final Logger log = LoggerFactory.getLogger(JwkTransformerFunction.class);
 
   /** KeyID calculation function. */
   private Function<PkiCredential, String> keyIdFunction = new DefaultKeyIdFunction();
@@ -244,11 +238,9 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
     @Nullable
     public String apply(@Nonnull final PkiCredential credential) {
       return Optional.ofNullable(credential.getMetadata().getKeyId())
-          .orElseGet(() -> {
-            return Optional.ofNullable(credential.getCertificate())
-                .map(c -> c.getSerialNumber().toString(10))
-                .orElse(null);
-          });
+          .orElseGet(() -> Optional.ofNullable(credential.getCertificate())
+              .map(c -> c.getSerialNumber().toString(10))
+              .orElse(null));
     }
   }
 

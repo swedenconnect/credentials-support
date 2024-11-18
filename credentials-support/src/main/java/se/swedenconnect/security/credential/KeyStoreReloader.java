@@ -22,7 +22,7 @@ import java.security.KeyStoreException;
 
 /**
  * When a {@link se.swedenconnect.security.credential.KeyStoreCredential KeyStoreCredential} is used with an underlying
- * PKCS#11 {@link }KeyStore} the implementation may want to reload the {@link KeyStore}. This class provides this
+ * PKCS#11 {@link KeyStore} the implementation may want to reload the {@link KeyStore}. This class provides this
  * function.
  *
  * @author Martin Lindström

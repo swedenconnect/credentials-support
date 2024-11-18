@@ -105,48 +105,18 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <doctitle>Sweden Connect - PKI Credentials Base Support Library - ${project.version}</doctitle>
+          <windowtitle>Sweden Connect - PKI Credentials Base Support Library - ${project.version}</windowtitle>
+        </configuration>
+      </plugin>
+
     </plugins>
 
   </build>
 
-  <profiles>
-
-    <profile>
-      <id>release</id>
-
-      <!-- See http://central.sonatype.org/pages/apache-maven.html for setup -->
-
-      <build>
-        <plugins>
-
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.6.0</version>
-            <executions>
-              <execution>
-                <id>attach-javadoc</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <doctitle>Sweden Connect - PKI credentials support library - ${project.version}</doctitle>
-              <windowtitle>Sweden Connect - PKI credentials support library - ${project.version}</windowtitle>
-              <detectJavaApiLink>true</detectJavaApiLink>
-              <doclint>all,-missing</doclint>
-              <links>
-                <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
-              </links>
-            </configuration>
-          </plugin>
-
-        </plugins>
-      </build>
-
-    </profile>
-
-  </profiles>
 
 </project>

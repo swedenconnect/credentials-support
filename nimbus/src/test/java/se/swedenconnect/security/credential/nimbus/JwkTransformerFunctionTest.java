@@ -92,7 +92,7 @@ class JwkTransformerFunctionTest {
   }
 
   @Test
-  void testRsaKeyPair() throws Exception {
+  void testRsaKeyPair() {
     final PkiCredential credential = new BasicCredential(this.rsaCert.getPublicKey(), this.rsaPrivateKey);
 
     final JwkTransformerFunction function = new JwkTransformerFunction();
@@ -128,7 +128,7 @@ class JwkTransformerFunctionTest {
   }
 
   @Test
-  void testEcKeyPair() throws Exception {
+  void testEcKeyPair() {
     final PkiCredential credential = new BasicCredential(this.ecCert.getPublicKey(), this.ecPrivateKey);
 
     final JwkTransformerFunction function = new JwkTransformerFunction();
