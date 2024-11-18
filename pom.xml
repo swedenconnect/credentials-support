@@ -93,7 +93,6 @@
     <module>opensaml</module>
     <module>nimbus</module>
     <module>spring</module>
-    <module>softhsm</module>
   </modules>
 
   <dependencyManagement>

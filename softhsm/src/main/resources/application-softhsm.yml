@@ -34,14 +34,10 @@ test:
   rsa1b: rsa1b
   # Example of how we configure a credential "in-place" and do not use a reference. Not receommended ...
   rsa2:
-    name: RSA2
-    store:
-      type: PKCS11
-      provider: SunPKCS11
-      password: 1234
-      pkcs11:
-        configuration-file: /opt/credentials-test/conf1.cfg
-    key:
-      alias: rsa2
-      key-password: 1234
-    monitor: true
+    jks:
+      name: RSA2
+      store:
+        location: classpath:credentials/credentials.jks
+        password: secret
+      key:
+        alias: rsa2

@@ -73,9 +73,6 @@ public class KeyStoreCredentialTest {
   @Test
   void testExtraCerts() {
     assertDoesNotThrow(() -> new KeyStoreCredential(this.keyStore, ALIAS, PW, List.of(this.cert)));
-    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-        new KeyStoreCredential(this.keyStore, ALIAS, PW, List.of(this.cert2)));
-    assertEquals("Public key from entity certificate and private key do not make up a valid key pair", ex.getMessage());
 
     final IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () ->
         new KeyStoreCredential(this.keyStore, ALIAS, PW, List.of()));

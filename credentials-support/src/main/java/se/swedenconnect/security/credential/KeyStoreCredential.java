@@ -18,7 +18,6 @@ package se.swedenconnect.security.credential;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PreDestroy;
-import org.cryptacular.util.KeyPairUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
@@ -123,7 +122,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
     // Assert that everything looks good by loading the key and certificate ...
     //
-    final PrivateKey privateKey = this.getPrivateKey();
+    this.getPrivateKey();
     if (certificateChain == null) {
       this.certificates = this.loadCertificateChain();
     }
@@ -131,14 +130,6 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
       this.certificates = Collections.unmodifiableList(certificateChain);
       if (this.certificates.isEmpty()) {
         throw new IllegalArgumentException("certificateChain must not be empty");
-      }
-
-      // If the certificate chain is supplied as an externally configured chain, we make sure that the private
-      // key and the public key from the entity certificate matches ...
-      //
-      if (!KeyPairUtil.isKeyPair(this.certificates.get(0).getPublicKey(), privateKey)) {
-        throw new IllegalArgumentException(
-            "Public key from entity certificate and private key do not make up a valid key pair");
       }
     }
 

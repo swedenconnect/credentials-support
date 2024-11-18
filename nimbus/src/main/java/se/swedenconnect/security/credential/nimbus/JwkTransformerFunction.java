@@ -93,8 +93,17 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
     final PublicKey publicKey = credential.getPublicKey();
 
     if (publicKey instanceof final RSAPublicKey rsaPublicKey) {
-      jwk = new RSAKey.Builder(rsaPublicKey)
-          .privateKey((RSAPrivateKey) credential.getPrivateKey())
+      final RSAKey.Builder builder = new RSAKey.Builder(rsaPublicKey);
+
+      // Special handling of PKCS#11 keys ...
+      if (credential.getPrivateKey() instanceof final RSAPrivateKey rsaPrivateKey) {
+        builder.privateKey(rsaPrivateKey);
+      }
+      else {
+        builder.privateKey(credential.getPrivateKey());
+      }
+
+      jwk = builder
           .keyStore(credential instanceof KeyStoreCredential ? ((KeyStoreCredential) credential).getKeyStore() : null)
           .keyID(this.keyIdFunction.apply(credential))
           .keyUse(this.keyUseFunction.apply(credential))
@@ -112,8 +121,17 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
       if (curve == null) {
         throw new IllegalArgumentException("Could not determine curve");
       }
-      jwk = new ECKey.Builder(curve, ecPublicKey)
-          .privateKey((ECPrivateKey) credential.getPrivateKey())
+      final ECKey.Builder builder = new ECKey.Builder(curve, ecPublicKey);
+
+      // Special handling of PKCS#11 keys ...
+      if (credential.getPrivateKey() instanceof final ECPrivateKey ecPrivateKey) {
+        builder.privateKey(ecPrivateKey);
+      }
+      else {
+        builder.privateKey(credential.getPrivateKey());
+      }
+
+      jwk = builder
           .keyStore(credential instanceof KeyStoreCredential ? ((KeyStoreCredential) credential).getKeyStore() : null)
           .keyID(this.keyIdFunction.apply(credential))
           .keyUse(this.keyUseFunction.apply(credential))

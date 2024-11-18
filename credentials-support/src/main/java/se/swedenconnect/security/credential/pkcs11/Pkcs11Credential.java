@@ -19,7 +19,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
-import org.cryptacular.util.KeyPairUtil;
 import se.swedenconnect.security.credential.AbstractReloadablePkiCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -97,13 +96,6 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
         .filter(c -> c.length > 0)
         .map(Arrays::asList)
         .orElseThrow(() -> new Pkcs11ConfigurationException("No certificates available"));
-
-    // Assert that the private key and entity certificate makes up a valid key pair ...
-    //
-    if (!KeyPairUtil.isKeyPair(this.getCertificate().getPublicKey(), this.privateKey)) {
-      throw new IllegalArgumentException(
-          "Public key from entity certificate and private key do not make up a valid key pair");
-    }
 
     // Install a default test function - this may be overridden by setTestFunction later ...
     final DefaultCredentialTestFunction testFunction = new DefaultCredentialTestFunction();

@@ -46,7 +46,7 @@ public class SunPkcs11PrivateKeyAccessor implements Pkcs11PrivateKeyAccessor {
       throws SecurityException {
     try {
       log.debug("Creating a PKCS11 KeyStore using provider '{}' ...", provider.getName());
-      final KeyStore keyStore = KeyStore.getInstance(KeyStoreFactory.PKCS11_KEYSTORE_TYPE, provider.getName());
+      final KeyStore keyStore = KeyStore.getInstance(KeyStoreFactory.PKCS11_KEYSTORE_TYPE, provider);
 
       log.debug("Loading KeyStore using supplied PIN ...");
       keyStore.load(null, pin);

@@ -8,6 +8,3 @@ pushd $SCRIPT_DIR/..
 
 mvn clean install
 docker build -t credentials-support-test:latest --platform linux/arm64 .
-
-
-

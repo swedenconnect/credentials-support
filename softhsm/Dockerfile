@@ -29,8 +29,8 @@ COPY src/main/resources/conf*.cfg /opt/credentials-test/
 #
 ADD target/credentials-support-test.jar /opt/credentials-test/credentials-support-test.jar
 
-ENV JAVA_OPTS="-Djava.security.egd=file:/cfg/./urandom -Dtest.pkcs11.enabled=true"
-  
+ENV JAVA_OPTS="-Djava.security.egd=file:/cfg/./urandom"
+
 ENTRYPOINT exec java $JAVA_OPTS -jar /opt/credentials-test/credentials-support-test.jar
 
 EXPOSE 8080 8443

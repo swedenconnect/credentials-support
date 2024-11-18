@@ -37,6 +37,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.cert.CertificateException;
+import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -104,13 +105,20 @@ public class KeyStoreFactory {
       @Nonnull final char[] pin) throws KeyStoreException {
 
     final Provider provider = pkcs11Configuration.getProvider();
+    log.debug("Loading PKCS#11 KeyStore using provider '{}'",
+        Optional.ofNullable(provider.getName()).orElse("-"));
 
     try {
-      final KeyStore keyStore = KeyStore.getInstance(PKCS11_KEYSTORE_TYPE, provider.getName());
+      final KeyStore keyStore = KeyStore.getInstance(PKCS11_KEYSTORE_TYPE, provider);
       keyStore.load(null, pin);
+
+      log.debug("Loaded PKCS#11 KeyStore. Aliases: {}", Optional.ofNullable(keyStore.aliases())
+          .map(Collections::list)
+          .orElse(null));
+
       return keyStore;
     }
-    catch (final NoSuchAlgorithmException | CertificateException | IOException | NoSuchProviderException e) {
+    catch (final NoSuchAlgorithmException | CertificateException | IOException e) {
       throw new KeyStoreException(e.getMessage(), e);
     }
   }
