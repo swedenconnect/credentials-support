@@ -264,18 +264,18 @@ public class KeyStoreFactoryTest {
     }
   }
 
-  private static String getAbsolutePath(final String resource) {
+  public static String getAbsolutePath(final String resource) {
     final String p = resource.startsWith("/") ? "" : "/";
     return System.getProperty("user.dir") + "/src/test/resources" + p + resource;
   }
 
-  private static void setupPkcs11() {
+  public static void setupPkcs11() {
     Security.insertProviderAt(new MockSunPkcs11Provider(), 1);
     // We let rsa1.jks simulate our PKCS#11 device
     MockSunPkcs11Provider.MockedPkcs11ResourceHolder.getInstance().setResource(new ClassPathResource("rsa1.jks"));
   }
 
-  private static void tearDownPkcs11() {
+  public static void tearDownPkcs11() {
     Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
     final Provider[] providers = Security.getProviders();
     for (final Provider p : providers) {
