@@ -51,7 +51,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>17</java.version>
 
-    <bc.version>1.78.1</bc.version>
+    <bc.version>1.79</bc.version>
     
     <spring.version>6.1.7</spring.version>
     <spring.boot.version>3.2.5</spring.boot.version>
@@ -246,7 +246,7 @@
             <id>enforce</id>
             <configuration>
               <rules>
-                <dependencyConvergence />
+                <dependencyConvergence/>
               </rules>
             </configuration>
             <goals>
