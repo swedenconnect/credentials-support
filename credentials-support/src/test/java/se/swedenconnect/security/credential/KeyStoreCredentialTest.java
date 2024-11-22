@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test cases for KeyStoreCredential.
@@ -89,7 +90,7 @@ public class KeyStoreCredentialTest {
   void testDefaultName() throws Exception {
     final KeyStoreCredential cred = new KeyStoreCredential(this.keyStore, ALIAS, PW);
 
-    assertEquals("RSA-" + ALIAS, cred.getName());
+    assertTrue(cred.getName().startsWith("RSA-" + ALIAS + "-"));
     assertNull(cred.getTestFunction());
   }
 
@@ -108,7 +109,7 @@ public class KeyStoreCredentialTest {
     final KeyStoreCredential cred = new KeyStoreCredential(mockedKeyStore, ALIAS, PW);
 
     final String name = cred.getName();
-    assertEquals("SunPKCS11-" + ALIAS, name);
+    assertTrue(cred.getName().startsWith("SunPKCS11-" + ALIAS + "-"));
   }
 
   @Test

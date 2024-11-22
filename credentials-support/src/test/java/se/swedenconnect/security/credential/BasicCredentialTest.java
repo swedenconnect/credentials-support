@@ -107,7 +107,7 @@ class BasicCredentialTest {
   void testDefaultNameCertSet() {
     final BasicCredential cred = new BasicCredential(this.cert, this.privateKey);
 
-    assertEquals(this.cert.getSubjectX500Principal().getName(), cred.getName());
+    assertEquals(this.cert.getSerialNumber().toString(10), cred.getName());
   }
 
   @Test

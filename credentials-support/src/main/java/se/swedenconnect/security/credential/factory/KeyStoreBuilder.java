@@ -157,7 +157,7 @@ public class KeyStoreBuilder {
    * @return the builder
    */
   @Nonnull
-  KeyStoreBuilder type(@Nonnull final String type) {
+  public KeyStoreBuilder type(@Nonnull final String type) {
     this.type = Objects.requireNonNull(type, "type must not be null");
     return this;
   }
@@ -172,7 +172,7 @@ public class KeyStoreBuilder {
    * @return the builder
    */
   @Nonnull
-  KeyStoreBuilder location(@Nonnull final String location) {
+  public KeyStoreBuilder location(@Nonnull final String location) {
     this.location = Objects.requireNonNull(location, "location must not be null");
     return this;
   }
@@ -184,7 +184,7 @@ public class KeyStoreBuilder {
    * @return the builder
    */
   @Nonnull
-  KeyStoreBuilder password(@Nonnull final String password) {
+  public KeyStoreBuilder password(@Nonnull final String password) {
     this.password = Objects.requireNonNull(password, "password must not be null");
     return this;
   }
@@ -197,7 +197,7 @@ public class KeyStoreBuilder {
    * @return the builder
    */
   @Nonnull
-  KeyStoreBuilder pin(@Nonnull final String pin) {
+  public KeyStoreBuilder pin(@Nonnull final String pin) {
     this.password = Objects.requireNonNull(pin, "pin must not be null");
     return this;
   }
@@ -210,7 +210,7 @@ public class KeyStoreBuilder {
    * @return the builder
    */
   @Nonnull
-  KeyStoreBuilder provider(@Nonnull final String provider) {
+  public KeyStoreBuilder provider(@Nonnull final String provider) {
     this.provider = Objects.requireNonNull(provider, "provider must not be null");
     return this;
   }
@@ -222,7 +222,7 @@ public class KeyStoreBuilder {
    * @return the builder
    */
   @Nonnull
-  KeyStoreBuilder pkcs11ConfigurationFile(@Nonnull final String pkcs11ConfigurationFile) {
+  public KeyStoreBuilder pkcs11ConfigurationFile(@Nonnull final String pkcs11ConfigurationFile) {
     this.pkcs11ConfigurationFile =
         Objects.requireNonNull(pkcs11ConfigurationFile, "pkcs11ConfigurationFile must not be null");
     return this;
@@ -236,7 +236,7 @@ public class KeyStoreBuilder {
    * @return the builder
    */
   @Nonnull
-  KeyStoreBuilder pkcs11Library(@Nonnull final String pkcs11Library) {
+  public KeyStoreBuilder pkcs11Library(@Nonnull final String pkcs11Library) {
     this.pkcs11Library = Objects.requireNonNull(pkcs11Library, "pkcs11Library must not be null");
     return this;
   }
@@ -249,7 +249,7 @@ public class KeyStoreBuilder {
    * @return the builder
    */
   @Nonnull
-  KeyStoreBuilder pkcs11SlotName(@Nonnull final String pkcs11SlotName) {
+  public KeyStoreBuilder pkcs11SlotName(@Nonnull final String pkcs11SlotName) {
     this.pkcs11SlotName = Objects.requireNonNull(pkcs11SlotName, "pkcs11SlotName must not be null");
     return this;
   }
@@ -262,7 +262,7 @@ public class KeyStoreBuilder {
    * @return the builder
    */
   @Nonnull
-  KeyStoreBuilder pkcs11Slot(@Nonnull final String pkcs11Slot) {
+  public KeyStoreBuilder pkcs11Slot(@Nonnull final String pkcs11Slot) {
     this.pkcs11Slot = Objects.requireNonNull(pkcs11Slot, "pkcs11Slot must not be null");
     return this;
   }
@@ -275,7 +275,7 @@ public class KeyStoreBuilder {
    * @return the builder
    */
   @Nonnull
-  KeyStoreBuilder pkcs11SlotListIndex(@Nonnull final Integer pkcs11SlotListIndex) {
+  public KeyStoreBuilder pkcs11SlotListIndex(@Nonnull final Integer pkcs11SlotListIndex) {
     this.pkcs11SlotListIndex = Objects.requireNonNull(pkcs11SlotListIndex, "pkcs11SlotListIndex must not be null");
     return this;
   }

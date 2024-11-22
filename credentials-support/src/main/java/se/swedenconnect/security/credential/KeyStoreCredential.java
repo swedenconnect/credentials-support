@@ -270,10 +270,12 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   @Override
   protected String getDefaultName() {
     if (KeyStoreFactory.PKCS11_KEYSTORE_TYPE.equalsIgnoreCase(this.keyStore.getType())) {
-      return "%s-%s".formatted(this.keyStore.getProvider().getName(), this.alias);
+      return "%s-%s-%s".formatted(this.keyStore.getProvider().getName(), this.alias,
+          this.getCertificate().getSerialNumber().toString(10));
     }
     else {
-      return this.getPublicKey().getAlgorithm() + "-" + this.alias;
+      return "%s-%s-%s".formatted(this.getPublicKey().getAlgorithm(), this.alias,
+          this.getCertificate().getSerialNumber().toString(10));
     }
   }
 

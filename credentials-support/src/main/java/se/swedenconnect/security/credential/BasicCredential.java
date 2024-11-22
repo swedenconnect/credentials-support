@@ -137,17 +137,14 @@ public class BasicCredential extends AbstractPkiCredential {
   }
 
   /**
-   * Gets the subject DN of the certificate and if no certificate is available a UUID is used.
+   * Gets the certificate serial number, and if no certificate is available a UUID is used.
    */
   @Override
   @Nonnull
   protected String getDefaultName() {
-    final X509Certificate cert = this.getCertificate();
-    if (cert != null) {
-      return cert.getSubjectX500Principal().getName();
-    }
-    final PublicKey key = this.getPublicKey();
-    return String.format("%s-%s", key.getAlgorithm(), UUID.randomUUID());
+    return Optional.ofNullable(this.getCertificate())
+        .map(c -> c.getSerialNumber().toString(10))
+        .orElseGet(() -> "%s-%s".formatted(this.getPublicKey().getAlgorithm(), UUID.randomUUID()));
   }
 
 }
