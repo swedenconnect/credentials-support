@@ -234,4 +234,13 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
     super.afterPropertiesSet();
   }
 
+  /**
+   * Returns the underlying configuration.
+   *
+   * @return the underlying configuration
+   */
+  protected PkiCredentialConfiguration getConfiguration() {
+    return this.configuration;
+  }
+
 }

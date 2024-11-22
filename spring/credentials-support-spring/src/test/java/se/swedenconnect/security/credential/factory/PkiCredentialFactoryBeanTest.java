@@ -88,7 +88,7 @@ class PkiCredentialFactoryBeanTest {
 
   @Test
   void testMissingConfiguration2() {
-    assertThrows(SecurityException.class, () -> {
+    assertThrows(IllegalArgumentException.class, () -> {
       final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean();
       factory.setCertificate(new ClassPathResource("rsa1.crt"));
       factory.setSingleton(false);
@@ -140,7 +140,7 @@ class PkiCredentialFactoryBeanTest {
     props.setPrivateKey(new ClassPathResource("rsa1.pkcs8.key"));
     props.setName("name");
 
-    final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean(props, null);
+    final PkiCredentialFactoryBean factory = new PkiCredentialFactoryBean(props);
     factory.afterPropertiesSet();
     final PkiCredential credential = factory.getObject();
     assertTrue(credential instanceof BasicCredential);
@@ -154,13 +154,9 @@ class PkiCredentialFactoryBeanTest {
     props.setPrivateKey(new ClassPathResource("rsa1.pkcs8.key"));
     props.setName("name");
 
-    final PkiCredentialFactoryBean _factory = new PkiCredentialFactoryBean(props, null);
+    final PkiCredentialFactoryBean _factory = new PkiCredentialFactoryBean(props);
     _factory.afterPropertiesSet();
     final PkiCredential credential = _factory.getObject();
-
-    final PkiCredentialFactoryBean factory1 = new PkiCredentialFactoryBean();
-    factory1.setBundle("ref");
-    assertThrows(IllegalArgumentException.class, factory1::afterPropertiesSet);
 
     final CredentialBundles credentialBundles = new CredentialBundles() {
       @Nonnull
@@ -191,18 +187,12 @@ class PkiCredentialFactoryBeanTest {
       }
     };
 
-    final PkiCredentialFactoryBean factory2 = new PkiCredentialFactoryBean(credentialBundles);
-    factory2.setBundle("ref");
-    factory2.afterPropertiesSet();
-
-    final PkiCredential credential2 = factory2.getObject();
-    assertTrue(credential2 == credential);
-
     // Test with properties
     final PkiCredentialConfigurationProperties props3 = new PkiCredentialConfigurationProperties();
     props3.setBundle("ref");
 
-    final PkiCredentialFactoryBean factory3 = new PkiCredentialFactoryBean(props3, credentialBundles);
+    final PkiCredentialFactoryBean factory3 = new PkiCredentialFactoryBean(props3);
+    factory3.setCredentialBundles(credentialBundles);
     factory3.afterPropertiesSet();
 
     final PkiCredential credential3 = factory3.getObject();
