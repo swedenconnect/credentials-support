@@ -61,6 +61,16 @@ public class PropertyToPrivateKeyConverterTest {
   }
 
   @Test
+  void testConvertInlinePem() throws Exception {
+    final PropertyToPrivateKeyConverter converter = new PropertyToPrivateKeyConverter();
+    converter.setApplicationContext(this.context);
+
+    final String pem = new String((new ClassPathResource("rsa1.pkcs8.key")).getInputStream().readAllBytes());
+    final PrivateKey pk = converter.convert(pem);
+    assertNotNull(pk);
+  }
+
+  @Test
   void testConvertNoPath() {
     final PropertyToPrivateKeyConverter converter = new PropertyToPrivateKeyConverter();
     converter.setApplicationContext(this.context);

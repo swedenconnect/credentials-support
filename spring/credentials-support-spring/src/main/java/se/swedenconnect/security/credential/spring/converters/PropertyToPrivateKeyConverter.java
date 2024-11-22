@@ -58,4 +58,10 @@ public class PropertyToPrivateKeyConverter extends AbstractResourcePropertyConve
     return KeyUtils.decodePrivateKey(inputStream);
   }
 
+  /** {@inheritDoc} */
+  @Override
+  protected boolean isInlinedPem(@Nonnull final String property) {
+    return KeyUtils.isInlinedPem(property);
+  }
+
 }

@@ -20,9 +20,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 
@@ -41,7 +43,9 @@ public abstract class AbstractResourcePropertyConverter<T> implements Converter<
   @Nonnull
   public T convert(@Nonnull final String source) {
     try {
-      final Resource resource = this.applicationContext.getResource(getResourceUrl(source));
+      final Resource resource = this.isInlinedPem(source)
+          ? new InputStreamResource(new ByteArrayInputStream(source.getBytes()))
+          : this.applicationContext.getResource(getResourceUrl(source));
       try (final InputStream inputStream = resource.getInputStream()) {
         return this.convert(inputStream);
       }
@@ -71,6 +75,14 @@ public abstract class AbstractResourcePropertyConverter<T> implements Converter<
    */
   @Nonnull
   protected abstract T convert(@Nonnull final InputStream inputStream) throws Exception;
+
+  /**
+   * Tells whether the property value holds an "inlined" PEM representation of the object.
+   *
+   * @param property the property value
+   * @return {@code true} if the property holds a PEM object, and {@code false} otherwise
+   */
+  protected abstract boolean isInlinedPem(@Nonnull final String property);
 
   /** {@inheritDoc} */
   @Override

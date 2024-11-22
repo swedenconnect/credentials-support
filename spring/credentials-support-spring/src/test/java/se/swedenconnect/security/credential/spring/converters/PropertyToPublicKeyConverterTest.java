@@ -26,6 +26,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import se.swedenconnect.security.credential.spring.BaseTestConfiguration;
 
+import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -68,6 +69,16 @@ public class PropertyToPublicKeyConverterTest {
     converter.setApplicationContext(this.context);
 
     final PublicKey pk = converter.convert("ec.pubkey.pem");
+    assertNotNull(pk);
+  }
+
+  @Test
+  void testConvertInlinePem() throws IOException {
+    final PropertyToPublicKeyConverter converter = new PropertyToPublicKeyConverter();
+    converter.setApplicationContext(this.context);
+
+    final String pem = new String((new ClassPathResource("ec.pubkey.pem")).getInputStream().readAllBytes());
+    final PublicKey pk = converter.convert(pem);
     assertNotNull(pk);
   }
 

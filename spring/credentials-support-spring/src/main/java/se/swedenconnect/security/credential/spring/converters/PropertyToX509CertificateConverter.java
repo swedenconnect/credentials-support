@@ -26,7 +26,7 @@ import java.security.cert.X509Certificate;
 
 /**
  * A {@link Converter} that gets the property value (e.g., {@code classpath:cert.crt}) and instantiates a
- * {@link X509Certificate} object.
+ * {@link X509Certificate} object. The converter also handles "inlined" PEM certificates.
  * <p>
  * To use this converter it has to be instantiated as a bean and then registered in the registry using
  * {@link ConverterRegistry#addConverter(Converter)}.
@@ -44,7 +44,6 @@ import java.security.cert.X509Certificate;
  * </pre>
  *
  * @author Martin Lindström (martin@idsec.se)
- * @author Stefan Santesson (stefan@idsec.se)
  */
 public class PropertyToX509CertificateConverter extends AbstractResourcePropertyConverter<X509Certificate> {
 
@@ -53,6 +52,12 @@ public class PropertyToX509CertificateConverter extends AbstractResourceProperty
   @Nonnull
   public X509Certificate convert(@Nonnull final InputStream inputStream) throws CertificateException {
     return X509Utils.decodeCertificate(inputStream);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected boolean isInlinedPem(@Nonnull final String property) {
+    return X509Utils.isInlinedPem(property);
   }
 
 }

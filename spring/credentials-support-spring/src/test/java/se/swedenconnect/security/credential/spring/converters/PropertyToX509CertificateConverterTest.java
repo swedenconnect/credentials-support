@@ -21,10 +21,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import se.swedenconnect.security.credential.spring.BaseTestConfiguration;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -56,6 +58,16 @@ public class PropertyToX509CertificateConverterTest {
     converter.setApplicationContext(this.context);
 
     final X509Certificate cert = converter.convert("classpath:rsa1.crt");
+    assertNotNull(cert);
+  }
+
+  @Test
+  void testConvertInline() throws IOException {
+    final PropertyToX509CertificateConverter converter = new PropertyToX509CertificateConverter();
+    converter.setApplicationContext(this.context);
+
+    final String pem = new String((new ClassPathResource("rsa1.crt")).getInputStream().readAllBytes());
+    final X509Certificate cert = converter.convert(pem);
     assertNotNull(cert);
   }
 

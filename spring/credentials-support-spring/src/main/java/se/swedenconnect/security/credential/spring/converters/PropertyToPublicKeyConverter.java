@@ -45,14 +45,19 @@ import java.security.PublicKey;
  *
  * @author Martin Lindström (martin@idsec.se)
  */
-public class PropertyToPublicKeyConverter extends AbstractResourcePropertyConverter<PublicKey>
-    implements Converter<String, PublicKey> {
+public class PropertyToPublicKeyConverter extends AbstractResourcePropertyConverter<PublicKey> {
 
   /** {@inheritDoc} */
   @Override
   @Nonnull
   public PublicKey convert(@Nonnull final InputStream inputStream) throws KeyException {
     return KeyUtils.decodePublicKey(inputStream);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  protected boolean isInlinedPem(@Nonnull final String property) {
+    return KeyUtils.isInlinedPem(property);
   }
 
 }
