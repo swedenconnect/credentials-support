@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class BasicCredentialTest {
     assertNull(cred.getCertificate());
     assertNotNull(cred.getName());
   }
-  
+
   @Test
   public void testSetters4() throws Exception {
     final BasicCredential cred = new BasicCredential();
@@ -99,7 +99,7 @@ public class BasicCredentialTest {
     assertNull(cred.getCertificate());
     assertNotNull(cred.getName());
   }
-  
+
   @Test
   public void testSetters5() throws Exception {
     final BasicCredential cred = new BasicCredential();
@@ -111,7 +111,7 @@ public class BasicCredentialTest {
     assertNull(cred.getCertificate());
     assertNotNull(cred.getName());
   }
-  
+
 //  @Test
 //  public void testSetters6() throws Exception {
 //    final BasicCredential cred = new BasicCredential();
@@ -122,8 +122,8 @@ public class BasicCredentialTest {
 //    assertNotNull(cred.getPublicKey());
 //    assertNull(cred.getCertificate());
 //    assertNotNull(cred.getName());
-//  }  
-  
+//  }
+
   @Test
   public void testSetters7() throws Exception {
     final BasicCredential cred = new BasicCredential();
@@ -134,7 +134,7 @@ public class BasicCredentialTest {
     assertNotNull(cred.getPublicKey());
     assertNull(cred.getCertificate());
     assertNotNull(cred.getName());
-  }  
+  }
 
   @Test
   public void testDefaultConstructorMissingKeyAndCert() throws Exception {

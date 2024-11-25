@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * Test cases for DefaultPkcs11FileConfiguration.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -78,7 +78,7 @@ public class DefaultPkcs11ConfigurationTest {
     assertNotNull(cred);
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getPrivateKey());
-    
+
     // Get private key should also work
     assertNotNull(conf.getPrivateKeyProvider().get(provider, ALIAS, PIN));
   }
@@ -132,7 +132,7 @@ public class DefaultPkcs11ConfigurationTest {
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getPrivateKey());
   }
-  
+
   @Test
   public void testMissingParamsNoInit() throws Exception {
     assertThrows(Pkcs11ConfigurationException.class, () -> {
@@ -147,7 +147,7 @@ public class DefaultPkcs11ConfigurationTest {
     Security.removeProvider(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
     Security.insertProviderAt(MockSunPkcs11Provider.createStaticallyConfigured(), 1);
     DefaultPkcs11Configuration conf = null;
-    
+
     try {
       conf = new DefaultPkcs11Configuration();
       conf.setConfigurationFile(getAbsolutePath("cfg1.txt"));
@@ -157,7 +157,7 @@ public class DefaultPkcs11ConfigurationTest {
     }
     catch (Pkcs11ConfigurationException e) {
     }
-    
+
     try {
       conf = new DefaultPkcs11Configuration();
       conf.setLibrary(LIBRARY);
@@ -167,7 +167,7 @@ public class DefaultPkcs11ConfigurationTest {
     }
     catch (Pkcs11ConfigurationException e) {
     }
-    
+
     try {
       conf = new DefaultPkcs11Configuration();
       conf.setName(NAME);
@@ -177,7 +177,7 @@ public class DefaultPkcs11ConfigurationTest {
     }
     catch (Pkcs11ConfigurationException e) {
     }
-    
+
     try {
       conf = new DefaultPkcs11Configuration();
       conf.setSlot("1");
@@ -187,7 +187,7 @@ public class DefaultPkcs11ConfigurationTest {
     }
     catch (Pkcs11ConfigurationException e) {
     }
-    
+
     try {
       conf = new DefaultPkcs11Configuration();
       conf.setSlotListIndex(1);
@@ -208,7 +208,7 @@ public class DefaultPkcs11ConfigurationTest {
       conf.afterPropertiesSet();
     });
   }
-  
+
   @Test
   public void testProviderNotFound2() throws Exception {
     assertThrows(Pkcs11ConfigurationException.class, () -> {
@@ -218,7 +218,7 @@ public class DefaultPkcs11ConfigurationTest {
       conf.getProvider();
     });
   }
-  
+
   @Test
   public void testInvalidConfiguration() throws Exception {
     assertThrows(Pkcs11ConfigurationException.class, () -> {
@@ -229,7 +229,7 @@ public class DefaultPkcs11ConfigurationTest {
       conf.getProvider();
     });
   }
-  
+
   @Test
   public void testDoubleCalls() throws Exception {
     final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration(getAbsolutePath("cfg1.txt"));
@@ -243,7 +243,7 @@ public class DefaultPkcs11ConfigurationTest {
     assertNotNull(cred);
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getPrivateKey());
-    
+
     final DefaultPkcs11Configuration conf2 = new DefaultPkcs11Configuration(LIBRARY, "Foo", null, null);
     conf2.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
     conf2.afterPropertiesSet();
@@ -256,9 +256,9 @@ public class DefaultPkcs11ConfigurationTest {
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getPrivateKey());
   }
-  
+
   @Test
-  public void testMissingPrivateKey() throws Exception {    
+  public void testMissingPrivateKey() throws Exception {
     final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration(getAbsolutePath("cfg1.txt"));
     conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
     conf.afterPropertiesSet();
@@ -266,7 +266,7 @@ public class DefaultPkcs11ConfigurationTest {
     PrivateKey pk = conf.getPrivateKeyProvider().get(conf.getProvider(), "not-found", PIN);
     assertNull(pk);
   }
-  
+
   @Test
   public void testFailedGetPrivateKey() throws Exception {
     assertThrows(SecurityException.class, () -> {
@@ -277,9 +277,9 @@ public class DefaultPkcs11ConfigurationTest {
       conf.getPrivateKeyProvider().get(conf.getProvider(), ALIAS, "wrong-pin".toCharArray());
     });
   }
-  
+
   @Test
-  public void testMissingCredential() throws Exception {    
+  public void testMissingCredential() throws Exception {
     final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration(getAbsolutePath("cfg1.txt"));
     conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);
     conf.afterPropertiesSet();
@@ -287,7 +287,7 @@ public class DefaultPkcs11ConfigurationTest {
     PkiCredential cred = conf.getCredentialProvider().get(conf.getProvider(), "not-found", PIN);
     assertNull(cred);
   }
-  
+
   @Test
   public void testFailedGetCredential() throws Exception {
     assertThrows(SecurityException.class, () -> {
@@ -298,9 +298,9 @@ public class DefaultPkcs11ConfigurationTest {
       conf.getCredentialProvider().get(conf.getProvider(), ALIAS, "bad-pin".toCharArray());
     });
   }
-  
+
   @Test
-  public void testNoCertInCredential() throws Exception {    
+  public void testNoCertInCredential() throws Exception {
     MockSunPkcs11Provider.MockedPkcs11ResourceHolder.getInstance().setMockNoCertificate(true);
     final DefaultPkcs11Configuration conf = new DefaultPkcs11Configuration(getAbsolutePath("cfg1.txt"));
     conf.setBaseProviderName(MockSunPkcs11Provider.PROVIDER_BASE_NAME);

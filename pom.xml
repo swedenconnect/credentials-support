@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support</artifactId>
-  <version>1.3.2</version>
+  <version>1.3.3</version>
 
   <name>Sweden Connect :: PKI credentials support library</name>
   <description>Support for credentials (including PKCS11 based keys and HSM:s)</description>
@@ -23,7 +23,7 @@
   <scm>
     <connection>scm:https://github.com/swedenconnect/credentials-support.git</connection>
     <developerConnection>scm:https://github.com/swedenconnect/credentials-support.git</developerConnection>
-    <url>https://github.com/swedenconnect/credentials-support/tree/master</url>
+    <url>https://github.com/swedenconnect/credentials-support/tree/main</url>
   </scm>
 
   <developers>
@@ -51,12 +51,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>17</java.version>
 
-    <bc.version>1.78.1</bc.version>
-    
-    <spring.version>6.1.7</spring.version>
-    <spring.boot.version>3.2.5</spring.boot.version>
-    <opensaml.version>5.1.2</opensaml.version>
-    <slf4j.version>2.0.13</slf4j.version>
+    <bc.version>1.79</bc.version>
+
+    <spring.version>6.2.0</spring.version>
+    <spring.boot.version>3.4.0</spring.boot.version>
+    <opensaml.version>5.1.3</opensaml.version>
+    <slf4j.version>2.0.16</slf4j.version>
 
   </properties>
 
@@ -83,10 +83,10 @@
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
-  
+
   <dependencyManagement>
     <dependencies>
-      
+
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
@@ -94,17 +94,17 @@
         <version>${spring.version}</version>
         <scope>import</scope>
       </dependency>
-      
+
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>${slf4j.version}</version>
       </dependency>
-      
+
       <dependency>
         <groupId>org.apache.httpcomponents.core5</groupId>
         <artifactId>httpcore5</artifactId>
-        <version>5.2.4</version>
+        <version>5.3.1</version>
       </dependency>
 
       <dependency>
@@ -118,7 +118,7 @@
         <artifactId>bcpkix-jdk18on</artifactId>
         <version>${bc.version}</version>
       </dependency>
-            
+
     </dependencies>
   </dependencyManagement>
 
@@ -138,20 +138,20 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
       <version>${bc.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.opensaml</groupId>
       <artifactId>opensaml-security-api</artifactId>
       <version>${opensaml.version}</version>
       <type>jar</type>
     </dependency>
-    
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -160,7 +160,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.32</version>
+      <version>1.18.36</version>
       <scope>provided</scope>
     </dependency>
 
@@ -168,14 +168,14 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>5.10.2</version>
+      <version>5.11.3</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.12.0</version>
+      <version>5.14.2</version>
       <scope>test</scope>
     </dependency>
 
@@ -202,24 +202,24 @@
       <version>${spring.boot.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>${slf4j.version}</version>
       <scope>test</scope>
-    </dependency>    
-    
+    </dependency>
+
   </dependencies>
 
   <build>
 
     <plugins>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>3.13.0</version>
         <configuration>
           <release>${java.version}</release>
         </configuration>
@@ -228,25 +228,25 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.4.2</version>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>3.4.0</version>
       </plugin>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.4.1</version>
+        <version>3.5.0</version>
         <executions>
           <execution>
             <id>enforce</id>
             <configuration>
               <rules>
-                <dependencyConvergence />
+                <dependencyConvergence/>
               </rules>
             </configuration>
             <goals>
@@ -255,25 +255,25 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
-      </plugin>      
+        <version>3.5.0</version>
+      </plugin>
 
       <!-- run mvn jacoco:report -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.10</version>
+        <version>0.8.12</version>
         <executions>
           <execution>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
           </execution>
-        </executions>        
+        </executions>
       </plugin>
 
     </plugins>
@@ -289,20 +289,20 @@
 
       <build>
         <plugins>
-        
+
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.13</version>
+            <version>1.7.0</version>
             <extensions>true</extensions>
             <configuration>
               <serverId>ossrh</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
-              <!-- 
-                Allows manual inspection of the staging repo before deploying it to the central repo. 
-                Use 'mvn nexus-staging:release -Prelease' to release and 
-                'mvn nexus-staging:drop' to abort. 
+              <!--
+                Allows manual inspection of the staging repo before deploying it to the central repo.
+                Use 'mvn nexus-staging:release -Prelease' to release and
+                'mvn nexus-staging:drop' to abort.
               -->
             </configuration>
           </plugin>
@@ -310,7 +310,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.2.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -325,7 +325,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>3.3.0</version>
+            <version>3.3.1</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -345,7 +345,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.6.0</version>
+            <version>3.10.1</version>
             <executions>
               <execution>
                 <id>attach-javadoc</id>

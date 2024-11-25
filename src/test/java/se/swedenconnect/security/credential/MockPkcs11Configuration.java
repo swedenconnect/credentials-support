@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import se.swedenconnect.security.credential.pkcs11conf.Pkcs11ObjectProvider;
 
 /**
  * A mocked {@link Pkcs11Configuration} that doesn't use a PKCS#11 device but a KeyStore on disk instead.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -42,14 +42,14 @@ public class MockPkcs11Configuration implements Pkcs11Configuration {
   /** Setting for simulating that there is no certificate available. */
   @Setter
   private boolean simulateNoCertificate = false;
-  
+
   /** Setting for simulating that there is no private available. */
   @Setter
   private boolean simulateNoPrivateKey = false;
 
   /**
    * Constructor.
-   * 
+   *
    * @param keyStore
    *          the keystore to pick the credential from.
    */
@@ -59,7 +59,7 @@ public class MockPkcs11Configuration implements Pkcs11Configuration {
 
   /**
    * Constructor.
-   * 
+   *
    * @param resource
    *          the keystore resource
    * @param password
@@ -102,7 +102,7 @@ public class MockPkcs11Configuration implements Pkcs11Configuration {
     return (provider, alias, pin) -> {
       try {
         final PrivateKey pk = !this.simulateNoPrivateKey ? (PrivateKey) this.keyStore.getKey(alias, pin) : null;
-        final X509Certificate cert = !this.simulateNoCertificate ? (X509Certificate) this.keyStore.getCertificate(alias) : null; 
+        final X509Certificate cert = !this.simulateNoCertificate ? (X509Certificate) this.keyStore.getCertificate(alias) : null;
         if (pk == null && cert == null) {
           return null;
         }
