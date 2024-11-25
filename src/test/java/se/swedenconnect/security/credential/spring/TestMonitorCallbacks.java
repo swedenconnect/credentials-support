@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
 /**
  * Callback functions for the Spring context test.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -33,13 +33,13 @@ public class TestMonitorCallbacks {
     System.out.println("Test of credential " + c.getName() + " failed with exception: " + e.getClass().getSimpleName());
     return true;
   };
-  
-  public static Consumer<ReloadablePkiCredential> RELOAD_SUCCESS_CALLBACK = 
+
+  public static Consumer<ReloadablePkiCredential> RELOAD_SUCCESS_CALLBACK =
       (c) -> System.out.println("Credential " + c.getName() + " was reloaded");
-      
+
   public static BiConsumer<ReloadablePkiCredential, Exception> RELOAD_FAILURE_CALLBACK = (c, e) ->
   System.out.println("Reloading of credential " + c.getName() + " failed with exception: " + e.getClass().getSimpleName());
 
-  private TestMonitorCallbacks() {    
+  private TestMonitorCallbacks() {
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import se.swedenconnect.security.credential.utils.X509Utils;
  * ({@link #setResource(Resource)}, {@link #setPassword(char[])}, {@link #setAlias(String)}).</li>
  * <li>If none of the above matches an error is thrown.</li>
  * </ul>
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -102,7 +102,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
   /**
    * Constructor that initializes the factory from the supplied credential configuration properties object.
-   * 
+   *
    * @param properties
    *          credential configuration properties
    */
@@ -129,7 +129,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   protected PkiCredential createInstance() throws Exception {
 
     AbstractPkiCredential credential = null;
-    
+
     final List<X509Certificate> _certificates = new ArrayList<>();
     if (this.certificates != null && !this.certificates.isEmpty()) {
       for (final Resource r : this.certificates) {
@@ -142,7 +142,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
     if (!_certificates.isEmpty() && this.privateKey != null) {
       final char[] pw = Optional.ofNullable(this.keyPassword).orElseGet(() -> this.password);
-      credential = new BasicCredential(_certificates, this.privateKey, pw); 
+      credential = new BasicCredential(_certificates, this.privateKey, pw);
     }
     else if (StringUtils.hasText(this.pkcs11Configuration) && StringUtils.hasText(this.alias) && this.keyPassword != null
         && (!StringUtils.hasText(this.type) || "PKCS11".equalsIgnoreCase(this.type))) {
@@ -191,7 +191,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
   /**
    * Assigns the name of the credential.
-   * 
+   *
    * @param name
    *          the credential name
    */
@@ -202,7 +202,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   /**
    * Assigns the resource holding the certificate part of the credential (optional since the certificate may be part of
    * a keystore).
-   * 
+   *
    * @param certificate
    *          certificate resource
    */
@@ -216,7 +216,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   /**
    * Assigns the list of resources holding the certificate chain that part of the credential (optional since the
    * certificate may be part of a keystore). If used, the entity certificate must be the first element.
-   * 
+   *
    * @param certificates
    *          a list of certificate resources
    */
@@ -230,7 +230,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   /**
    * Assigns the resource holding the private key part of the credential (optional since the key may be part of a
    * keystore).
-   * 
+   *
    * @param privateKey
    *          private key resource
    */
@@ -240,7 +240,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
   /**
    * Assigns the resource to the keystore containing the credential.
-   * 
+   *
    * @param resource
    *          the keystore resource
    */
@@ -250,7 +250,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
   /**
    * Assigns the keystore password.
-   * 
+   *
    * @param password
    *          keystore password
    */
@@ -260,7 +260,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
   /**
    * Assigns the type of keystore.
-   * 
+   *
    * @param type
    *          the keystore type
    */
@@ -270,7 +270,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
   /**
    * Assigns the name of the security provider to use when creating the KeyStore instance.
-   * 
+   *
    * @param provider
    *          security provider name
    */
@@ -280,7 +280,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
   /**
    * Assigns the PKCS#11 configuration file to use.
-   * 
+   *
    * @param pkcs11Configuration
    *          PKCS#11 configuration file (full path)
    */
@@ -290,7 +290,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
   /**
    * Assigns the keystore alias to the entry holding the key pair.
-   * 
+   *
    * @param alias
    *          keystore alias
    */
@@ -300,7 +300,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
   /**
    * Assigns the password to unlock the private key from the keystore.
-   * 
+   *
    * @param keyPassword
    *          the key password
    */
@@ -310,7 +310,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
 
   /**
    * Assigns the PIN. The same as keyPassword (used mainly for PKCS#11 credentials).
-   * 
+   *
    * @param pin
    *          the PIN
    */
@@ -321,7 +321,7 @@ public class PkiCredentialFactoryBean extends AbstractFactoryBean<PkiCredential>
   /** {@inheritDoc} */
   @Override
   public void afterPropertiesSet() throws Exception {
-    if ((this.certificate != null || (this.certificates != null && !this.certificates.isEmpty())) 
+    if ((this.certificate != null || (this.certificates != null && !this.certificates.isEmpty()))
         && this.privateKey != null) {
       log.debug("A BasicCredential will be created");
     }
