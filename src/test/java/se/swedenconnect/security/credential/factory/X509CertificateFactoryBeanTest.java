@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * Test cases for X509CertificateFactoryBean.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -34,16 +34,16 @@ public class X509CertificateFactoryBeanTest {
     X509CertificateFactoryBean factory = new X509CertificateFactoryBean();
     factory.setResource(new ClassPathResource("rsa1.crt"));
     factory.afterPropertiesSet();
-    
+
     assertNotNull(factory.getObject());
     assertEquals(X509Certificate.class, factory.getObjectType());
-    
+
     factory = new X509CertificateFactoryBean(new ClassPathResource("rsa1.crt"));
     factory.afterPropertiesSet();
-    
+
     assertNotNull(factory.getObject());
   }
-  
+
   @Test
   public void testMissingResource() throws Exception {
     assertThrows(IllegalArgumentException.class, () -> {

@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2020-2024 Sweden Connect
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:context="http://www.springframework.org/schema/context"
   xmlns:task="http://www.springframework.org/schema/task"
@@ -10,7 +25,7 @@
 
 
   <!--
-    Register our converters ... 
+    Register our converters ...
    -->
   <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
     <property name="converters">
@@ -20,26 +35,26 @@
       </list>
     </property>
   </bean>
-  
-  <!-- 
-    Configurer for the application settings 
-  --> 
+
+  <!--
+    Configurer for the application settings
+  -->
   <bean id="appConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" scope="singleton">
     <property name="placeholderPrefix" value="${" />
     <property name="location" value="classpath:application.properties" />
   </bean>
-  
+
   <!--
-    BasicCredential 
+    BasicCredential
    -->
   <bean id="credential1" class="se.swedenconnect.security.credential.BasicCredential">
     <property name="certificate" value="${credential1.certificate}" />
     <property name="privateKey" value="${credential1.private-key}" />
     <property name="name" value="${credential1.name}" />
   </bean>
-  
+
   <!--
-    KeyStoreCredential - where we set each property 
+    KeyStoreCredential - where we set each property
    -->
   <bean id="credential2" class="se.swedenconnect.security.credential.KeyStoreCredential">
     <property name="resource" value="${credential2.resource}" />
@@ -51,10 +66,10 @@
     <!-- <property name="type" value="${credential2.type}" /> -->
     <property name="name" value="${credential2.name}" />
   </bean>
-  
+
   <!--
     KeyStoreCredential - where we use a KeyStoreFactory ...
-      This is useful if you have a keystore that holds several credentials ... 
+      This is useful if you have a keystore that holds several credentials ...
    -->
    <bean id="credential2b" class="se.swedenconnect.security.credential.KeyStoreCredential">
     <property name="keyStore" ref="keyStoreFactory" />
@@ -62,14 +77,14 @@
     <property name="keyPassword" value="${credential2.key-password}" />
     <property name="name" value="Credential-2b" />
   </bean>
-  
+
   <bean id="keyStoreFactory" class="se.swedenconnect.security.credential.factory.KeyStoreFactoryBean">
     <property name="resource" value="${credential2.resource}" />
     <property name="password" value="${credential2.password}" />
   </bean>
-  
+
   <!--
-    Pkcs11Credential - mocked 
+    Pkcs11Credential - mocked
    -->
   <bean id="credential3" class="se.swedenconnect.security.credential.Pkcs11Credential">
     <property name="alias" value="${credential3.alias}" />
@@ -77,14 +92,14 @@
     <property name="name" value="${credential3.name}" />
     <property name="configuration" ref="pkcs11conf" />
   </bean>
-  
+
   <bean id="pkcs11conf" class="se.swedenconnect.security.credential.pkcs11conf.DefaultPkcs11Configuration">
     <property name="baseProviderName" value="${credential3.configuration.base-provider-name}" />
     <property name="configurationFile" value="${credential3.configuration.configuration-file}" />
   </bean>
-  
+
   <!--
-    KeyStoreCredential for PKCS#11 (as an alternative to Pkcs11Credential) 
+    KeyStoreCredential for PKCS#11 (as an alternative to Pkcs11Credential)
    -->
   <bean id="credential4" class="se.swedenconnect.security.credential.KeyStoreCredential">
     <property name="provider" value="${credential4.provider}" />
@@ -95,9 +110,9 @@
     <property name="type" value="${credential4.type}" />
     <property name="name" value="${credential4.name}" />
   </bean>
-  
+
   <!--
-    Monitoring 
+    Monitoring
    -->
   <bean id="credentialMonitor" class="se.swedenconnect.security.credential.monitoring.DefaultCredentialMonitorBean">
     <property name="credentials">
@@ -116,11 +131,11 @@
       <util:constant static-field="se.swedenconnect.security.credential.spring.TestMonitorCallbacks.RELOAD_FAILURE_CALLBACK"/>
     </property>
   </bean>
-  
+
   <task:scheduled-tasks scheduler="monitorScheduler">
     <task:scheduled ref="credentialMonitor" method="test" fixed-delay="1000" initial-delay="1000" />
   </task:scheduled-tasks>
 
   <task:scheduler id="monitorScheduler" pool-size="10"/>
-  
+
 </beans>

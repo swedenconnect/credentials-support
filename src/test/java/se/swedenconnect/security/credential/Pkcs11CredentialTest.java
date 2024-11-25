@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,25 +31,25 @@ import se.swedenconnect.security.credential.pkcs11conf.Pkcs11ConfigurationExcept
 
 /**
  * Test cases for Pkcs11Credential.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class Pkcs11CredentialTest {
-  
+
   private final static char[] PIN = "secret".toCharArray();
   private final static String ALIAS = "test";
 
   private KeyStore keyStore;
   private X509Certificate cert;
-  
+
   public Pkcs11CredentialTest() throws Exception {
     KeyStoreFactoryBean factory = new KeyStoreFactoryBean(new ClassPathResource("rsa1.jks"), "secret".toCharArray());
     factory.afterPropertiesSet();
     this.keyStore = factory.getObject();
     this.cert = (X509Certificate) this.keyStore.getCertificate(ALIAS);
   }
-  
+
   @Test
   public void testDefaultConstructor() throws Exception {
     Pkcs11Credential cred = new Pkcs11Credential();
@@ -59,7 +59,7 @@ public class Pkcs11CredentialTest {
     }
     catch (IllegalArgumentException e) {
     }
-    
+
     final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);
     cred.setConfiguration(conf);
     try {
@@ -68,7 +68,7 @@ public class Pkcs11CredentialTest {
     }
     catch (IllegalArgumentException e) {
     }
-    
+
     cred.setAlias(ALIAS);
     try {
       cred.afterPropertiesSet();
@@ -76,16 +76,16 @@ public class Pkcs11CredentialTest {
     }
     catch (IllegalArgumentException e) {
     }
-    
+
     cred.setPin(PIN);
     cred.afterPropertiesSet();
-    
+
     assertNotNull(cred.getPrivateKey());
     assertNotNull(cred.getPublicKey());
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getName());
   }
-  
+
   @Test
   public void testConstructorAll() throws Exception {
     Pkcs11Credential cred = new Pkcs11Credential(null, null, null);
@@ -95,7 +95,7 @@ public class Pkcs11CredentialTest {
     }
     catch (IllegalArgumentException e) {
     }
-    
+
     final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);
     cred = new Pkcs11Credential(conf, null, null);
     try {
@@ -104,7 +104,7 @@ public class Pkcs11CredentialTest {
     }
     catch (IllegalArgumentException e) {
     }
-    
+
     cred = new Pkcs11Credential(conf, ALIAS, null);
     try {
       cred.afterPropertiesSet();
@@ -112,25 +112,25 @@ public class Pkcs11CredentialTest {
     }
     catch (IllegalArgumentException e) {
     }
-    
+
     cred = new Pkcs11Credential(conf, ALIAS, PIN);
     cred.afterPropertiesSet();
-    
+
     assertNotNull(cred.getPrivateKey());
     assertNotNull(cred.getPublicKey());
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getName());
-    
+
     // Make sure nothing bad happens if we call afterPropertiesSet several times ...
     cred.afterPropertiesSet();
-    
+
     assertNotNull(cred.getPrivateKey());
     assertNotNull(cred.getPublicKey());
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getName());
     assertTrue(cred.isHardwareCredential());
   }
-  
+
   @Test
   public void testConstructorAllWithCert() throws Exception {
     Pkcs11Credential cred = new Pkcs11Credential(null, null, null, (X509Certificate) null);
@@ -140,7 +140,7 @@ public class Pkcs11CredentialTest {
     }
     catch (IllegalArgumentException e) {
     }
-    
+
     final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);
     conf.setSimulateNoCertificate(true);
     cred = new Pkcs11Credential(conf, null, null, (X509Certificate) null);
@@ -150,7 +150,7 @@ public class Pkcs11CredentialTest {
     }
     catch (IllegalArgumentException e) {
     }
-    
+
     cred = new Pkcs11Credential(conf, ALIAS, null, (X509Certificate) null);
     try {
       cred.afterPropertiesSet();
@@ -158,7 +158,7 @@ public class Pkcs11CredentialTest {
     }
     catch (IllegalArgumentException e) {
     }
-    
+
     cred = new Pkcs11Credential(conf, ALIAS, PIN, (X509Certificate) null);
     try {
       cred.afterPropertiesSet();
@@ -166,16 +166,16 @@ public class Pkcs11CredentialTest {
     }
     catch (IllegalArgumentException e) {
     }
-    
+
     cred = new Pkcs11Credential(conf, ALIAS, PIN, this.cert);
     cred.afterPropertiesSet();
-    
+
     assertNotNull(cred.getPrivateKey());
     assertNotNull(cred.getPublicKey());
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getName());
   }
-    
+
   @Test
   public void testNoPrivateKey() throws Exception {
     assertThrows(IllegalArgumentException.class, () -> {
@@ -190,7 +190,7 @@ public class Pkcs11CredentialTest {
       cred.init();
     });
   }
-  
+
   @Test
   public void missingCredential() throws Exception {
     assertThrows(IllegalArgumentException.class, () -> {
@@ -199,84 +199,84 @@ public class Pkcs11CredentialTest {
       cred.init();
     });
   }
-  
+
   @Test
   public void installOwnTestFunction() throws Exception {
-    
-    final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);    
+
+    final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);
     final Pkcs11Credential cred = new Pkcs11Credential(conf, ALIAS, PIN);
     cred.setTestFunction(new DefaultCredentialTestFunction());
     cred.init();
-    
+
     assertNotNull(cred.getPrivateKey());
     assertNotNull(cred.getPublicKey());
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getTestFunction());
   }
-  
+
   @Test
   public void testDefaultTestFunction() throws Exception {
-    
-    final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);    
+
+    final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);
     final Pkcs11Credential cred = new Pkcs11Credential(conf, ALIAS, PIN);
     cred.init();
-    
+
     assertNotNull(cred.getPrivateKey());
     assertNotNull(cred.getPublicKey());
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getTestFunction());
   }
-  
+
   @Test
   public void testLoadAtGet() throws Exception {
-    final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);    
+    final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);
     Pkcs11Credential cred = new Pkcs11Credential(conf, ALIAS, PIN);
     // No init ...
-    
+
     assertNotNull(cred.getPrivateKey());
     assertNotNull(cred.getPublicKey());
     assertNotNull(cred.getCertificate());
-    
+
     cred = new Pkcs11Credential(conf, ALIAS, PIN);
     assertNotNull(cred.getPublicKey());
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getPrivateKey());
-    
-    cred = new Pkcs11Credential(conf, ALIAS, PIN);    
+
+    cred = new Pkcs11Credential(conf, ALIAS, PIN);
     assertNotNull(cred.getCertificate());
     assertNotNull(cred.getPrivateKey());
     assertNotNull(cred.getPublicKey());
   }
-  
+
   @Test
   public void testLoadAtGetErrors() throws Exception {
     Pkcs11Credential cred = new Pkcs11Credential();
     // No init ...
-    
+
     try {
       cred.getPrivateKey();
       fail("Expected SecurityException");
     }
-    catch (SecurityException e) {      
+    catch (SecurityException e) {
     }
-    
+
     cred = new Pkcs11Credential();
     try {
       cred.getPublicKey();
       fail("Expected SecurityException");
     }
-    catch (SecurityException e) {      
+    catch (SecurityException e) {
     }
-    
+
     cred = new Pkcs11Credential();
     try {
       cred.getCertificate();
       fail("Expected SecurityException");
     }
-    catch (SecurityException e) {      
-    }    
+    catch (SecurityException e) {
+    }
   }
-  
+
   @Test
   public void testIllegalSetPrivateKey() throws Exception {
     assertThrows(IllegalArgumentException.class, () -> {
@@ -286,7 +286,7 @@ public class Pkcs11CredentialTest {
       cred.setPrivateKey(pk);
     });
   }
-  
+
   @Test
   public void testIllegalSetPublicKey() throws Exception {
     assertThrows(IllegalArgumentException.class, () -> {
@@ -294,13 +294,13 @@ public class Pkcs11CredentialTest {
       cred.setPublicKey(this.cert.getPublicKey());
     });
   }
-  
+
   @Test
   public void testAssignPkcs11ConfigurationFile() throws Exception {
     Pkcs11Credential cred = new Pkcs11Credential();
     cred.setConfigurationFile(new ClassPathResource("cfg1.txt").getFile().getAbsolutePath());
   }
-  
+
   @Test
   public void testAssignPkcs11ConfigurationFileError() throws Exception {
     assertThrows(Pkcs11ConfigurationException.class, () -> {
@@ -308,23 +308,23 @@ public class Pkcs11CredentialTest {
       cred.setConfigurationFile("/dummy/file/path/conf.cfg");
     });
   }
-  
+
   @Test
   public void testReload() throws Exception {
-    final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);    
+    final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);
     final Pkcs11Credential cred = new Pkcs11Credential(conf, ALIAS, PIN);
     cred.init();
-    
+
     assertNotNull(cred.getPrivateKey());
     // Mess up the private key
-    Field pk = AbstractPkiCredential.class.getDeclaredField("privateKey"); 
+    Field pk = AbstractPkiCredential.class.getDeclaredField("privateKey");
     pk.setAccessible(true);
     pk.set(cred, null);
-    
+
     cred.reload();
     assertNotNull(cred.getPrivateKey());
   }
-  
+
   @Test
   public void testReloadNoInit() throws Exception {
     assertThrows(SecurityException.class, () -> {
@@ -332,7 +332,7 @@ public class Pkcs11CredentialTest {
       cred.reload();
     });
   }
-  
+
   @Test
   public void testReloadNoInit2() throws Exception {
     assertThrows(SecurityException.class, () -> {
@@ -341,7 +341,7 @@ public class Pkcs11CredentialTest {
       cred.reload();
     });
   }
-  
+
   @Test
   public void testReloadNoInit3() throws Exception {
     assertThrows(SecurityException.class, () -> {
@@ -350,7 +350,7 @@ public class Pkcs11CredentialTest {
       cred.reload();
     });
   }
-  
+
   @Test
   public void testReloadNoPrivateKey() throws Exception {
     assertThrows(KeyException.class, () -> {
@@ -363,28 +363,28 @@ public class Pkcs11CredentialTest {
       cred.reload();
     });
   }
-  
+
   @Test
   public void testDestroy() throws Exception {
     final MockPkcs11Configuration conf = new MockPkcs11Configuration(this.keyStore);
     final Pkcs11Credential cred = new Pkcs11Credential(conf, ALIAS, PIN);
     cred.init();
-    
+
     // Destroy clears the PIN so a reload should fail ...
     cred.destroy();
-    
+
     try {
       cred.reload();
       fail("Expected SecurityException");
     }
-    catch (SecurityException e) {      
+    catch (SecurityException e) {
     }
   }
-  
+
   @Test
   public void testDestroyUninitialized() throws Exception {
     final Pkcs11Credential cred = new Pkcs11Credential();
-    
+
     // Just to make sure that destroy doesn't crash if called for a non-initialized object ...
     cred.destroy();
   }

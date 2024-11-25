@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test cases for CredentialMonitorTask.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -33,18 +33,18 @@ public class CredentialMonitorTaskTest {
       new CredentialMonitorTask(null);
     });
   }
-  
+
   @Test
   public void testRun() throws Exception {
     TestBean bean = new TestBean();
     CredentialMonitorTask task = new CredentialMonitorTask(bean);
     task.run();
-    
+
     assertEquals(1, bean.getTestCalled());
   }
-  
+
   public static class TestBean implements CredentialMonitorBean {
-    
+
     @Getter
     private int testCalled = 0;
 
@@ -52,7 +52,7 @@ public class CredentialMonitorTaskTest {
     public void test() {
       this.testCalled++;
     }
-    
+
   }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.core.io.Resource;
 
 /**
  * A basic implementation of the {@link PkiCredential} interface.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -42,7 +42,7 @@ public class BasicCredential extends AbstractPkiCredential {
 
   /**
    * Constructor setting the public and private keys.
-   * 
+   *
    * @param publicKey the public key
    * @param privateKey the private key
    */
@@ -53,7 +53,7 @@ public class BasicCredential extends AbstractPkiCredential {
 
   /**
    * Constructor setting the certificate and private key.
-   * 
+   *
    * @param certificate the certificate
    * @param privateKey the private key
    */
@@ -64,7 +64,7 @@ public class BasicCredential extends AbstractPkiCredential {
 
   /**
    * Constructor setting the certificate and private key.
-   * 
+   *
    * @param certificateResource the resource holding a encoded certificate
    * @param privateKey the private key
    * @throws CertificateException if the certificate resource can not be decoded
@@ -76,7 +76,7 @@ public class BasicCredential extends AbstractPkiCredential {
 
   /**
    * Constructor setting the certificate and private key.
-   * 
+   *
    * @param certificateResource the resource holding a encoded certificate
    * @param privateKey the private key resource
    * @throws CertificateException if the certificate resource can not be decoded
@@ -90,7 +90,7 @@ public class BasicCredential extends AbstractPkiCredential {
 
   /**
    * Constructor setting the certificate and an encrypted private key.
-   * 
+   *
    * @param certificateResource the resource holding a encoded certificate
    * @param privateKey the private key resource
    * @param password the private key password
@@ -105,7 +105,7 @@ public class BasicCredential extends AbstractPkiCredential {
 
   /**
    * Constructor setting the certificate(s) and private key.
-   * 
+   *
    * @param certificates the certificate(s) where the entity certificate is placed first
    * @param privateKey the private key
    */
@@ -116,7 +116,7 @@ public class BasicCredential extends AbstractPkiCredential {
 
   /**
    * Constructor setting the certificate(s) and private key.
-   * 
+   *
    * @param certificates the certificate(s) where the entity certificate is placed first
    * @param privateKey the private key resource
    * @throws KeyException if the key decode fails
@@ -128,7 +128,7 @@ public class BasicCredential extends AbstractPkiCredential {
 
   /**
    * Constructor setting the certificate and an encrypted private key.
-   * 
+   *
    * @param certificates the certificate(s) where the entity certificate is placed first
    * @param privateKey the private key resource
    * @param password the private key password

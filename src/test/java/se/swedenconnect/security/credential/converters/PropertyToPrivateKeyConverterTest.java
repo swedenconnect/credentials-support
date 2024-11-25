@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import se.swedenconnect.security.credential.converters.PropertyToPrivateKeyConve
 
 /**
  * Test cases for PropertyToPrivateKeyConverter.
- * 
+ *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
@@ -44,25 +44,25 @@ import se.swedenconnect.security.credential.converters.PropertyToPrivateKeyConve
 @EnableConfigurationProperties(value = KeyConfig.class)
 @TestPropertySource(locations = { "classpath:application.properties" })
 public class PropertyToPrivateKeyConverterTest {
-  
+
   @Autowired
-  ApplicationContext context;  
-  
+  ApplicationContext context;
+
   @Autowired(required = false)
   PropertyToPrivateKeyConverter propertyToPrivateKeyConverter;
-  
+
   @Autowired(required = false)
   PrivateKey testKey;
-  
+
   @Test
   public void testConvert() throws Exception {
     PropertyToPrivateKeyConverter converter = new PropertyToPrivateKeyConverter();
     converter.setApplicationContext(this.context);
-    
+
     PrivateKey pk = converter.convert("classpath:rsa1.pkcs8.key");
     assertNotNull(pk);
   }
-  
+
   @Test
   public void testConvertFailed() throws Exception {
 
@@ -74,21 +74,21 @@ public class PropertyToPrivateKeyConverterTest {
     });
 
   }
-  
+
   @Test
   public void testConverterBean() throws Exception {
     assertNotNull(this.propertyToPrivateKeyConverter, "PropertyToPrivateKeyConverter bean is not present");
     assertNotNull(this.propertyToPrivateKeyConverter.convert("classpath:rsa1.pkcs8.key"));
   }
-  
+
   @Test
   public void testSpringContextPrivateKeySet() throws Exception {
     assertNotNull(this.testKey);
   }
 
-  @Configuration  
+  @Configuration
   public static class Config {
-        
+
     @Bean
     @ConfigurationPropertiesBinding
     public PropertyToPrivateKeyConverter propertyToPrivateKeyConverter() {
@@ -101,11 +101,11 @@ public class PropertyToPrivateKeyConverterTest {
   public static class KeyConfig {
     @Setter
     private PrivateKey testkey;
-    
+
     @Bean
     public PrivateKey testKey() {
       return this.testkey;
     }
-  }    
+  }
 
 }
