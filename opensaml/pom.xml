@@ -62,16 +62,26 @@
   <dependencies>
 
     <dependency>
-      <groupId>org.opensaml</groupId>
-      <artifactId>opensaml-security-api</artifactId>
-      <version>${opensaml.version}</version>
-      <type>jar</type>
-    </dependency>
-
-    <dependency>
       <groupId>se.swedenconnect.security</groupId>
       <artifactId>credentials-support</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.cryptacular</groupId>
+      <artifactId>cryptacular</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>opensaml-security-api</artifactId>
+      <version>${opensaml.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.cryptacular</groupId>
+          <artifactId>cryptacular</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- For testing -->

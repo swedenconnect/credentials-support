@@ -44,12 +44,12 @@ class ConfigurationCredentialBundleRegistrarTest {
 
     final CredentialBundlesConfigurationProperties configuration = new CredentialBundlesConfigurationProperties();
 
-    configuration.setKeyStore(new HashMap<>());
+    configuration.setKeystore(new HashMap<>());
     final StoreConfigurationProperties storeConf = new StoreConfigurationProperties();
     storeConf.setLocation("classpath:rsa1.jks");
     storeConf.setPassword("secret");
     storeConf.setType("JKS");
-    configuration.getKeyStore().put("ks", storeConf);
+    configuration.getKeystore().put("ks", storeConf);
 
     configuration.setPem(new HashMap<>());
     final PemCredentialConfigurationProperties pemConf = new PemCredentialConfigurationProperties();
@@ -91,11 +91,11 @@ class ConfigurationCredentialBundleRegistrarTest {
 
     final CredentialBundlesConfigurationProperties configuration = new CredentialBundlesConfigurationProperties();
 
-    configuration.setKeyStore(new HashMap<>());
+    configuration.setKeystore(new HashMap<>());
     final StoreConfigurationProperties storeConf = new StoreConfigurationProperties();
     storeConf.setLocation("classpath:rsa1.jks");
     storeConf.setPassword("bad");
-    configuration.getKeyStore().put("ks", storeConf);
+    configuration.getKeystore().put("ks", storeConf);
 
     final IllegalArgumentException ex =
         assertThrows(IllegalArgumentException.class, () -> ConfigurationCredentialBundleRegistrar.loadConfiguration(
@@ -162,12 +162,12 @@ class ConfigurationCredentialBundleRegistrarTest {
 
     final CredentialBundlesConfigurationProperties configuration = new CredentialBundlesConfigurationProperties();
 
-    configuration.setKeyStore(new HashMap<>());
+    configuration.setKeystore(new HashMap<>());
     final StoreConfigurationProperties storeConf = new StoreConfigurationProperties();
     storeConf.setLocation("classpath:rsa1.jks");
     storeConf.setPassword("secret");
     storeConf.setType("JKS");
-    configuration.getKeyStore().put("ks", storeConf);
+    configuration.getKeystore().put("ks", storeConf);
 
     final ConfigurationCredentialBundleRegistrar registrar =
         new ConfigurationCredentialBundleRegistrar(configuration, new DefaultConfigurationResourceLoader());

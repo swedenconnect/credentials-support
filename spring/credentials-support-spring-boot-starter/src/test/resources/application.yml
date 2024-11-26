@@ -3,7 +3,7 @@
 #
 credential:
   bundles:
-    key-store:
+    keystore:
       keystore1:
         location: classpath:test-1.jks
         password: secret

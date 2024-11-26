@@ -36,7 +36,7 @@ public class StoreConfigurationProperties implements StoreConfiguration {
   private String location;
 
   /**
-   * Password used to access the store.s
+   * Password used to access the store.
    */
   @Getter
   @Setter

@@ -19,6 +19,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import se.swedenconnect.security.credential.config.properties.PkiCredentialConfigurationProperties;
 import se.swedenconnect.security.credential.spring.config.KeyStoreReference;
 import se.swedenconnect.security.credential.spring.config.PkiCredentialReference;
@@ -60,6 +61,7 @@ public class TestConfigurationProperties {
    */
   @Getter
   @Setter
+  @NestedConfigurationProperty
   private PkiCredentialConfigurationProperties rsa2;
 
   /**

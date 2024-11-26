@@ -3,7 +3,7 @@
 #
 credential:
   bundles:
-    key-store:
+    keystore:
       rsa-store:
         location: classpath:credentials/credentials.jks
         type: JKS

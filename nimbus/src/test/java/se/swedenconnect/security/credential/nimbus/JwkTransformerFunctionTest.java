@@ -80,7 +80,7 @@ class JwkTransformerFunctionTest {
     assertEquals(KeyType.RSA, jwk.getKeyType());
     assertTrue(jwk.isPrivate());
     assertNotNull(jwk.getKeyStore());
-    assertEquals(credential.getCertificate().getSerialNumber().toString(10), jwk.getKeyID());
+    assertEquals(jwk.computeThumbprint().toString(), jwk.getKeyID());
     assertNotNull(jwk.getX509CertChain());
     assertNotNull(jwk.getX509CertSHA256Thumbprint());
     assertNotNull(jwk.getIssueTime());
@@ -102,7 +102,7 @@ class JwkTransformerFunctionTest {
     assertEquals(KeyType.RSA, jwk.getKeyType());
     assertTrue(jwk.isPrivate());
     assertNull(jwk.getKeyStore());
-    assertNull(jwk.getKeyID());
+    assertNotNull(jwk.getKeyID());
     assertNull(jwk.getX509CertChain());
     assertNull(jwk.getX509CertSHA256Thumbprint());
     assertNull(jwk.getIssueTime());
@@ -121,7 +121,7 @@ class JwkTransformerFunctionTest {
     assertEquals(KeyType.EC, jwk.getKeyType());
     assertTrue(jwk.isPrivate());
     assertNotNull(jwk.getKeyStore());
-    assertEquals(credential.getCertificate().getSerialNumber().toString(10), jwk.getKeyID());
+    assertEquals(jwk.computeThumbprint().toString(), jwk.getKeyID());
 
     final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     System.out.println(gson.toJson(jwk.toJSONObject()));
@@ -138,7 +138,7 @@ class JwkTransformerFunctionTest {
     assertEquals(KeyType.EC, jwk.getKeyType());
     assertTrue(jwk.isPrivate());
     assertNull(jwk.getKeyStore());
-    assertNull(jwk.getKeyID());
+    assertNotNull(jwk.getKeyID());
     assertNull(jwk.getX509CertChain());
     assertNull(jwk.getX509CertSHA256Thumbprint());
     assertNull(jwk.getIssueTime());

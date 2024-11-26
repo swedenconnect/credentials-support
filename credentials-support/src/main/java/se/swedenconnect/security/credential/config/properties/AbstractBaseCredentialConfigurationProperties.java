@@ -60,7 +60,7 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
   private Instant expiresAt;
 
   /**
-   * Metadata properties.
+   * Credential metadata properties.
    */
   @Getter
   private final Map<String, String> metadata = new HashMap<>();

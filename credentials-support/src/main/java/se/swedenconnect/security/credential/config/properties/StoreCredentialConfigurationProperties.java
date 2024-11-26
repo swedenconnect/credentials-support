@@ -36,6 +36,7 @@ public class StoreCredentialConfigurationProperties extends AbstractBaseCredenti
    */
   @Getter
   @Setter
+  @org.springframework.boot.context.properties.NestedConfigurationProperty
   private StoreConfigurationProperties store;
 
   /**

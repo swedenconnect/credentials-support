@@ -73,6 +73,20 @@
       <version>${bc.version}</version>
     </dependency>
 
+    <!--
+     We don't have any dependencies to Spring Boot in the base library. However, we want to be able to use the
+     NestedConfigurationProperty annotation so that Spring Boot's annotation processor can build nice metadata for
+     configuration properties (which are defined in this library).
+     So, if you are not using Spring Boot, stuff will work anyway ....
+     Yes, they will: https://www.baeldung.com/classnotfoundexception-missing-annotation
+    -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot</artifactId>
+      <version>${spring.boot.version}</version>
+      <optional>true</optional>
+    </dependency>
+
   </dependencies>
 
   <build>

@@ -46,6 +46,7 @@ public class PkiCredentialConfigurationProperties implements PkiCredentialConfig
    */
   @Getter
   @Setter
+  @org.springframework.boot.context.properties.NestedConfigurationProperty
   private StoreCredentialConfigurationProperties jks;
 
   /**
@@ -53,6 +54,7 @@ public class PkiCredentialConfigurationProperties implements PkiCredentialConfig
    */
   @Getter
   @Setter
+  @org.springframework.boot.context.properties.NestedConfigurationProperty
   private PemCredentialConfigurationProperties pem;
 
   /** {@inheritDoc} */

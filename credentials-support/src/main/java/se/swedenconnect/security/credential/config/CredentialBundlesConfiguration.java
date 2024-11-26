@@ -36,7 +36,7 @@ public interface CredentialBundlesConfiguration {
    *
    * @return a map of key store ID:s and key store configurations
    */
-  Optional<Map<String, StoreConfiguration>> keyStore();
+  Optional<Map<String, StoreConfiguration>> keystore();
 
   /**
    * Gets the map of credential ID:s and PEM based credential configurations.

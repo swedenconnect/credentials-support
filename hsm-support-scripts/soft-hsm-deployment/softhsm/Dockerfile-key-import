@@ -10,14 +10,22 @@ ARG KEY_DIR
 # Get script dir where the key import script is stored as input argument
 ARG SCRIPT_DIR
 
-# Make softhsm2 available for install
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-RUN apt-get -q update
-RUN apt-get -y upgrade
+# The following commented lines install softhsm and the pkcs11tool. These have been removed as they should be done in the Docker image
+# being used as FROM image. In recent versions of Java imaged based on openjdk, the slim JAVA images do not longer contain the apt or apt-get command.
+# For this reason the from image must be based on a more comprahensive image when softhsm is used, and for this reason we do no longer
+# assume that a general common image is used for both softhsm and for non-softhsm use cases.
+# To build an image prepared for softhsm use "FROM openjdk:21-jdk-buster" to get access to the apt command.
+# See the Docker file "Dockerfile-softhsm" in the root directory.
+
+#RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+#RUN apt-get -q update
+#RUN apt-get -y upgrade
 # Install softhsm2
-RUN apt-get install -y procps softhsm2
+# RUN apt-get install -y procps softhsm2
 # Install pkcs11-tool
-RUN apt-get -y install opensc
+#RUN apt-get -y install opensc
+
+
 # Copy exported keys to image
 COPY $KEY_DIR /opt/keys
 # Copy hsm key import script

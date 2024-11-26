@@ -108,7 +108,7 @@ public class ConfigurationCredentialBundleRegistrar implements CredentialBundleR
     //
     final Map<String, KeyStore> keyStoreMap = new HashMap<>();
     final Map<String, KeyStoreReloader> keyStoreReloaderMap = new HashMap<>();
-    this.configuration.keyStore().ifPresent(map -> map.forEach((key, value) -> {
+    this.configuration.keystore().ifPresent(map -> map.forEach((key, value) -> {
       log.debug("Loading key store for entry '{}' ...", key);
       try {
         final KeyStore keyStore = KeyStoreFactory.loadKeyStore(value, this.resourceLoader);

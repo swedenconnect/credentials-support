@@ -3,7 +3,7 @@
 #
 credential:
   bundles:
-    key-store:
+    keystore:
       p11-store:
         type: PKCS11
         provider: SunPKCS11

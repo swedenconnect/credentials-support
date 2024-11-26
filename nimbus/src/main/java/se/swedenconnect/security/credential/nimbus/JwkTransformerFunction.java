@@ -249,16 +249,42 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   public static class DefaultKeyIdFunction implements Function<PkiCredential, String> {
 
     /**
-     * If the credential metadata contains a {@code key-id}, this is used, otherwise the serial number of the
-     * certificate is used for key id-calculation.
+     * If the credential metadata contains a {@code key-id}, this is used, otherwise the function attempts to calculate
+     * the RFC 7638 thumbprint, and finally the serial number of the certificate is used for key id-calculation.
      */
     @Override
     @Nullable
     public String apply(@Nonnull final PkiCredential credential) {
       return Optional.ofNullable(credential.getMetadata().getKeyId())
-          .orElseGet(() -> Optional.ofNullable(credential.getCertificate())
-              .map(c -> c.getSerialNumber().toString(10))
-              .orElse(null));
+          .orElseGet(() -> Optional.ofNullable(this.calculateThumbprint(credential))
+              .orElseGet(() -> Optional.ofNullable(credential.getCertificate())
+                  .map(c -> c.getSerialNumber().toString(10))
+                  .orElse(null)));
+    }
+
+    /**
+     * Calculates the RFC 7638 thumbprint.
+     *
+     * @param credential the credential
+     * @return the thumbprint
+     */
+    @Nullable
+    private String calculateThumbprint(@Nonnull final PkiCredential credential) {
+      try {
+        if (credential.getPublicKey() instanceof final RSAPublicKey rsaPublicKey) {
+          return new RSAKey.Builder(rsaPublicKey).build().computeThumbprint().toString();
+        }
+        else if (credential.getPublicKey() instanceof final ECPublicKey ecPublicKey) {
+          final Curve curve = Curve.forECParameterSpec(ecPublicKey.getParams());
+          return new ECKey.Builder(curve, ecPublicKey).build().computeThumbprint().toString();
+        }
+        else {
+          return null;
+        }
+      }
+      catch (final Exception e) {
+        return null;
+      }
     }
   }
 
@@ -268,7 +294,7 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   public static final class DefaultKeyUseFunction implements Function<PkiCredential, KeyUse> {
 
     /**
-     * Will use the {@code key-id} property from the metadata, and if not present, use the certificate to calculate the
+     * Will use the {@code key-use} property from the metadata, and if not present, use the certificate to calculate the
      * usage.
      */
     @Override

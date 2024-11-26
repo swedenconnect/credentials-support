@@ -42,7 +42,7 @@ public class CredentialBundlesConfigurationProperties implements CredentialBundl
    */
   @Getter
   @Setter
-  private Map<String, StoreConfigurationProperties> keyStore;
+  private Map<String, StoreConfigurationProperties> keystore;
 
   /**
    * Map of credential ID:s and PEM based credential configurations.
@@ -60,8 +60,8 @@ public class CredentialBundlesConfigurationProperties implements CredentialBundl
 
   /** {@inheritDoc} */
   @Override
-  public Optional<Map<String, StoreConfiguration>> keyStore() {
-    return Optional.ofNullable(this.getKeyStore())
+  public Optional<Map<String, StoreConfiguration>> keystore() {
+    return Optional.ofNullable(this.getKeystore())
         .map(ks -> ks.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
   }
 
