@@ -29,6 +29,18 @@ The **credentials-support-opensaml** library:
 
 > Will include the **opensaml-library**.
 
+The **credentials-support-nimbus** library:
+
+```
+<dependency>
+  <groupId>se.swedenconnect.security</groupId>
+  <artifactId>credentials-support-nimbus</artifactId>
+  <version>${credentials-support.version}</version>
+</dependency>
+```
+
+> Will include the **opensaml-library**.
+
 The **credentials-support-spring** library:
 
 ```

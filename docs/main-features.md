@@ -1,18 +1,60 @@
 ![Logo](https://github.com/swedenconnect/technical-framework/blob/master/img/sweden-connect.png)
 
-# credentials-support - Credential Types
+# credentials-support - Main Features
 
 ---
+
+## Table of contents
+
+1. [**Credential Types**](#credential-types)
+    
+    1.1. [BasicCredential](#basiccredential)
+    
+    1.2. [KeyStoreCredential](#keystorecredential)
+    
+2. [**PkiCredential Features**](#pkicredential-features)
+
+    2.1. [Credential Name](#credential-name)
+    
+    2.2. [Transformation to other Formats](#transformation-to-other-formats)
+    
+    2.3. [Monitoring](#monitoring)
+    
+    2.4. [Credential Metadata](#credential-metadata)
+    
+3. [**Builders and Factories**](#factories)
+
+    3.1. [KeyStore Builder and Factory](#keystore-builder-and-factory)
+    
+    3.2. [Credential Factory](#credential-factory)
+    
+
+
+4. [**Credential Bundles and Configuration Support**](#credential-bundles-and-configuration-support)
+
+    4.1. [The Bundles Concept](#the-bundles-concept)
+    
+    4.2. [Configuration Support](#configuration-support)
+    
+    4.2.1. [Basic Configuration Concepts](#basic-configuration-concepts)    
+    
+    4.2.2. [Key Store Configurations](#key-store-configurations)
+    
+    
+---
+
+<a name="credential-types"></a>
+## 1. Credential Types
 
 The **credentials-support** library defines three classes implementing the [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) interface and a wrapper that takes a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) into an OpenSAML credential type.
 
 <a name="basiccredential"></a>
-## BasicCredential
+### 1.1. BasicCredential
 
-The [BasicCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/BasicCredential.java) class is a simple implementation of the [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) interface that is created by providing the private key and certificate. This class can for example be used when you have the key and certificate stored on file.
+The [BasicCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/BasicCredential.java) class is a simple implementation of the [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) interface that is created by providing the private key and certificate (or just a public key). This class can for example be used when you have the key and certificate stored on file.
 
 <a name="keystorecredential"></a>
-## KeyStoreCredential
+### 1.2. KeyStoreCredential
 
 The [KeyStoreCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/KeyStoreCredential.java) class is backed by a KeyStore and is initialized by providing a loaded KeyStore instance (see [Factories](#factories) below) and giving the entry alias and key password. 
 
