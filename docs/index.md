@@ -1,4 +1,4 @@
-![Logo](https://github.com/swedenconnect/technical-framework/blob/master/img/sweden-connect.png)
+![Logo](https://docs.swedenconnect.se/technical-framework/img/sweden-connect.png)
 
 # credentials-support
 
