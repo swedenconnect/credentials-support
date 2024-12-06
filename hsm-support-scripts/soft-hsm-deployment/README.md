@@ -1,4 +1,8 @@
+![Logo](https://github.com/swedenconnect/technical-framework/blob/master/img/sweden-connect.png)
+
 # Soft HSM deployment scripts
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ---
 
@@ -48,3 +52,7 @@ The scripts in the "softhsm" folder is used to
 
 The example script demonstrates how the new image is created and started with all keys ready to be used inside
 a SoftHSM slot installed in the container.
+
+---
+
+Copyright &copy; 2020-2024, [Sweden Connect](https://swedenconnect.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).

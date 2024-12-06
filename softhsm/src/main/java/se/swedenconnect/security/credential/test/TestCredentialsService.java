@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Sweden Connect
+ * Copyright 2020-2024 Sweden Connect
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,17 @@
  */
 package se.swedenconnect.security.credential.test;
 
+import org.opensaml.security.x509.X509Credential;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import se.swedenconnect.security.credential.PkiCredential;
+
+import javax.crypto.Cipher;
 import java.security.Signature;
 import java.util.Arrays;
 
-import javax.crypto.Cipher;
-
-import org.opensaml.security.x509.X509Credential;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-
-import lombok.Setter;
-import se.swedenconnect.security.credential.PkiCredential;
-
 /**
- * Service responsible of testing the credentials.
+ * Service responsible for testing the credentials.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -40,36 +36,29 @@ public class TestCredentialsService {
   /** The bytes that we sign ... */
   private static final byte[] TEST_BYTES = "TestStringToSign".getBytes();
 
-  @Setter
-  @Autowired
-  @Qualifier("rsa1")
-  private PkiCredential rsa1;
+  private final PkiCredential rsa1;
+  private final PkiCredential rsa1b;
+  private final PkiCredential rsa2;
+  public final X509Credential openSamlRsa1;
 
-  @Setter
-  @Autowired
-  @Qualifier("rsa1b")
-  private PkiCredential rsa1b;
-
-  @Setter
-  @Autowired
-  @Qualifier("rsa1bb")
-  private PkiCredential rsa1bb;
-
-  @Setter
-  @Autowired
-  @Qualifier("rsa1_OpenSaml")
-  public X509Credential openSamlRsa1;
+  public TestCredentialsService(final @Qualifier("rsa1") PkiCredential rsa1,
+      final @Qualifier("rsa1b") PkiCredential rsa1b,
+      final @Qualifier("rsa2") PkiCredential rsa2,
+      final @Qualifier("rsa1_OpenSaml") X509Credential openSamlRsa1) {
+    this.rsa1 = rsa1;
+    this.rsa1b = rsa1b;
+    this.rsa2 = rsa2;
+    this.openSamlRsa1 = openSamlRsa1;
+  }
 
   public String test() {
-    StringBuffer sb = new StringBuffer();
-    sb.append(this.testSignAndVerify(this.rsa1)).append(System.lineSeparator()).append(System.lineSeparator());
-    sb.append(this.testSignAndVerify(this.rsa1b)).append(System.lineSeparator()).append(System.lineSeparator());
-    sb.append(this.testSignAndVerify(this.rsa1bb)).append(System.lineSeparator());
-    return sb.toString();
+    return this.testSignAndVerify(this.rsa1) + System.lineSeparator() + System.lineSeparator()
+        + this.testSignAndVerify(this.rsa1b) + System.lineSeparator() + System.lineSeparator()
+        + this.testSignAndVerify(this.rsa2) + System.lineSeparator();
   }
 
   private String testSignAndVerify(final PkiCredential credential) {
-    final StringBuffer sb = new StringBuffer();
+    final StringBuilder sb = new StringBuilder();
     sb.append("Testing credential ").append(credential.getName()).append(System.lineSeparator());
 
     try {
@@ -77,14 +66,14 @@ public class TestCredentialsService {
       Signature signature = Signature.getInstance("SHA256withRSA");
       signature.initSign(credential.getPrivateKey());
       signature.update(TEST_BYTES);
-      byte[] signatureBytes = signature.sign();
+      final byte[] signatureBytes = signature.sign();
       sb.append("    Success").append(System.lineSeparator());
 
       sb.append("  Verifying signature...").append(System.lineSeparator());
       signature = Signature.getInstance("SHA256withRSA");
       signature.initVerify(credential.getPublicKey());
       signature.update(TEST_BYTES);
-      boolean r = signature.verify(signatureBytes);
+      final boolean r = signature.verify(signatureBytes);
       if (r) {
         sb.append("    Success").append(System.lineSeparator());
       }
@@ -95,13 +84,13 @@ public class TestCredentialsService {
       sb.append("  Encrypting using RSA/ECB/PKCS1Padding...").append(System.lineSeparator());
       Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
       cipher.init(Cipher.ENCRYPT_MODE, credential.getPublicKey());
-      byte[] encryptedbytes = cipher.doFinal(TEST_BYTES);
+      final byte[] encryptedbytes = cipher.doFinal(TEST_BYTES);
       sb.append("    Success").append(System.lineSeparator());
 
       sb.append("  Decrypting data...").append(System.lineSeparator());
       cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
       cipher.init(Cipher.DECRYPT_MODE, credential.getPrivateKey());
-      byte[] decryptedBytes = cipher.doFinal(encryptedbytes);
+      final byte[] decryptedBytes = cipher.doFinal(encryptedbytes);
       if (Arrays.equals(TEST_BYTES, decryptedBytes)) {
         sb.append("    Success").append(System.lineSeparator());
       }
@@ -109,8 +98,9 @@ public class TestCredentialsService {
         sb.append("    Error: Decrypted data does not correspond to original data").append(System.lineSeparator());
       }
     }
-    catch (Exception e) {
-      sb.append("    Error: ").append(e.getClass().getSimpleName()).append(" - ").append(e.getMessage()).append(System.lineSeparator());
+    catch (final Exception e) {
+      sb.append("    Error: ").append(e.getClass().getSimpleName()).append(" - ").append(e.getMessage())
+          .append(System.lineSeparator());
     }
 
     return sb.toString();
