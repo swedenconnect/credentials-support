@@ -57,11 +57,6 @@ public class DefaultCredentialTestFunctionTest {
   /** EC key */
   private final ReloadablePkiCredential ecCred;
 
-  /**
-   * Constructor.
-   *
-   * @throws Exception for errors setting up test data
-   */
   public DefaultCredentialTestFunctionTest() throws Exception {
     final Resource resource = new ClassPathResource("rsa-dsa-ec.jks");
     try (final InputStream is = resource.getInputStream()) {
@@ -72,9 +67,6 @@ public class DefaultCredentialTestFunctionTest {
     }
   }
 
-  /**
-   * Tests the DefaultCredentialTestFunction for an RSA, DSA and EC key.
-   */
   @Test
   public void testCredentials() {
     final Function<ReloadablePkiCredential, Exception> func = new DefaultCredentialTestFunction();
@@ -89,9 +81,6 @@ public class DefaultCredentialTestFunctionTest {
     assertNull(result, "Test of EC key was not successful");
   }
 
-  /**
-   * Testing successful and non-successful use of provider.
-   */
   @Test
   public void testProviders() {
     final DefaultCredentialTestFunction func = new DefaultCredentialTestFunction();
@@ -117,9 +106,6 @@ public class DefaultCredentialTestFunctionTest {
     assertTrue(result instanceof NoSuchProviderException, "Expected NoSuchProviderException exception");
   }
 
-  /**
-   * Tests error cases.
-   */
   @Test
   public void testErrors() {
     final DefaultCredentialTestFunction func = new DefaultCredentialTestFunction();
