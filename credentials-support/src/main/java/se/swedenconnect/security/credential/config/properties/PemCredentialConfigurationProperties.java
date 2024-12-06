@@ -55,7 +55,7 @@ public class PemCredentialConfigurationProperties extends AbstractBaseCredential
   private String privateKey;
 
   /**
-   * Password used to decrypt an encrypted private key.
+   * Password used to decrypt the private key (if this is given in encrypted format).
    */
   @Getter
   @Setter

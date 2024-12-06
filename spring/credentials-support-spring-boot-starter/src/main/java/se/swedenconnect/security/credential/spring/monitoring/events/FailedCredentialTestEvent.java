@@ -23,7 +23,7 @@ import java.io.Serial;
 import java.util.Objects;
 
 /**
- * Event that is signalled when a credential has been tested and that test failed.
+ * Event that is signalled when a credential has been tested and the test failed.
  *
  * @author Martin Lindström
  */

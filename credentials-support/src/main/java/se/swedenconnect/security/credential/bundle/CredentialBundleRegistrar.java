@@ -18,8 +18,8 @@ package se.swedenconnect.security.credential.bundle;
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface to be implemented for registering {@link java.security.KeyStore KeyStore} and *
- * {@link se.swedenconnect.security.credential.PkiCredential PkiCredential} objects at a *
+ * Interface to be implemented for registering {@link java.security.KeyStore KeyStore} and
+ * {@link se.swedenconnect.security.credential.PkiCredential PkiCredential} objects at a
  * {@link CredentialBundleRegistry}.
  *
  * @author Martin Lindström

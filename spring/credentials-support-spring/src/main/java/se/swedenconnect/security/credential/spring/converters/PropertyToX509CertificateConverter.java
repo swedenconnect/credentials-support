@@ -25,7 +25,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 /**
- * A {@link Converter} that gets the property value (e.g., {@code classpath:cert.crt}) and instantiates a
+ * A {@link Converter} that gets the property value (e.g., {@code classpath:cert.crt}) and instantiates an
  * {@link X509Certificate} object. The converter also handles "inlined" PEM certificates.
  * <p>
  * To use this converter it has to be instantiated as a bean and then registered in the registry using

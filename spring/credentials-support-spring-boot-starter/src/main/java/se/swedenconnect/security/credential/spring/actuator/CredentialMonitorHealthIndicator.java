@@ -215,7 +215,7 @@ public class CredentialMonitorHealthIndicator implements HealthIndicator {
     @JsonProperty("reload-error")
     private String reloadError;
 
-    @JsonProperty("test-exception")
+    @JsonProperty("reload-exception")
     private String reloadException;
 
     @JsonIgnore

@@ -32,13 +32,6 @@ import java.time.Duration;
 public class SpringCredentialBundlesConfigurationProperties extends CredentialBundlesConfigurationProperties {
 
   /**
-   * Credential health endpoint monitoring.
-   */
-  @Getter
-  @Setter
-  private boolean healthEndpointEnabled;
-
-  /**
    * Configuration for monitoring credentials.
    */
   @Getter
@@ -64,7 +57,7 @@ public class SpringCredentialBundlesConfigurationProperties extends CredentialBu
     private Duration testInterval = Duration.ofMinutes(10);
 
     /**
-     * Whether a HealthEndpoint for monitoring should be set up. Note that overall monitoring must be enabled.
+     * Whether a HealthEndpoint for monitoring should be set up.
      */
     @Getter
     @Setter

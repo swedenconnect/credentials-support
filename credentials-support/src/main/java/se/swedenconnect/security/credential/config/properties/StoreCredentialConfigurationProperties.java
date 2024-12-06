@@ -32,7 +32,7 @@ public class StoreCredentialConfigurationProperties extends AbstractBaseCredenti
     implements StoreCredentialConfiguration {
 
   /**
-   * Configuration for the KeyStore holding the key pair entry.
+   * Configuration for the KeyStore holding the key pair entry. Mutually exclusive with the store-reference property.
    */
   @Getter
   @Setter

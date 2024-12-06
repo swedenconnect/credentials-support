@@ -18,7 +18,7 @@
  * Generic configuration support for credentials.
  * <p>
  * Each configuration class will also have an interface. This is to support frameworks using the <a
- * href="https://smallrye.io/smallrye-config/3.10.0/">SmallRye Configuration Library</a> (for example, Quarkus).
+ * href="https://smallrye.io/smallrye-config/">SmallRye Configuration Library</a> (for example, Quarkus).
  * </p>
  */
 package se.swedenconnect.security.credential.config;
