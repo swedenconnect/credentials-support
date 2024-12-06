@@ -368,7 +368,7 @@ The **credentials-support** library borrows/steals this concept and introduces "
 
 Example:
 
-```
+```yaml
 credential:
   bundles:
     keystore:
@@ -514,7 +514,7 @@ In addition to the [BaseCredentialConfigurationProperties](#base-credential-conf
 
 Examples illustrating how a PEM-based credential can be configured.
 
-```yml
+```yaml
 credential:
   bundles:
     ...
@@ -525,7 +525,7 @@ credential:
         name: "Example credential #1"
 ```
 
-```yml
+```yaml
 credential:
   bundles:
     ...
@@ -569,7 +569,7 @@ In addition to the [BaseCredentialConfigurationProperties](#base-credential-conf
 
 Example:
 
-```yml
+```yaml
 credential:
   bundles:
     keystore:
@@ -633,7 +633,7 @@ The [CredentialBundlesConfigurationProperties](https://github.com/swedenconnect/
 
 **Example:**
 
-```yml
+```yaml
 credential:
   bundles:
     keystore:
@@ -907,7 +907,7 @@ If everything is looking good (no failed tests of reloads), an output like the f
         "test-result" : "success"
       }, 
       {
-         "credential-name" : "Encryption",
+        "credential-name" : "Encryption",
         "test-result" : "success"
       }
     ]
