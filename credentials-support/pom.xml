@@ -10,7 +10,7 @@
   <parent>
     <groupId>se.swedenconnect.security</groupId>
     <artifactId>credentials-support-parent</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1-SNAPSHOT</version>
   </parent>
 
   <name>Sweden Connect :: Credentials Support :: Base Library</name>
