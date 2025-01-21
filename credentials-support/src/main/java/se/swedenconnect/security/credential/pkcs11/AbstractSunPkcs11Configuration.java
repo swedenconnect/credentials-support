@@ -128,9 +128,12 @@ public abstract class AbstractSunPkcs11Configuration implements Pkcs11Configurat
         //
         final int result = Security.addProvider(p);
         if (result == -1) {
-          log.warn("A provider with the name '{}' has already been installed", p.getName());
+          log.info("A provider with the name '{}' has already been installed, re-using it ...", p.getName());
+          this.provider = Security.getProvider(p.getName());
         }
-        this.provider = p;
+        else {
+          this.provider = p;
+        }
       }
     }
     return this.provider;
