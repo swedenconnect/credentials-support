@@ -14,4 +14,4 @@ Example application of how to use SoftHSM to test your PKCS#11 credentials.
 
 * [build.sh](scripts/build.sh), [run.sh](scripts/run.sh) - Scripts for building and running the test application.
 
-Copyright &copy; 2020-2024, [Sweden Connect](https://swedenconnect.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
+Copyright &copy; 2020-2025, [Sweden Connect](https://swedenconnect.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
