@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import se.swedenconnect.security.credential.spring.converters.PropertyToPrivateKeyConverter;
+import se.swedenconnect.security.credential.spring.converters.PropertyToPublicKeyConverter;
 import se.swedenconnect.security.credential.spring.converters.PropertyToX509CertificateConverter;
 
 /**
@@ -38,6 +39,7 @@ class ConvertersAutoConfigurationTest {
         .run(context -> {
           Assertions.assertThat(context).hasSingleBean(PropertyToX509CertificateConverter.class);
           Assertions.assertThat(context).hasSingleBean(PropertyToPrivateKeyConverter.class);
+          Assertions.assertThat(context).hasSingleBean(PropertyToPublicKeyConverter.class);
         });
   }
 

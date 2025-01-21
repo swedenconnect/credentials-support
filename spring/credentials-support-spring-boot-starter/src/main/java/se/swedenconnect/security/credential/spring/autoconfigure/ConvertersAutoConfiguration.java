@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import se.swedenconnect.security.credential.spring.converters.KeyStoreReferenceConverter;
 import se.swedenconnect.security.credential.spring.converters.PkiCredentialReferenceConverter;
 import se.swedenconnect.security.credential.spring.converters.PropertyToPrivateKeyConverter;
+import se.swedenconnect.security.credential.spring.converters.PropertyToPublicKeyConverter;
 import se.swedenconnect.security.credential.spring.converters.PropertyToX509CertificateConverter;
 
 /**
@@ -56,6 +57,19 @@ public class ConvertersAutoConfiguration {
   @ConfigurationPropertiesBinding
   PropertyToPrivateKeyConverter propertyToPrivateKeyConverter() {
     return new PropertyToPrivateKeyConverter();
+  }
+
+  /**
+   * Creates the bean the allows us to use property values that are referencing public key resources and get the
+   * {@link java.security.PublicKey PublicKey} injected.
+   *
+   * @return a {@link PropertyToPublicKeyConverter} bean
+   */
+  @ConditionalOnMissingBean
+  @Bean
+  @ConfigurationPropertiesBinding
+  PropertyToPublicKeyConverter propertyToPublicKeyConverter() {
+    return new PropertyToPublicKeyConverter();
   }
 
   /**

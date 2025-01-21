@@ -12,6 +12,8 @@
 
 **Date:** -
 
+- The `PropertyToPublicKeyConverter` was added to the Spring Boot Starter autoconfiguration.
+
 - Fixed bug that occurred if the same PKCS#11 provider were used for several keys. See https://github.com/swedenconnect/credentials-support/issues/74.
 
 ### 2.0.1
