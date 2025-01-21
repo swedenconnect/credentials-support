@@ -16,6 +16,8 @@ Java libraries for PKI credentials support, including PKCS#11 and HSM:s.
     
     1.2. [Maven](#maven)
     
+    1.3. [Release Notes](#release-notes)
+    
 2. [**Credential types**](#credential-types)
 
     2.1. [BasicCredential](#basiccredential)
@@ -183,6 +185,10 @@ The **credentials-support-spring-boot-starter** library:
 
 > Will include **opensaml-library** and **credentials-support-spring**.
 
+<a name="release-notes"></a>
+### 1.3. Release Notes
+
+See https://docs.swedenconnect.se/credentials-support/release-notes.html
 
 <a name="credential-types"></a>
 ## 2. Credential Types
@@ -997,4 +1003,4 @@ For further information consult the information at [hsm-support-scripts/key-gene
 
 ---
 
-Copyright &copy; 2020-2024, [Sweden Connect](https://swedenconnect.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
+Copyright &copy; 2020-2025, [Sweden Connect](https://swedenconnect.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
