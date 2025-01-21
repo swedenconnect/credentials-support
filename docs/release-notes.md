@@ -10,7 +10,7 @@
 
 ### 2.0.2
 
-**Date:** -
+**Date:** 2025-01-21
 
 - The `PropertyToPublicKeyConverter` was added to the Spring Boot Starter autoconfiguration.
 
