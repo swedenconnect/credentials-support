@@ -39,6 +39,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -72,6 +73,12 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   /** For thumbprints. */
   private static final MessageDigest sha256;
 
+  /** Customizers to be applied after defaults */
+  private final List<Function<RSAKey.Builder,RSAKey.Builder>> rsaCustomizers = new ArrayList<>();
+
+  /** Customizers to be applied after defaults */
+  private final List<Function<ECKey.Builder,ECKey.Builder>> ecCustomizers = new ArrayList<>();
+
   static {
     try {
       sha256 = MessageDigest.getInstance("SHA-256");
@@ -103,7 +110,7 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
         builder.privateKey(credential.getPrivateKey());
       }
 
-      jwk = builder
+      builder
           .keyStore(credential instanceof KeyStoreCredential ? ((KeyStoreCredential) credential).getKeyStore() : null)
           .keyID(this.keyIdFunction.apply(credential))
           .keyUse(this.keyUseFunction.apply(credential))
@@ -113,8 +120,11 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
           .x509CertSHA256Thumbprint(toX5t256(credential.getCertificate()))
           .issueTime(Optional.ofNullable(credential.getMetadata().getIssuedAt()).map(Date::from).orElse(null))
           .notBeforeTime(Optional.ofNullable(credential.getMetadata().getIssuedAt()).map(Date::from).orElse(null))
-          .expirationTime(Optional.ofNullable(credential.getMetadata().getExpiresAt()).map(Date::from).orElse(null))
-          .build();
+          .expirationTime(Optional.ofNullable(credential.getMetadata().getExpiresAt()).map(Date::from).orElse(null));
+
+
+      this.rsaCustomizers.forEach(customizer -> customizer.apply(builder));
+      jwk = builder.build();
     }
     else if (publicKey instanceof final ECPublicKey ecPublicKey) {
       final Curve curve = Curve.forECParameterSpec(ecPublicKey.getParams());
@@ -131,7 +141,7 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
         builder.privateKey(credential.getPrivateKey());
       }
 
-      jwk = builder
+       builder
           .keyStore(credential instanceof KeyStoreCredential ? ((KeyStoreCredential) credential).getKeyStore() : null)
           .keyID(this.keyIdFunction.apply(credential))
           .keyUse(this.keyUseFunction.apply(credential))
@@ -141,14 +151,45 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
           .x509CertSHA256Thumbprint(toX5t256(credential.getCertificate()))
           .issueTime(Optional.ofNullable(credential.getMetadata().getIssuedAt()).map(Date::from).orElse(null))
           .notBeforeTime(Optional.ofNullable(credential.getMetadata().getIssuedAt()).map(Date::from).orElse(null))
-          .expirationTime(Optional.ofNullable(credential.getMetadata().getExpiresAt()).map(Date::from).orElse(null))
-          .build();
+          .expirationTime(Optional.ofNullable(credential.getMetadata().getExpiresAt()).map(Date::from).orElse(null));
+
+      this.ecCustomizers.forEach(customizer -> customizer.apply(builder));
+
+      jwk = builder.build();
     }
     else {
       throw new IllegalArgumentException("Unsupported key type: " + publicKey.getAlgorithm());
     }
 
     return jwk;
+  }
+
+  /**
+   * @param customizer to apply after default properties is set for key
+   * @return this instance
+   */
+  public JwkTransformerFunction withRsaCustomizer(final Function<RSAKey.Builder, RSAKey.Builder> customizer) {
+    this.rsaCustomizers.add(customizer);
+    return this;
+  }
+
+  /**
+   * @param customizer to apply after default properties is set for key
+   * @return this instance
+   */
+  public JwkTransformerFunction withEcKeyCustomizer(final Function<ECKey.Builder, ECKey.Builder> customizer) {
+    this.ecCustomizers.add(customizer);
+    return this;
+  }
+
+  /**
+   * Customizes the function to remove the {@link java.security.KeyStore} of any created
+   * {@link com.nimbusds.jose.jwk.JWK} which makes keys unserializable.
+   * @return this instance
+   */
+  public JwkTransformerFunction serializable() {
+    return this.withRsaCustomizer(b -> b.keyStore(null))
+        .withEcKeyCustomizer(b -> b.keyStore(null));
   }
 
   /**
