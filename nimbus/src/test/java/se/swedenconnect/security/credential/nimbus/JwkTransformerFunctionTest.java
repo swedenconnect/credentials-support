@@ -23,18 +23,28 @@ import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.shaded.gson.Gson;
 import com.nimbusds.jose.shaded.gson.GsonBuilder;
 import org.cryptacular.io.ClassPathResource;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.Console;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
+import java.io.UncheckedIOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -327,5 +337,52 @@ class JwkTransformerFunctionTest {
     assertNotNull(jwk);
     assertEquals(JWSAlgorithm.RS256, jwk.getAlgorithm());
   }
+
+  @Test
+  void testRSAKeyIsSerializable() throws KeyStoreException {
+
+    //Tries to serialize jwk, throws UncheckedIOException if jwk is not serializable
+    final BiConsumer<JwkTransformerFunction,PkiCredential> jwkSerialize = (function,pki) -> {
+      try {
+        new ObjectOutputStream(new ByteArrayOutputStream()).writeObject(function.apply(pki));
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
+    };
+
+    final PkiCredential credential = new KeyStoreCredential(this.keyStore, ALIAS_RSA, PW);
+
+    final JwkTransformerFunction customizedFunction = new JwkTransformerFunction()
+        .serializable();
+
+    final JwkTransformerFunction defaultFunction = new JwkTransformerFunction();
+
+    Assertions.assertThrows(UncheckedIOException.class, () -> jwkSerialize.accept(defaultFunction, credential));
+    Assertions.assertDoesNotThrow(() -> jwkSerialize.accept(customizedFunction, credential));
+  }
+
+  @Test
+  void testEcKeyIsSerializable() throws KeyStoreException {
+
+    //Tries to serialize jwk, throws UncheckedIOException if jwk is not serializable
+    final BiConsumer<JwkTransformerFunction,PkiCredential> jwkSerialize = (function,pki) -> {
+      try {
+        new ObjectOutputStream(new ByteArrayOutputStream()).writeObject(function.apply(pki));
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
+    };
+
+    final PkiCredential credential = new KeyStoreCredential(this.keyStore, ALIAS_EC, PW);
+
+    final JwkTransformerFunction customizedFunction = new JwkTransformerFunction()
+        .serializable();
+
+    final JwkTransformerFunction defaultFunction = new JwkTransformerFunction();
+
+    Assertions.assertThrows(UncheckedIOException.class, () -> jwkSerialize.accept(defaultFunction, credential));
+    Assertions.assertDoesNotThrow(() -> jwkSerialize.accept(customizedFunction, credential));
+  }
+
 
 }
