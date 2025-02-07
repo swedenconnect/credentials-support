@@ -8,6 +8,12 @@
 
 ## Release Notes
 
+### 2.0.3
+
+Date: 2025-02-07
+
+* Functionality to create serializable JWKs using the `JwkTransformerFunction#serializable` function was added.
+
 ### 2.0.2
 
 **Date:** 2025-01-21
