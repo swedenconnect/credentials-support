@@ -10,9 +10,9 @@
 
 ### 2.0.3
 
-Date: -
+**Date:** 2025-02-10
 
-* Functionality to create serializable JWKs using the `JwkTransformerFunction#serializable` function was added.
+- Functionality to create serializable JWKs using the `JwkTransformerFunction#serializable` function was added.
 
 ### 2.0.2
 
