@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import se.swedenconnect.security.credential.bundle.CredentialBundleRegistry;
 import se.swedenconnect.security.credential.bundle.CredentialBundles;
 import se.swedenconnect.security.credential.config.ConfigurationResourceLoader;
+import se.swedenconnect.security.credential.factory.PkiCredentialFactory;
 import se.swedenconnect.security.credential.monitoring.CredentialMonitorBean;
 import se.swedenconnect.security.credential.spring.actuator.CredentialMonitorHealthIndicator;
 
@@ -57,6 +58,7 @@ class SpringCredentialBundlesAutoConfigurationTest {
 
           Assertions.assertThat(context).hasSingleBean(CredentialBundleRegistry.class);
           Assertions.assertThat(context).hasSingleBean(ConfigurationResourceLoader.class);
+          Assertions.assertThat(context).hasSingleBean(PkiCredentialFactory.class);
           Assertions.assertThat(context).hasSingleBean(CredentialMonitorBean.class);
         });
   }
@@ -81,8 +83,6 @@ class SpringCredentialBundlesAutoConfigurationTest {
             "credential.bundles.jks.test1.monitor=true",
             "credential.bundles.monitoring.enabled=true",
             "credential.bundles.monitoring.health-endpoint-enabled=true")
-        .run(context -> {
-          Assertions.assertThat(context).hasSingleBean(CredentialMonitorHealthIndicator.class);
-        });
+        .run(context -> Assertions.assertThat(context).hasSingleBean(CredentialMonitorHealthIndicator.class));
   }
 }

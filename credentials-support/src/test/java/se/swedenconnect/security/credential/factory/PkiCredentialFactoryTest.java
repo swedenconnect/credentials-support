@@ -18,10 +18,12 @@ package se.swedenconnect.security.credential.factory;
 import org.cryptacular.io.ClassPathResource;
 import org.cryptacular.io.Resource;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.KeyStoreCredentialTest;
 import se.swedenconnect.security.credential.KeyStoreReloader;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.bundle.CredentialBundles;
 import se.swedenconnect.security.credential.bundle.NoSuchCredentialException;
 import se.swedenconnect.security.credential.bundle.NoSuchKeyStoreException;
 import se.swedenconnect.security.credential.config.properties.PemCredentialConfigurationProperties;
@@ -61,10 +63,27 @@ public class PkiCredentialFactoryTest {
     properties.setPrivateKey(keyContents);
     properties.setKeyPassword("secret");
 
+    final PkiCredentialFactory factory = new PkiCredentialFactory(null, null, false);
+    final PkiCredentialFactory factory2 = new PkiCredentialFactory(null, null, true);
+
     final PkiCredential credential = PkiCredentialFactory.createCredential(properties, null);
     assertNotNull(credential);
     assertEquals("test", credential.getName());
     assertEquals(1, credential.getCertificateChain().size());
+
+    final PkiCredential credentialB = factory.createCredential(properties);
+    assertNotNull(credentialB);
+    assertEquals("test", credentialB.getName());
+    assertEquals(1, credentialB.getCertificateChain().size());
+
+    final PkiCredential credentialC = factory2.createCredential(properties);
+    assertNotNull(credentialC);
+    assertEquals("test", credentialC.getName());
+    assertEquals(1, credentialC.getCertificateChain().size());
+
+    final PkiCredential credentialC2 = factory2.createCredential(properties);
+    assertNotNull(credentialC2);
+    assertTrue(credentialC == credentialC2);
 
     final PkiCredentialConfigurationProperties pc = new PkiCredentialConfigurationProperties();
     pc.setPem(properties);
@@ -73,6 +92,23 @@ public class PkiCredentialFactoryTest {
     assertNotNull(credential2);
     assertEquals("test", credential2.getName());
     assertEquals(1, credential2.getCertificateChain().size());
+
+    final PkiCredential credential2b = factory.createCredential(pc);
+    assertNotNull(credential2b);
+    assertEquals("test", credential2b.getName());
+    assertEquals(1, credential2b.getCertificateChain().size());
+
+    final PkiCredential credential2B = factory.createCredential(pc);
+    assertNotNull(credential2B);
+    assertEquals("test", credential2B.getName());
+
+    final PkiCredential credential2C = factory2.createCredential(pc);
+    assertNotNull(credential2C);
+    assertEquals("test", credential2C.getName());
+
+    final PkiCredential credential2C2 = factory2.createCredential(pc);
+    assertNotNull(credentialC2);
+    assertTrue(credential2C == credential2C2);
   }
 
   @Test
@@ -179,10 +215,23 @@ public class PkiCredentialFactoryTest {
     final PkiCredential c = PkiCredentialFactory.createCredential(configuration, null, id -> credential, null, null);
     assertNotNull(c);
     assertTrue(credential == c);
+
+    final PkiCredentialFactory factory = new PkiCredentialFactory(id -> credential, null, null, false);
+    final PkiCredential cB = factory.createCredential(configuration);
+    assertNotNull(cB);
+    assertTrue(credential == cB);
+
+    final CredentialBundles bundles = Mockito.mock(CredentialBundles.class);
+    Mockito.when(bundles.getCredentialProvider()).thenReturn(id -> credential);
+
+    final PkiCredentialFactory factory2 = new PkiCredentialFactory(bundles, null, false);
+    final PkiCredential cC = factory2.createCredential(configuration);
+    assertNotNull(cC);
+    assertTrue(credential == cC);
   }
 
   @Test
-  void testCredentialReferenceNotFound() throws Exception {
+  void testCredentialReferenceNotFound() {
     final PkiCredentialConfigurationProperties configuration = new PkiCredentialConfigurationProperties();
     configuration.setBundle("bundle");
 
@@ -192,7 +241,7 @@ public class PkiCredentialFactoryTest {
   }
 
   @Test
-  void testCredentialReferenceNoProvider() throws Exception {
+  void testCredentialReferenceNoProvider() {
     final PkiCredentialConfigurationProperties configuration = new PkiCredentialConfigurationProperties();
     configuration.setBundle("bundle");
 
@@ -201,7 +250,7 @@ public class PkiCredentialFactoryTest {
   }
 
   @Test
-  void testCredentialReferenceOtherAssigned() throws Exception {
+  void testCredentialReferenceOtherAssigned() {
     final PkiCredentialConfigurationProperties configuration = new PkiCredentialConfigurationProperties();
     configuration.setBundle("bundle");
     configuration.setJks(new StoreCredentialConfigurationProperties());
@@ -230,11 +279,29 @@ public class PkiCredentialFactoryTest {
     properties.getKey().setAlias("test");
     properties.getKey().setKeyPassword("secret");
 
+    final PkiCredentialFactory factory = new PkiCredentialFactory(null, i -> keyStore, null, false);
+    final PkiCredentialFactory factory2 = new PkiCredentialFactory(null, i -> keyStore, null, true);
+
     final PkiCredential credential = PkiCredentialFactory.createCredential(properties, null,
         i -> keyStore, i -> reloader);
     assertNotNull(credential);
     assertEquals("test", credential.getName());
     assertEquals(1, credential.getCertificateChain().size());
+
+    final PkiCredential credentialB = factory.createCredential(properties);
+    assertNotNull(credentialB);
+    assertEquals("test", credentialB.getName());
+    assertEquals(1, credentialB.getCertificateChain().size());
+
+    final PkiCredential credentialC = factory2.createCredential(properties);
+    assertNotNull(credentialC);
+    assertEquals("test", credentialC.getName());
+
+    final PkiCredential credentialC2 = factory2.createCredential(properties);
+    assertNotNull(credentialC2);
+    assertEquals("test", credentialC2.getName());
+    final PkiCredential credentialC22 = factory2.createCredential(properties);
+    assertTrue(credentialC2 == credentialC22);
 
     final PkiCredentialConfigurationProperties pc = new PkiCredentialConfigurationProperties();
     pc.setJks(properties);

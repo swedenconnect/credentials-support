@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.security.credential.config.PemCredentialConfiguration;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -83,6 +84,30 @@ public class PemCredentialConfigurationProperties extends AbstractBaseCredential
   @Override
   public Optional<String> keyPassword() {
     return Optional.ofNullable(this.getKeyPassword());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || this.getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final PemCredentialConfigurationProperties that = (PemCredentialConfigurationProperties) o;
+    return Objects.equals(this.publicKey, that.publicKey) && Objects.equals(this.certificates,
+        that.certificates) && Objects.equals(this.privateKey, that.privateKey) && Objects.equals(
+        this.keyPassword, that.keyPassword);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), this.publicKey, this.certificates, this.privateKey, this.keyPassword);
   }
 
 }

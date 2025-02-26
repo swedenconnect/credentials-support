@@ -23,6 +23,7 @@ import se.swedenconnect.security.credential.config.StoreConfiguration;
 import se.swedenconnect.security.credential.config.StoreCredentialConfiguration;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -79,6 +80,26 @@ public class CredentialBundlesConfigurationProperties implements CredentialBundl
     return Optional.ofNullable(this.getJks())
         .map(jks -> jks.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || this.getClass() != o.getClass()) {
+      return false;
+    }
+    final CredentialBundlesConfigurationProperties that = (CredentialBundlesConfigurationProperties) o;
+    return Objects.equals(this.keystore, that.keystore) && Objects.equals(this.pem, that.pem)
+        && Objects.equals(this.jks, that.jks);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.keystore, this.pem, this.jks);
   }
 
 }
