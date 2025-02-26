@@ -20,6 +20,7 @@ import lombok.Setter;
 import se.swedenconnect.security.credential.config.StoreConfiguration;
 import se.swedenconnect.security.credential.config.StoreCredentialConfiguration;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -134,4 +135,26 @@ public class StoreCredentialConfigurationProperties extends AbstractBaseCredenti
     }
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || this.getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final StoreCredentialConfigurationProperties that = (StoreCredentialConfigurationProperties) o;
+    return Objects.equals(this.store, that.store) && Objects.equals(this.storeReference, that.storeReference)
+        && Objects.equals(this.monitor, that.monitor) && Objects.equals(this.key, that.key);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), this.store, this.storeReference, this.monitor, this.key);
+  }
 }

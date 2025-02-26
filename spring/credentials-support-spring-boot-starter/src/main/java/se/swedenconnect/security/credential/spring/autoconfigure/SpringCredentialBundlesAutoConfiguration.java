@@ -25,7 +25,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 import se.swedenconnect.security.credential.bundle.ConfigurationCredentialBundleRegistrar;
 import se.swedenconnect.security.credential.bundle.CredentialBundleRegistrar;
@@ -33,6 +32,7 @@ import se.swedenconnect.security.credential.bundle.CredentialBundleRegistry;
 import se.swedenconnect.security.credential.bundle.CredentialBundles;
 import se.swedenconnect.security.credential.bundle.DefaultCredentialBundleRegistry;
 import se.swedenconnect.security.credential.config.ConfigurationResourceLoader;
+import se.swedenconnect.security.credential.factory.PkiCredentialFactory;
 import se.swedenconnect.security.credential.monitoring.CredentialMonitorBean;
 import se.swedenconnect.security.credential.monitoring.DefaultCredentialMonitorBean;
 import se.swedenconnect.security.credential.spring.actuator.CredentialMonitorHealthIndicator;
@@ -106,6 +106,20 @@ public class SpringCredentialBundlesAutoConfiguration {
     final DefaultCredentialBundleRegistry registry = new DefaultCredentialBundleRegistry();
     registrars.orderedStream().forEach((registrar) -> registrar.register(registry));
     return registry;
+  }
+
+  /**
+   * Creates a {@link PkiCredentialFactory} bean.
+   *
+   * @param credentialBundles the credential bundle bean
+   * @param configurationResourceLoader the resource loader
+   * @return a {@link PkiCredentialFactory}
+   */
+  @Bean
+  @ConditionalOnMissingBean
+  PkiCredentialFactory pkiCredentialFactory(final CredentialBundles credentialBundles,
+      final ConfigurationResourceLoader configurationResourceLoader) {
+    return new PkiCredentialFactory(credentialBundles, configurationResourceLoader, true);
   }
 
   /**

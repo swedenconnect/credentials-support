@@ -22,6 +22,7 @@ import se.swedenconnect.security.credential.config.BaseCredentialConfiguration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -93,6 +94,27 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
   @Override
   public Optional<Map<String, String>> metadata() {
     return Optional.of(this.getMetadata());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || this.getClass() != o.getClass()) {
+      return false;
+    }
+    final AbstractBaseCredentialConfigurationProperties that = (AbstractBaseCredentialConfigurationProperties) o;
+    return Objects.equals(this.name, that.name) && Objects.equals(this.keyId, that.keyId)
+        && Objects.equals(this.issuedAt, that.issuedAt) && Objects.equals(this.expiresAt, that.expiresAt)
+        && Objects.equals(this.metadata, that.metadata);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.name, this.keyId, this.issuedAt, this.expiresAt, this.metadata);
   }
 
 }

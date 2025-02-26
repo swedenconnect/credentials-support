@@ -21,6 +21,7 @@ import se.swedenconnect.security.credential.config.PemCredentialConfiguration;
 import se.swedenconnect.security.credential.config.PkiCredentialConfiguration;
 import se.swedenconnect.security.credential.config.StoreCredentialConfiguration;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -74,4 +75,25 @@ public class PkiCredentialConfigurationProperties implements PkiCredentialConfig
   public Optional<PemCredentialConfiguration> pem() {
     return Optional.ofNullable(this.getPem());
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || this.getClass() != o.getClass()) {
+      return false;
+    }
+    final PkiCredentialConfigurationProperties that = (PkiCredentialConfigurationProperties) o;
+    return Objects.equals(this.bundle, that.bundle) && Objects.equals(this.jks, that.jks)
+        && Objects.equals(this.pem, that.pem);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.bundle, this.jks, this.pem);
+  }
+
 }

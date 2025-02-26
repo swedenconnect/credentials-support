@@ -33,7 +33,9 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -316,6 +318,35 @@ public class PkiCredentialConfigurationProperties
       this.certificate = null;
       this.certificates = null;
     }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || this.getClass() != o.getClass()) {
+      return false;
+    }
+    if (!super.equals(o)) {
+      return false;
+    }
+    final PkiCredentialConfigurationProperties that = (PkiCredentialConfigurationProperties) o;
+    return Objects.equals(this.name, that.name) && Objects.equals(this.certificate, that.certificate)
+        && Objects.equals(this.certificates, that.certificates) && Objects.equals(this.privateKey,
+        that.privateKey) && Objects.equals(this.resource, that.resource) && Objects.deepEquals(this.password,
+        that.password) && Objects.equals(this.type, that.type) && Objects.equals(this.provider, that.provider)
+        && Objects.equals(this.pkcs11Configuration, that.pkcs11Configuration) && Objects.equals(this.alias,
+        that.alias) && Objects.deepEquals(this.keyPassword, that.keyPassword);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), this.name, this.certificate, this.certificates, this.privateKey,
+        this.resource, Arrays.hashCode(this.password), this.type, this.provider, this.pkcs11Configuration, this.alias,
+        Arrays.hashCode(this.keyPassword));
   }
 
 }

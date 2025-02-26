@@ -24,6 +24,7 @@ import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.KeyStoreReloader;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.bundle.CredentialBundles;
 import se.swedenconnect.security.credential.bundle.NoSuchCredentialException;
 import se.swedenconnect.security.credential.bundle.NoSuchKeyStoreException;
 import se.swedenconnect.security.credential.config.BaseCredentialConfiguration;
@@ -50,10 +51,13 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 /**
- * Factory class for creating {@link PkiCredential} instances.
+ * Factory class for creating {@link PkiCredential} instances. It can either be used statically, or instantiated with a
+ * resource loader and loaders for credentials or keystores (or a credential bundles object).
  *
  * @author Martin Lindström
  */
@@ -61,6 +65,51 @@ public class PkiCredentialFactory {
 
   /** Logger instance. */
   private static final Logger log = LoggerFactory.getLogger(PkiCredentialFactory.class);
+
+  /** For loading credentials. */
+  private final Function<String, PkiCredential> credentialProvider;
+
+  /** For loading keystores. */
+  private final Function<String, KeyStore> keyStoreProvider;
+
+  /** For loading resources. */
+  private final ConfigurationResourceLoader resourceLoader;
+
+  /** Cache for avoiding loading the same credential several times. */
+  private ConcurrentMap<Integer, PkiCredential> cache;
+
+  /**
+   * Constructor assigning the {@link CredentialBundles}, credential and keystore providers.
+   *
+   * @param credentialProvider for loading credentials
+   * @param keyStoreProvider for loading keystores
+   * @param resourceLoader for loading resources
+   * @param useCache whether caches will be used
+   */
+  public PkiCredentialFactory(@Nullable final Function<String, PkiCredential> credentialProvider,
+      @Nullable final Function<String, KeyStore> keyStoreProvider,
+      @Nullable final ConfigurationResourceLoader resourceLoader, final boolean useCache) {
+    this.credentialProvider = credentialProvider;
+    this.keyStoreProvider = keyStoreProvider;
+    this.resourceLoader = Optional.ofNullable(resourceLoader).orElseGet(DefaultConfigurationResourceLoader::new);
+    if (useCache) {
+      this.cache = new ConcurrentHashMap<>();
+    }
+  }
+
+  /**
+   * Constructor assigning the {@link CredentialBundles} and {@link ConfigurationResourceLoader}.
+   *
+   * @param credentialBundles the credentials bundles to use
+   * @param resourceLoader for loading resources
+   * @param useCache whether caches will be used
+   */
+  public PkiCredentialFactory(@Nullable final CredentialBundles credentialBundles,
+      @Nullable final ConfigurationResourceLoader resourceLoader, final boolean useCache) {
+    this(Optional.ofNullable(credentialBundles).map(CredentialBundles::getCredentialProvider).orElse(null),
+        Optional.ofNullable(credentialBundles).map(CredentialBundles::getKeyStoreProvider).orElse(null),
+        resourceLoader, useCache);
+  }
 
   /**
    * Creates a {@link PkiCredential} based on the supplied {@link PkiCredentialConfiguration}.
@@ -119,6 +168,38 @@ public class PkiCredentialFactory {
     else {
       throw new IllegalArgumentException("Invalid credential configuration - one of jks or pem must be present");
     }
+  }
+
+  /**
+   * Creates a {@link PkiCredential} based on the supplied {@link PkiCredentialConfiguration}.
+   *
+   * @param configuration the configuration
+   * @return a {@link PkiCredential}
+   * @throws IllegalArgumentException for invalid configuration settings
+   * @throws IOException if a referenced file can not be read
+   * @throws NoSuchCredentialException if a bundle is used in the supplied configuration, and it does not exist
+   * @throws NoSuchKeyStoreException if a reference to a key store can not be found
+   * @throws CertificateException for certificate decoding errors
+   * @throws KeyException for key decoding errors
+   * @throws KeyStoreException for errors unlocking the key store
+   * @throws NoSuchProviderException if a referenced provider does not exist
+   */
+  @Nonnull
+  public PkiCredential createCredential(@Nonnull final PkiCredentialConfiguration configuration)
+      throws IllegalArgumentException, IOException, NoSuchCredentialException, NoSuchKeyStoreException,
+      CertificateException, KeyException, KeyStoreException, NoSuchProviderException {
+
+    if (this.cache != null && configuration.bundle().isEmpty()) {
+      final PkiCredential c = this.cache.get(configuration.hashCode());
+      if (c != null) {
+        log.debug("Returning cached credential '{}'", c.getName());
+        return c;
+      }
+    }
+    final PkiCredential credential = PkiCredentialFactory.createCredential(configuration, this.resourceLoader,
+        this.credentialProvider, this.keyStoreProvider, null);
+    Optional.ofNullable(this.cache).ifPresent(c -> c.put(configuration.hashCode(), credential));
+    return credential;
   }
 
   /**
@@ -205,6 +286,32 @@ public class PkiCredentialFactory {
 
     assignBaseProperties(configuration, credential);
 
+    return credential;
+  }
+
+  /**
+   * Creates a {@link PkiCredential} based on a {@link PemCredentialConfiguration}.
+   *
+   * @param configuration the configuration
+   * @return a {@link PkiCredential}
+   * @throws IllegalArgumentException for invalid configuration settings
+   * @throws IOException if a referenced file can not be read
+   * @throws CertificateException for certificate decoding errors
+   * @throws KeyException for key decoding errors
+   */
+  @Nonnull
+  public PkiCredential createCredential(@Nonnull final PemCredentialConfiguration configuration)
+      throws IllegalArgumentException, IOException, CertificateException, KeyException {
+
+    if (this.cache != null) {
+      final PkiCredential c = this.cache.get(configuration.hashCode());
+      if (c != null) {
+        log.debug("Returning cached credential '{}'", c.getName());
+        return c;
+      }
+    }
+    final PkiCredential credential = PkiCredentialFactory.createCredential(configuration, this.resourceLoader);
+    Optional.ofNullable(this.cache).ifPresent(c -> c.put(configuration.hashCode(), credential));
     return credential;
   }
 
@@ -328,6 +435,36 @@ public class PkiCredentialFactory {
   }
 
   /**
+   * Creates a {@link PkiCredential} based on a {@link StoreCredentialConfiguration}.
+   *
+   * @param configuration the configuration
+   * @return a {@link PkiCredential}
+   * @throws IllegalArgumentException for invalid configuration settings
+   * @throws IOException if a referenced file can not be read
+   * @throws NoSuchKeyStoreException if a reference to a key store can not be found
+   * @throws KeyStoreException for errors unlocking the key store
+   * @throws NoSuchProviderException if a referenced provider does not exist
+   * @throws CertificateException for certificate decoding errors
+   */
+  @Nonnull
+  public PkiCredential createCredential(@Nonnull final StoreCredentialConfiguration configuration)
+      throws IllegalArgumentException, IOException, NoSuchKeyStoreException, KeyStoreException, NoSuchProviderException,
+      CertificateException {
+
+    if (this.cache != null) {
+      final PkiCredential c = this.cache.get(configuration.hashCode());
+      if (c != null) {
+        log.debug("Returning cached credential '{}'", c.getName());
+        return c;
+      }
+    }
+    final PkiCredential credential = PkiCredentialFactory.createCredential(configuration, this.resourceLoader,
+        this.keyStoreProvider, null);
+    Optional.ofNullable(this.cache).ifPresent(c -> c.put(configuration.hashCode(), credential));
+    return credential;
+  }
+
+  /**
    * Assigns common credential properties.
    *
    * @param configuration the configuration
@@ -347,7 +484,4 @@ public class PkiCredentialFactory {
         c -> credential.getMetadata().getProperties().put(PkiCredential.Metadata.EXPIRES_AT_PROPERTY, c));
   }
 
-  // Hidden constructor
-  private PkiCredentialFactory() {
-  }
 }

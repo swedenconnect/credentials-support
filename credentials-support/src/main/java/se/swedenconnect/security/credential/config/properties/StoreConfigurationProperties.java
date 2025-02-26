@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.security.credential.config.StoreConfiguration;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -127,6 +128,26 @@ public class StoreConfigurationProperties implements StoreConfiguration {
       return Optional.ofNullable(this.getSettings());
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || this.getClass() != o.getClass()) {
+        return false;
+      }
+      final Pkcs11ConfigurationProperties that = (Pkcs11ConfigurationProperties) o;
+      return Objects.equals(this.configurationFile, that.configurationFile) && Objects.equals(this.settings,
+          that.settings);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+      return Objects.hash(this.configurationFile, this.settings);
+    }
+
     /**
      * Custom PKCS#11 settings.
      */
@@ -183,6 +204,27 @@ public class StoreConfigurationProperties implements StoreConfiguration {
       public Optional<Integer> slotListIndex() {
         return Optional.ofNullable(this.getSlotListIndex());
       }
+
+      /** {@inheritDoc} */
+      @Override
+      public boolean equals(final Object o) {
+        if (this == o) {
+          return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+          return false;
+        }
+        final Pkcs11SettingsProperties that = (Pkcs11SettingsProperties) o;
+        return Objects.equals(this.library, that.library) && Objects.equals(this.name, that.name)
+            && Objects.equals(this.slot, that.slot) && Objects.equals(this.slotListIndex, that.slotListIndex);
+      }
+
+      /** {@inheritDoc} */
+      @Override
+      public int hashCode() {
+        return Objects.hash(this.library, this.name, this.slot, this.slotListIndex);
+      }
+
     }
   }
 

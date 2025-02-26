@@ -8,6 +8,12 @@
 
 ## Release Notes
 
+### 2.0.4
+
+**Date:** -
+
+- Extended the [PkiCredentialFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/PkiCredentialFactory.java) class so that it can be instantiated as a bean for easier use. This bean is also automatically provided by the Spring Boot starter.
+
 ### 2.0.3
 
 **Date:** 2025-02-10
