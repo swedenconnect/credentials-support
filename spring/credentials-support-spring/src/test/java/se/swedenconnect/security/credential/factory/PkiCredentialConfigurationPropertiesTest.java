@@ -17,10 +17,13 @@ package se.swedenconnect.security.credential.factory;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
+import se.swedenconnect.security.credential.config.properties.PemCredentialConfigurationProperties;
+import se.swedenconnect.security.credential.config.properties.StoreCredentialConfigurationProperties;
 import se.swedenconnect.security.credential.utils.X509Utils;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -65,6 +68,29 @@ public class PkiCredentialConfigurationPropertiesTest {
     assertNotNull(props.getPem().getName());
 
     assertFalse(props.hasDeprecatedProperties());
+  }
+
+  @Test
+  void testHandleName() {
+    final PkiCredentialConfigurationProperties props = new PkiCredentialConfigurationProperties();
+    props.setJks(new StoreCredentialConfigurationProperties());
+    props.setName("Hello");
+    props.afterPropertiesSet();
+
+    assertNotNull(props.getJks());
+    assertEquals("Hello", props.getJks().getName());
+    assertNull(props.getName());
+    assertFalse(props.hasDeprecatedProperties());
+
+    final PkiCredentialConfigurationProperties props2 = new PkiCredentialConfigurationProperties();
+    props2.setPem(new PemCredentialConfigurationProperties());
+    props2.setName("Hello");
+    props2.afterPropertiesSet();
+
+    assertNotNull(props2.getPem());
+    assertEquals("Hello", props2.getPem().getName());
+    assertNull(props2.getName());
+    assertFalse(props2.hasDeprecatedProperties());
   }
 
 }

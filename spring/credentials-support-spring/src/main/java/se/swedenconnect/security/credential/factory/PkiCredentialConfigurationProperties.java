@@ -206,6 +206,15 @@ public class PkiCredentialConfigurationProperties
     if (!this.hasDeprecatedProperties()) {
       return;
     }
+    // Be forgiving if only name is assigned ...
+    final String name = this.name;
+    this.name = null;
+    if (StringUtils.hasText(name) && !this.hasDeprecatedProperties()) {
+      Optional.ofNullable(this.getJks()).ifPresent(j -> j.setName(name));
+      Optional.ofNullable(this.getPem()).ifPresent(p -> p.setName(name));
+      return;
+    }
+
     if (this.getJks() != null || this.getPem() != null || this.getBundle() != null) {
       throw new IllegalArgumentException("Invalid PKI credential configuration");
     }
@@ -220,10 +229,7 @@ public class PkiCredentialConfigurationProperties
       this.getPem().setPrivateKey(resourceToUrl(this.privateKey));
       this.privateKey = null;
       this.getPem().setCertificates(this.parseCertificates());
-      Optional.ofNullable(this.name).ifPresent(n -> {
-        this.getPem().setName(n);
-        this.name = null;
-      });
+      Optional.ofNullable(name).ifPresent(n -> this.getPem().setName(n));
       Optional.ofNullable(this.keyPassword).ifPresent(p -> {
         this.getPem().setKeyPassword(new String(p));
         this.keyPassword = null;
@@ -233,11 +239,7 @@ public class PkiCredentialConfigurationProperties
       this.setJks(new StoreCredentialConfigurationProperties());
       this.getJks().setKey(new StoreCredentialConfigurationProperties.KeyConfigurationProperties());
       this.getJks().setStore(new StoreConfigurationProperties());
-
-      Optional.ofNullable(this.name).ifPresent(n -> {
-        this.getJks().setName(n);
-        this.name = null;
-      });
+      Optional.ofNullable(name).ifPresent(n -> this.getJks().setName(n));
 
       Optional.ofNullable(this.resource).ifPresent(r -> {
         this.getJks().getStore().setLocation(resourceToUrl(r));
