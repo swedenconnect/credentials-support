@@ -8,11 +8,21 @@
 
 ## Release Notes
 
+### 2.0.5
+
+**Date:** -
+
+- When transforming from the old way of configuring credentials to the new we are a bit forgiving to avoid unnecessary
+  confusion.
+
 ### 2.0.4
 
 **Date:** 2025-02-26
 
-- Extended the [PkiCredentialFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/PkiCredentialFactory.java) class so that it can be instantiated as a bean for easier use. This bean is also automatically provided by the Spring Boot starter.
+- Extended
+  the [PkiCredentialFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/PkiCredentialFactory.java)
+  class so that it can be instantiated as a bean for easier use. This bean is also automatically provided by the Spring
+  Boot starter.
 
 ### 2.0.3
 
@@ -26,13 +36,15 @@
 
 - The `PropertyToPublicKeyConverter` was added to the Spring Boot Starter autoconfiguration.
 
-- Fixed bug that occurred if the same PKCS#11 provider were used for several keys. See https://github.com/swedenconnect/credentials-support/issues/74.
+- Fixed bug that occurred if the same PKCS#11 provider were used for several keys.
+  See https://github.com/swedenconnect/credentials-support/issues/74.
 
 ### 2.0.1
 
 **Date:** 2024-12-07
 
-- Moved Spring application events from the Spring Boot Starter to the Spring library to make them re-usable by other libraries.
+- Moved Spring application events from the Spring Boot Starter to the Spring library to make them re-usable by other
+  libraries.
 
 ### 2.0.0
 
@@ -42,4 +54,5 @@
 
 ---
 
-Copyright &copy; 2020-2025, [Sweden Connect](https://swedenconnect.se). Licensed under version 2.0 of the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
+Copyright &copy; 2020-2025, [Sweden Connect](https://swedenconnect.se). Licensed under version 2.0 of
+the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
