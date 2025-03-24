@@ -17,7 +17,6 @@ ARG SCRIPT_DIR
 # To build an image prepared for softhsm use "FROM openjdk:21-jdk-buster" to get access to the apt command.
 # See the Docker file "Dockerfile-softhsm" in the root directory.
 
-#RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 #RUN apt-get -q update
 #RUN apt-get -y upgrade
 # Install softhsm2
@@ -30,6 +29,8 @@ ARG SCRIPT_DIR
 COPY $KEY_DIR /opt/keys
 # Copy hsm key import script
 COPY $SCRIPT_DIR/key-import.sh /opt/key-import.sh
+# Make the script executable
+RUN chmod +x /opt/key-import.sh
 # Import keys to hsm
 RUN bash /opt/key-import.sh -p $PIN -l $SLOT_LABEL
 
