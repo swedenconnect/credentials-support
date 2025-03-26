@@ -24,7 +24,7 @@ public final class LibraryVersion {
 
   private static final int MAJOR = 2;
   private static final int MINOR = 0;
-  private static final int PATCH = 4;
+  private static final int PATCH = 5;
 
   /**
    * Global serialization value for classes.
@@ -40,5 +40,6 @@ public final class LibraryVersion {
     return MAJOR + "." + MINOR + "." + PATCH;
   }
 
-  private LibraryVersion() {}
+  private LibraryVersion() {
+  }
 }

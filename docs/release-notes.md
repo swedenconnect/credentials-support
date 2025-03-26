@@ -10,7 +10,7 @@
 
 ### 2.0.5
 
-**Date:** -
+**Date:** 2025-03-26
 
 - When transforming from the old way of configuring credentials to the new we are a bit forgiving to avoid unnecessary
   confusion.
