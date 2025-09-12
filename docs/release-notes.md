@@ -8,6 +8,17 @@
 
 ## Release Notes
 
+### 2.0.7
+
+**Date:** 2025-09-12
+
+- Dependency updates.
+
+- Fixed bug where `StoreCredentialConfigurationProperties.KeyConfigurationProperties` did not implement `hashcode`
+  and `equals`, making it impossible to cache.
+
+- We no longer assume that Spring Boot Actuator is on the classpath.
+
 ### 2.0.6
 
 **Date:** 2025-05-08

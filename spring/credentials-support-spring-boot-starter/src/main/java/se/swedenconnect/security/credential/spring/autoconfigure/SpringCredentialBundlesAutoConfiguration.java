@@ -15,7 +15,9 @@
  */
 package se.swedenconnect.security.credential.spring.autoconfigure;
 
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -24,6 +26,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 import se.swedenconnect.security.credential.bundle.ConfigurationCredentialBundleRegistrar;
@@ -157,33 +160,42 @@ public class SpringCredentialBundlesAutoConfiguration {
   }
 
   /**
-   * Creates a {@link CredentialMonitorHealthIndicator} component. If we have defined a
-   * {@link DefaultCredentialMonitorBean} that signals events for monitoring results, the indicator is set up in
-   * "passive" mode listening for events, and if not, it sets up its own monitor.
-   *
-   * @param credentialBundles credential bundles (needed for active mode)
-   * @return a {@link CredentialMonitorHealthIndicator} bean
+   * Configuration for the optional actuator.
    */
+  @Configuration
   @ConditionalOnClass(HealthIndicator.class)
-  @ConditionalOnMissingBean(CredentialMonitorHealthIndicator.class)
   @ConditionalOnProperty(
       prefix = "credential.bundles.monitoring", name = "health-endpoint-enabled", havingValue = "true", matchIfMissing = false)
-  @Bean("credential-monitor")
-  CredentialMonitorHealthIndicator credentialMonitor(final CredentialBundles credentialBundles) {
+  public static class ActuatorHealthConfiguration {
 
-    if (this.createdMonitorWithEvents) {
-      return new CredentialMonitorHealthIndicator();
+    /**
+     * Creates a {@link CredentialMonitorHealthIndicator} component. If we have defined a
+     * {@link DefaultCredentialMonitorBean} that signals events for monitoring results, the indicator is set up in
+     * "passive" mode listening for events, and if not, it sets up its own monitor.
+     *
+     * @param credentialBundles credential bundles (needed for active mode)
+     * @param defaultCredentialMonitorBean optional monitor bean that may be used
+     * @return a {@link CredentialMonitorHealthIndicator} bean
+     */
+    @ConditionalOnMissingBean(CredentialMonitorHealthIndicator.class)
+    @Bean("credential-monitor")
+    CredentialMonitorHealthIndicator credentialMonitor(final CredentialBundles credentialBundles,
+        @Autowired(required = false) @Nullable final DefaultCredentialMonitorBean defaultCredentialMonitorBean) {
+      if (defaultCredentialMonitorBean != null) {
+        return new CredentialMonitorHealthIndicator();
+      }
+      else {
+        final List<String> ids = credentialBundles.getRegisteredCredentials();
+        final List<ReloadablePkiCredential> credentials = ids.stream()
+            .map(credentialBundles::getCredential)
+            .filter(ReloadablePkiCredential.class::isInstance)
+            .map(ReloadablePkiCredential.class::cast)
+            .filter(c -> c.getTestFunction() != null)
+            .toList();
+        return new CredentialMonitorHealthIndicator(credentials);
+      }
     }
-    else {
-      final List<String> ids = credentialBundles.getRegisteredCredentials();
-      final List<ReloadablePkiCredential> credentials = ids.stream()
-          .map(credentialBundles::getCredential)
-          .filter(ReloadablePkiCredential.class::isInstance)
-          .map(ReloadablePkiCredential.class::cast)
-          .filter(c -> c.getTestFunction() != null)
-          .toList();
-      return new CredentialMonitorHealthIndicator(credentials);
-    }
+
   }
 
 }
