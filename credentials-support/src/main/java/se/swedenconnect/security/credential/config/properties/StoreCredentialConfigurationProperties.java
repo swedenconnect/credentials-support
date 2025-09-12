@@ -133,6 +133,26 @@ public class StoreCredentialConfigurationProperties extends AbstractBaseCredenti
     public Optional<String> certificates() {
       return Optional.ofNullable(this.getCertificates());
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || this.getClass() != o.getClass()) {
+        return false;
+      }
+      final KeyConfigurationProperties that = (KeyConfigurationProperties) o;
+      return Objects.equals(this.alias, that.alias) && Objects.equals(this.certificates, that.certificates)
+          && Objects.equals(this.keyPassword, that.keyPassword);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+      return Objects.hash(this.alias, this.certificates, this.keyPassword);
+    }
   }
 
   /** {@inheritDoc} */
