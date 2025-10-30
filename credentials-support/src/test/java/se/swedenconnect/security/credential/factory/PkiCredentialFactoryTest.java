@@ -17,16 +17,19 @@ package se.swedenconnect.security.credential.factory;
 
 import org.cryptacular.io.ClassPathResource;
 import org.cryptacular.io.Resource;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.KeyStoreCredentialTest;
 import se.swedenconnect.security.credential.KeyStoreReloader;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.PkiCredentialCollection;
 import se.swedenconnect.security.credential.bundle.CredentialBundles;
 import se.swedenconnect.security.credential.bundle.NoSuchCredentialException;
 import se.swedenconnect.security.credential.bundle.NoSuchKeyStoreException;
 import se.swedenconnect.security.credential.config.properties.PemCredentialConfigurationProperties;
+import se.swedenconnect.security.credential.config.properties.PkiCredentialCollectionConfigurationProperties;
 import se.swedenconnect.security.credential.config.properties.PkiCredentialConfigurationProperties;
 import se.swedenconnect.security.credential.config.properties.StoreConfigurationProperties;
 import se.swedenconnect.security.credential.config.properties.StoreCredentialConfigurationProperties;
@@ -38,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.time.Instant;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -536,6 +540,39 @@ public class PkiCredentialFactoryTest {
     finally {
       KeyStoreCredentialTest.cleanupPkcs11Mock();
     }
+  }
+
+  @Test
+  void testCollection() throws Exception {
+    final StoreConfigurationProperties storeProps = new StoreConfigurationProperties();
+    storeProps.setType("JKS");
+    storeProps.setLocation("keys.jks");
+    storeProps.setPassword("secret");
+
+    final PkiCredentialConfigurationProperties p1 = new PkiCredentialConfigurationProperties();
+    p1.setJks(new StoreCredentialConfigurationProperties());
+    p1.getJks().setName("rsa");
+    p1.getJks().setStore(storeProps);
+    p1.getJks().setKey(new StoreCredentialConfigurationProperties.KeyConfigurationProperties());
+    p1.getJks().getKey().setAlias("rsa");
+
+    final PkiCredentialConfigurationProperties p2 = new PkiCredentialConfigurationProperties();
+    p2.setJks(new StoreCredentialConfigurationProperties());
+    p2.getJks().setName("rsa2");
+    p2.getJks().setStore(storeProps);
+    p2.getJks().setKey(new StoreCredentialConfigurationProperties.KeyConfigurationProperties());
+    p2.getJks().getKey().setAlias("rsa2");
+
+    final PkiCredentialCollectionConfigurationProperties conf = new PkiCredentialCollectionConfigurationProperties();
+    conf.setCredentials(List.of(p1, p2));
+
+    final PkiCredentialCollection collection1 =
+        PkiCredentialFactory.createCredentialCollection(conf, null, null, null, null);
+    Assertions.assertEquals(2, collection1.getCredentials().size());
+
+    final PkiCredentialFactory factory = new PkiCredentialFactory(null, null, null, true);
+    final PkiCredentialCollection collection2 = factory.createCredentialCollection(conf);
+    Assertions.assertEquals(2, collection2.getCredentials().size());
   }
 
   private static String getContents(final String resource) throws IOException {

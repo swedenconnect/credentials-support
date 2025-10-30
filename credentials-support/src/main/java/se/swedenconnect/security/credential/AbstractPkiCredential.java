@@ -108,8 +108,8 @@ public abstract class AbstractPkiCredential implements PkiCredential {
   protected abstract String getDefaultName();
 
   /** {@inheritDoc} */
-  @Nonnull
   @Override
+  @Nonnull
   public Metadata getMetadata() {
     return this.metadata;
   }
@@ -126,13 +126,13 @@ public abstract class AbstractPkiCredential implements PkiCredential {
     if (this.getMetadata().getIssuedAt() == null) {
       Optional.ofNullable(certificate.getNotBefore())
           .ifPresent(d -> this.getMetadata().getProperties().put(Metadata.ISSUED_AT_PROPERTY, d.toInstant()));
-      log.debug("Assigned metadata property '{}' with value '{}'",
+      log.trace("Assigned metadata property '{}' with value '{}'",
           Metadata.ISSUED_AT_PROPERTY, this.getMetadata().getIssuedAt());
     }
     if (this.getMetadata().getExpiresAt() == null) {
       Optional.ofNullable(certificate.getNotAfter())
           .ifPresent(d -> this.getMetadata().getProperties().put(Metadata.EXPIRES_AT_PROPERTY, d.toInstant()));
-      log.debug("Assigned metadata property '{}' with value '{}'",
+      log.trace("Assigned metadata property '{}' with value '{}'",
           Metadata.EXPIRES_AT_PROPERTY, this.getMetadata().getExpiresAt());
     }
   }

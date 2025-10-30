@@ -24,6 +24,7 @@ import se.swedenconnect.security.credential.BasicCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.KeyStoreReloader;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.PkiCredentialCollection;
 import se.swedenconnect.security.credential.bundle.CredentialBundles;
 import se.swedenconnect.security.credential.bundle.NoSuchCredentialException;
 import se.swedenconnect.security.credential.bundle.NoSuchKeyStoreException;
@@ -31,6 +32,7 @@ import se.swedenconnect.security.credential.config.BaseCredentialConfiguration;
 import se.swedenconnect.security.credential.config.ConfigurationResourceLoader;
 import se.swedenconnect.security.credential.config.DefaultConfigurationResourceLoader;
 import se.swedenconnect.security.credential.config.PemCredentialConfiguration;
+import se.swedenconnect.security.credential.config.PkiCredentialCollectionConfiguration;
 import se.swedenconnect.security.credential.config.PkiCredentialConfiguration;
 import se.swedenconnect.security.credential.config.StoreCredentialConfiguration;
 import se.swedenconnect.security.credential.monitoring.DefaultCredentialTestFunction;
@@ -49,6 +51,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -465,6 +468,78 @@ public class PkiCredentialFactory {
   }
 
   /**
+   * Creates a {@link PkiCredentialCollection} based on the supplied {@link PkiCredentialCollectionConfiguration}.
+   *
+   * @param configuration the configuration
+   * @param resourceLoader loader for readning files, if {@code null}, a {@link DefaultConfigurationResourceLoader}
+   *     will be used
+   * @param credentialProvider if the supplied configuration object contains a credential bundle reference, this
+   *     provider must be supplied
+   * @param keyStoreProvider if the supplied configuration object contains a key store reference, this provider must
+   *     be supplied
+   * @param keyStoreReloaderProvider if store references are used, and those key stores are "reloadable", a function
+   *     that resolves references to a {@link KeyStoreReloader} may be supplied. If not, credentials will not be
+   *     reloadable
+   * @return a {@link PkiCredentialCollection}
+   * @throws IllegalArgumentException for invalid configuration settings
+   * @throws IOException if a referenced file can not be read
+   * @throws NoSuchCredentialException if a bundle is used in the supplied configuration, and it does not exist
+   * @throws NoSuchKeyStoreException if a reference to a key store can not be found
+   * @throws CertificateException for certificate decoding errors
+   * @throws KeyException for key decoding errors
+   * @throws KeyStoreException for errors unlocking the key store
+   * @throws NoSuchProviderException if a referenced provider does not exist
+   */
+  @Nonnull
+  public static PkiCredentialCollection createCredentialCollection(
+      @Nonnull final PkiCredentialCollectionConfiguration configuration,
+      @Nullable final ConfigurationResourceLoader resourceLoader,
+      @Nullable final Function<String, PkiCredential> credentialProvider,
+      @Nullable final Function<String, KeyStore> keyStoreProvider,
+      @Nullable final Function<String, KeyStoreReloader> keyStoreReloaderProvider)
+      throws IllegalArgumentException, IOException, NoSuchCredentialException, NoSuchKeyStoreException,
+      CertificateException, KeyException, KeyStoreException, NoSuchProviderException {
+
+    final List<PkiCredential> credentials = new ArrayList<>();
+    if (configuration.credentials().isPresent()) {
+      for (final PkiCredentialConfiguration conf : configuration.credentials().get()) {
+        credentials.add(
+            createCredential(conf, resourceLoader, credentialProvider, keyStoreProvider, keyStoreReloaderProvider));
+      }
+    }
+    return new PkiCredentialCollection(credentials);
+  }
+
+  /**
+   * Creates a {@link PkiCredentialCollection} based on the supplied {@link PkiCredentialCollectionConfiguration}.
+   *
+   * @param configuration the configuration
+   * @return a {@link PkiCredentialCollection}
+   * @throws IllegalArgumentException for invalid configuration settings
+   * @throws IOException if a referenced file can not be read
+   * @throws NoSuchCredentialException if a bundle is used in the supplied configuration, and it does not exist
+   * @throws NoSuchKeyStoreException if a reference to a key store can not be found
+   * @throws CertificateException for certificate decoding errors
+   * @throws KeyException for key decoding errors
+   * @throws KeyStoreException for errors unlocking the key store
+   * @throws NoSuchProviderException if a referenced provider does not exist
+   */
+  @Nonnull
+  public PkiCredentialCollection createCredentialCollection(
+      @Nonnull final PkiCredentialCollectionConfiguration configuration)
+      throws IllegalArgumentException, IOException, NoSuchCredentialException, NoSuchKeyStoreException,
+      CertificateException, KeyException, KeyStoreException, NoSuchProviderException {
+
+    final List<PkiCredential> credentials = new ArrayList<>();
+    if (configuration.credentials().isPresent()) {
+      for (final PkiCredentialConfiguration conf : configuration.credentials().get()) {
+        credentials.add(this.createCredential(conf));
+      }
+    }
+    return new PkiCredentialCollection(credentials);
+  }
+
+  /**
    * Assigns common credential properties.
    *
    * @param configuration the configuration
@@ -476,12 +551,14 @@ public class PkiCredentialFactory {
     configuration.name().ifPresent(credential::setName);
     configuration.metadata().ifPresent(
         c -> c.forEach((key, value) -> credential.getMetadata().getProperties().put(key, value)));
-    configuration.keyId().ifPresent(
-        c -> credential.getMetadata().getProperties().put(PkiCredential.Metadata.KEY_ID_PROPERTY, c));
+    configuration.keyId().ifPresent(c -> credential.getMetadata().setKeyId(c));
     configuration.issuedAt().ifPresent(
         c -> credential.getMetadata().getProperties().put(PkiCredential.Metadata.ISSUED_AT_PROPERTY, c));
     configuration.expiresAt().ifPresent(
         c -> credential.getMetadata().getProperties().put(PkiCredential.Metadata.EXPIRES_AT_PROPERTY, c));
+    configuration.usage().ifPresent(c -> credential.getMetadata().setUsage(c));
+    configuration.activeFrom().ifPresent(c -> credential.getMetadata().setActiveFrom(c));
+    configuration.activeTo().ifPresent(c -> credential.getMetadata().setActiveTo(c));
   }
 
 }

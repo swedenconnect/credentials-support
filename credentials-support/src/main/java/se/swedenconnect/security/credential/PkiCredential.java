@@ -24,6 +24,7 @@ import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -116,26 +117,132 @@ public interface PkiCredential {
 
   /**
    * Metadata associated with a {@link PkiCredential}.
+   * <p>
+   * Implementations may add any type of metadata to a credential. However, some XXX
+   * </p>
    */
   interface Metadata {
 
-    /** Property name for the key identifier metadata property. */
+    /** Property name for the key identifier metadata property. This property holds a {@link String}. */
     String KEY_ID_PROPERTY = "key-id";
 
-    /** Property name for the issued-at metadata property. */
+    /** Property name for the {@link Instant} when the credential was issued. */
     String ISSUED_AT_PROPERTY = "issued-at";
 
-    /** Property name for the expires-at metadata property. */
+    /**
+     * Property name for the {@link Instant} when the credential expires. Note that this may be different from the
+     * instant holding the {@link #ACTIVE_TO_PROPERTY} property.
+     */
     String EXPIRES_AT_PROPERTY = "expires-at";
 
     /**
-     * An assigned, or calculated, key identifier for the credential.
+     * Property that may be set to the {@link Instant} at which the credential no longer should be regarded as active.
+     */
+    String ACTIVE_TO_PROPERTY = "active-to";
+
+    /**
+     * Property that may be set to the {@link Instant} from when the credential should be regarded as active.
+     */
+    String ACTIVE_FROM_PROPERTY = "active-from";
+
+    /**
+     * Property name for the usage property. This property holds a {@link String}, that may be {@value #USAGE_SIGNING},
+     * {@value #USAGE_ENCRYPTION}, {@value #USAGE_METADATA_SIGNING} or any other application specific usage.
+     */
+    String USAGE_PROPERTY = "usage";
+
+    /** Usage value indicating that a credential is used for signing. */
+    String USAGE_SIGNING = "signing";
+
+    /** Usage value indicating that a credential is used for encryption. */
+    String USAGE_ENCRYPTION = "encryption";
+
+    /**
+     * Usage value indicating thet a credential is used for metadata signing, for example SAML metadata, or OIDC entity
+     * statements.
+     */
+    String USAGE_METADATA_SIGNING = "metadata-signing";
+
+    /**
+     * Assigns the key identifier ({@value #KEY_ID_PROPERTY} property).
      *
-     * @return the credential key identifier, or {@code null}, if not assigned/calculated
+     * @param keyId the key identifier, or {@code null} to reset the value
+     */
+    default void setKeyId(@Nullable final String keyId) {
+      this.getProperties().put(KEY_ID_PROPERTY, keyId);
+    }
+
+    /**
+     * Gets the stored key identifier ({@value #KEY_ID_PROPERTY} property).
+     *
+     * @return the credential key identifier, or {@code null}, if not assigned
      */
     @Nullable
     default String getKeyId() {
       return (String) this.getProperties().get(KEY_ID_PROPERTY);
+    }
+
+    /**
+     * Assigns the credential usage represented by the {@value #USAGE_PROPERTY} property.
+     *
+     * @param usage the usage string, or {@code null} to reset the {@value #USAGE_PROPERTY} property.
+     */
+    default void setUsage(@Nullable final String usage) {
+      this.getProperties().put(USAGE_PROPERTY, usage);
+    }
+
+    /**
+     * Gets the value for the {@value #USAGE_PROPERTY} property.
+     *
+     * @return a credential usage string or {@code null}
+     */
+    @Nullable
+    default String getUsage() {
+      return (String) this.getProperties().get(USAGE_PROPERTY);
+    }
+
+    /**
+     * Assigns the {@link Instant} from when the credential should be regarded as active. Stored using the
+     * {@value #ACTIVE_FROM_PROPERTY} property.
+     *
+     * @param activeFrom the active-from instant, or {@code null} for resetting the property
+     */
+    default void setActiveFrom(@Nullable final Instant activeFrom) {
+      this.getProperties().put(ACTIVE_FROM_PROPERTY, activeFrom);
+    }
+
+    /**
+     * Gets the {@link Instant} for the {@value #ACTIVE_FROM_PROPERTY} property.
+     *
+     * @return an {@link Instant} or {@code null}
+     */
+    @Nullable
+    default Instant getActiveFrom() {
+      return Optional.ofNullable(this.getProperties().get(ACTIVE_FROM_PROPERTY))
+          .map(Metadata::toInstant)
+          .orElse(null);
+    }
+
+    /**
+     * Assigns the {@link Instant} for when the credential should no longer be active. Stored using the
+     * {@value #ACTIVE_TO_PROPERTY} property.
+     *
+     * @param activeTo the active-to instant, or {@code null} for resetting the property
+     */
+    default void setActiveTo(@Nullable final Instant activeTo) {
+      this.getProperties().put(ACTIVE_TO_PROPERTY, activeTo);
+    }
+
+    /**
+     * Gets the {@link Instant} for the {@value #ACTIVE_TO_PROPERTY} property.
+     *
+     * @return an {@link Instant} or {@code null}
+     */
+    @Nullable
+    default Instant getActiveTo() {
+      return Optional.ofNullable(this.getProperties().get(ACTIVE_TO_PROPERTY))
+          .map(Metadata::toInstant)
+          .orElse(null);
     }
 
     /**
@@ -150,7 +257,9 @@ public interface PkiCredential {
      */
     @Nullable
     default Instant getIssuedAt() {
-      return (Instant) this.getProperties().get(ISSUED_AT_PROPERTY);
+      return Optional.ofNullable(this.getProperties().get(ISSUED_AT_PROPERTY))
+          .map(Metadata::toInstant)
+          .orElse(null);
     }
 
     /**
@@ -164,7 +273,9 @@ public interface PkiCredential {
      */
     @Nullable
     default Instant getExpiresAt() {
-      return (Instant) this.getProperties().get(EXPIRES_AT_PROPERTY);
+      return Optional.ofNullable(this.getProperties().get(EXPIRES_AT_PROPERTY))
+          .map(Metadata::toInstant)
+          .orElse(null);
     }
 
     /**
@@ -174,6 +285,19 @@ public interface PkiCredential {
      */
     @Nonnull
     Map<String, Object> getProperties();
+
+    @Nonnull
+    private static Instant toInstant(@Nonnull final Object instant) {
+      if (instant instanceof final Instant instantValue) {
+        return instantValue;
+      }
+      else if (instant instanceof final String instantValue) {
+        return Instant.parse(instantValue);
+      }
+      else {
+        throw new IllegalArgumentException("Invalid instant type: " + instant.getClass());
+      }
+    }
 
   }
 

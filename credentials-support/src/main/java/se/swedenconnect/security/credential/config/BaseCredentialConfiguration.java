@@ -56,6 +56,27 @@ public interface BaseCredentialConfiguration {
   Optional<Instant> expiresAt();
 
   /**
+   * Metadata property for active-from.
+   *
+   * @return property for active-from
+   */
+  Optional<Instant> activeFrom();
+
+  /**
+   * Metadata property for active-to.
+   *
+   * @return property for active-to
+   */
+  Optional<Instant> activeTo();
+
+  /**
+   * Metadata property for (credential) usage.
+   *
+   * @return property for usage
+   */
+  Optional<String> usage();
+
+  /**
    * Additional metadata properties.
    *
    * @return additional metadata properties

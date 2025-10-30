@@ -15,6 +15,13 @@
  */
 package se.swedenconnect.security.credential.opensaml;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import se.swedenconnect.security.credential.PkiCredential;
+
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Symbolic constants for storing OpenSAML specific properties in a
  * {@link se.swedenconnect.security.credential.PkiCredential.Metadata PkiCredential.Metadata} object.
@@ -24,8 +31,77 @@ package se.swedenconnect.security.credential.opensaml;
 public class OpenSamlMetadataProperties {
 
   /**
-   * Property name for assigning a SAML entity ID to the credential metadata.
+   * Property name for assigning a SAML entity ID to the credential metadata. Holds a {@link String}.
    */
   public static final String ENTITY_ID_PROPERTY = "entity-id";
 
+  /**
+   * Property name for holding {@code md:EncryptionMethod}. This property holds a {@link java.util.List List} of
+   * {@link EncryptionMethodMetadata} objects.
+   */
+  public static final String ENCRYPTION_METHODS = "encryption-methods";
+
+  /**
+   * Assigns the entityID property to the metadata.
+   *
+   * @param metadata the metadata to update
+   * @param entityId the entity ID - if {@code null}, the property is reset
+   */
+  public static void setEntityId(@Nonnull final PkiCredential.Metadata metadata, @Nullable final String entityId) {
+    metadata.getProperties().put(ENTITY_ID_PROPERTY, entityId);
+  }
+
+  /**
+   * Gets the entityID property.
+   *
+   * @param metadata the metadata
+   * @return an entityID {@link String}, or {@code null}
+   */
+  @Nullable
+  public static String getEntityId(@Nonnull final PkiCredential.Metadata metadata) {
+    return (String) metadata.getProperties().get(ENTITY_ID_PROPERTY);
+  }
+
+  /**
+   * Assigns the encryption methods given the string representation (see
+   * {@link EncryptionMethodMetadata#parseMethods(String)}) of the methods.
+   *
+   * @param metadata the metadata to update
+   * @param encryptionMethods the methods in string representation
+   */
+  public static void setEncryptionMethods(
+      @Nonnull final PkiCredential.Metadata metadata, @Nullable final String encryptionMethods) {
+    Optional.ofNullable(encryptionMethods)
+        .map(EncryptionMethodMetadata::parseMethods)
+        .ifPresentOrElse(m -> setEncryptionMethods(metadata, m),
+            () -> metadata.getProperties().remove(ENCRYPTION_METHODS));
+  }
+
+  /**
+   * Assigns the encryption methods property.
+   *
+   * @param metadata the metadata to update
+   * @param encryptionMethods the methods
+   */
+  public static void setEncryptionMethods(@Nonnull final PkiCredential.Metadata metadata,
+      @Nullable final List<EncryptionMethodMetadata> encryptionMethods) {
+    metadata.getProperties().put(ENCRYPTION_METHODS, encryptionMethods);
+  }
+
+  /**
+   * Gets the encryption methods property from the supplied metadata.
+   *
+   * @param metadata the metadata
+   * @return a list of methods, or {@code null}
+   */
+  @Nullable
+  public static List<EncryptionMethodMetadata> getEncryptionMethods(@Nonnull final PkiCredential.Metadata metadata) {
+    return Optional.ofNullable(metadata.getProperties().get(ENCRYPTION_METHODS))
+        .map(m -> m instanceof String ? EncryptionMethodMetadata.parseMethods((String) m)
+            : (List<EncryptionMethodMetadata>) m)
+        .orElse(null);
+  }
+
+  private OpenSamlMetadataProperties() {
+  }
 }

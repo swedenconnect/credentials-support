@@ -2,7 +2,7 @@
 
 # credentials-support
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.security/credentials-support/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.security/credentials-support)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![Maven Central](https://img.shields.io/maven-central/v/se.swedenconnect.security/credentials-support.svg)
 
 Java libraries for PKI credentials support, including PKCS#11 and HSM:s.
 
@@ -42,23 +42,29 @@ Java libraries for PKI credentials support, including PKCS#11 and HSM:s.
     
     4.2. [Credential Factories](#credential-factories)
 
-5. [**Credential Bundles and Configuration Support**](#credential-bundles-and-configuration-support)
+5. [**Credential Bundles, Collections and Configuration Support**](#credential-bundles-collections-and-configuration-support)
 
     5.1. [The Bundles Concept](#the-bundles-concept)
     
-    5.2. [Configuration Support](#configuration-support)
+    5.2. [PkiCredentialCollection](#pki-credential-collection)
     
-    5.2.1. [StoreConfigurationProperties](#store-configuration-properties)
+    5.3. [Configuration Support](#configuration-support)
     
-    5.2.2. [BaseCredentialConfigurationProperties](#base-credential-configuration-properties)
-
-    5.2.3. [PemCredentialConfigurationProperties](#pem-credential-configuration-properties)
+    5.3.1. [StoreConfigurationProperties](#store-configuration-properties)
     
-    5.2.4. [StoreCredentialConfigurationProperties](#store-credential-configuration-properties)
+    5.3.2. [BaseCredentialConfigurationProperties](#base-credential-configuration-properties)
 
-    5.2.5. [PkiCredentialConfigurationProperties](#pki-credential-configuration-properties)
+    5.3.3. [PemCredentialConfigurationProperties](#pem-credential-configuration-properties)
+    
+    5.3.4. [StoreCredentialConfigurationProperties](#store-credential-configuration-properties)
 
-    5.2.6. [CredentialBundlesConfigurationProperties](#credential-bundles-configuration-properties)
+    5.3.5. [PkiCredentialConfigurationProperties](#pki-credential-configuration-properties)
+
+    5.3.6. [CredentialBundlesConfigurationProperties](#credential-bundles-configuration-properties)
+
+    5.3.7. [PkiCredentialCollectionConfigurationProperties](#pki-credential-collection-configuration-properties)
+    
+    5.3.8. [SpringCredentialConfigurationProperties](#spring-credential-configuration-properties)
     
 6. [**Monitoring**](#monitoring)
 
@@ -90,9 +96,9 @@ Java libraries for PKI credentials support, including PKCS#11 and HSM:s.
 
 11. [**PKCS#11 Specifics**](#pkcs11-specifics)
 
-    11.1. [**Using SoftHSM to Test PKCS#11 Credentials**](#using-softhsm-to-test-pkcs11-credentials)
+    11.1. [Using SoftHSM to Test PKCS#11 Credentials](#using-softhsm-to-test-pkcs11-credentials)
 
-    11.2. [**Key Generation Scripts**](#key-generation-scripts)
+    11.2. [Key Generation Scripts](#key-generation-scripts)
 
 ---
 
@@ -251,7 +257,7 @@ If no name is explicitly assigned, a name will be generated according to the fol
 <a name="transformation-to-other-formats"></a>
 ### 3.2. Transformation to other Formats
 
-The **credentials-support** libraries offer a uniform way of representing credentials via the [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) interface and also a smooth and efficient way of configuring those (see section [5](credential-bundles-and-configuration-support) below), but other frameworks and libraries have their way of representing credentials. So, we need a way to handle this. The solution is the `tranform` method:
+The **credentials-support** libraries offer a uniform way of representing credentials via the [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) interface and also a smooth and efficient way of configuring those (see [Section 5](credential-bundles-collections-and-configuration-support) below), but other frameworks and libraries have their way of representing credentials. So, we need a way to handle this. The solution is the `tranform` method:
 
 ```java
 /**
@@ -268,7 +274,7 @@ default <T> T transform(@Nonnull final Function<PkiCredential, T> transformFunct
 
 Thus, by implementing a `Function` that accepts a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) and returns the custom credential representation we can use the **credentials-support** library together with other frameworks.
 
-See section [10](#nimbus-support), [Nimbus Support](#nimbus-support), for how to transform a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) into a [JWK](https://javadoc.io/doc/com.nimbusds/nimbus-jose-jwt/latest/com/nimbusds/jose/jwk/JWK.html) and section [11](#opensaml-support), [OpenSAML Support](#opensaml-support), for how to transform a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) into an OpenSAML [X509Credential](https://shibboleth.net/api/java-opensaml/5.1.3/org/opensaml/security/x509/X509Credential.html).
+See [Section 10, Nimbus Support](#nimbus-support), for how to transform a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) into a [JWK](https://javadoc.io/doc/com.nimbusds/nimbus-jose-jwt/latest/com/nimbusds/jose/jwk/JWK.html) and [Section 11, OpenSAML Support](#opensaml-support), for how to transform a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) into an OpenSAML [X509Credential](https://shibboleth.net/api/java-opensaml/5.1.3/org/opensaml/security/x509/X509Credential.html).
 
 
 <a name="testing-and-reloading"></a>
@@ -276,14 +282,40 @@ See section [10](#nimbus-support), [Nimbus Support](#nimbus-support), for how to
 
 When using a HSM there is a possibility that the connection with the device is lost. The result is that the instantiated credential stops working. Therefore the **credentials-support** library offers ways to test and reload credentials. The credential types that support testing and reloading implements the [ReloadablePkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/ReloadablePkiCredential.java) interface.
 
-An application that makes use of credentials that may fail, and may need to be reloaded, needs to set up a monitor that periodically tests that all monitored credentials are functional, and if not, tries to reload them. See section [6](#monitoring), [Monitoring](#monitoring), below.
+An application that makes use of credentials that may fail, and may need to be reloaded, needs to set up a monitor that periodically tests that all monitored credentials are functional, and if not, tries to reload them. See [Section 6, Monitoring](#monitoring) below.
 
 For credentials implementing the [ReloadablePkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/ReloadablePkiCredential.java), the [DefaultCredentialTestFunction](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/monitoring/DefaultCredentialTestFunction.java) will be installed by default.
 
 <a name="credential-metadata"></a>
 ### 3.4. Credential Metadata
 
-Additional metadata may be associated with a credential. This is mainly useful when transforming to other formats, see section [3.2](#transformation-to-other-formats) above. The [PkiCredential.Metadata](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) interface is basically a map where metadata is stored.
+Additional metadata may be associated with a credential. This is mainly useful when transforming to other formats, see [Section 3.2](#transformation-to-other-formats), or when storing credentials in a [PkiCredentialCollection](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredentialCollection.java), see [Section 5.2](#pki-credential-collection).
+
+The [PkiCredential.Metadata](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) interface is basically a map where metadata is stored.
+
+The following metadata properties are pre-defined:
+
+- `key-id` - Property name for the key identifier metadata property.
+
+- `issued-at` - Property name for the instant when the credential was issued.
+
+- `expires-at` - Property name for the instant when the credential expires. Note that this may be different from the instant holding the `active-to` property.
+
+- `active-to` - Property that may be set to the instant at which the credential no longer should be regarded as active.
+
+- `active-from` - Property that may be set to the instant from when the credential should be regarded as active.
+
+- `usage` - Property name for the usage property. This property holds a string that may be `signing`, `encryption`, `metadata-signing` or any other application specific usage.
+
+- `key-use` - \[Nimbus specific\] - Property name for the key use metadata property. Maps to JWK's `use` property. Prefer to use the generic `usage` setting.
+
+- `key-ops` - \[Nimbus specific\] - Property name for the key operations metadata property. Maps to JWK's `ops` property. Should hold a set of [KeyOperation](https://javadoc.io/doc/com.nimbusds/nimbus-jose-jwt/latest/com/nimbusds/jose/jwk/KeyOperation.html) objects or a comma-separated list of strings.
+
+- `jose-alg`- \[Nimbus specific\] - Property name for the JOSE algorithm metadata property. Maps to JWK's `alg` property. Should hold a [Algorithm](https://javadoc.io/doc/com.nimbusds/nimbus-jose-jwt/latest/com/nimbusds/jose/Algorithm.html) or its string representation.
+
+- `entity-id` - \[OpenSAML specific\] - Property name for assigning a SAML entity ID to the credential metadata.
+
+- `encryption-methods` - \[OpenSAML specific\] - Property name for holding `md:EncryptionMethod` data. See [EncryptionMethodMetadata](https://github.com/swedenconnect/credentials-support/blob/main/opensaml/src/main/java/se/swedenconnect/security/credential/opensaml/EncryptionMethodMetadata.java).
 
 The [AbstractPkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/AbstractPkiCredential.java) class will pre-populate the `issued-at` and `expires-at` based on the validity of a credential's entity certificate.
 
@@ -333,19 +365,19 @@ final KeyStore keyStore = KeyStoreBuilder.builder(customResourceLoader)
 
 The example above illustrates how another resource loader is used. For Spring users, the [SpringConfigurationResourceLoader](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring/src/main/java/se/swedenconnect/security/credential/spring/config/SpringConfigurationResourceLoader.java) should be used.
 
-Apart from the nice builder the class [KeyStoreFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/KeyStoreFactory.java) offers methods for loading a KeyStore. This class is mainly used internally when a [StoreConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/StoreConfiguration.java) object should be turned into a KeyStore. See section [5.2](#configuration-support) below.
+Apart from the nice builder the class [KeyStoreFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/KeyStoreFactory.java) offers methods for loading a KeyStore. This class is mainly used internally when a [StoreConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/StoreConfiguration.java) object should be turned into a KeyStore. See [Section 5.3](#configuration-support) below.
 
-See also section [8.1](#spring-factories), [Spring Factories](#spring-factories).
+See also [Section 8.1, Spring Factories](#spring-factories).
 
 <a name="credential-factories"></a>
 ### 4.2. Credential Factories
 
-Creating a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) instance is easiest done using the different constructors for [BasicCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/BasicCredential.java) or [KeyStoreCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/KeyStoreCredential.java), but the **credentials-support** also offers the [PkiCredentialFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/PkiCredentialFactory.java). This class is mainly intended to be used internally when loading configuration (see section [5.2](#configuration-support)) below.
+Creating a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) instance is easiest done using the different constructors for [BasicCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/BasicCredential.java) or [KeyStoreCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/KeyStoreCredential.java), but the **credentials-support** also offers the [PkiCredentialFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/PkiCredentialFactory.java). This class is mainly intended to be used internally when loading configuration (see [Section 5.3](#configuration-support)) below.
 
-See also section [8.1](#spring-factories), [Spring Factories](#spring-factories).
+See also [Section 8.1, Spring Factories](#spring-factories).
 
-<a name="credential-bundles-and-configuration-support"></a>
-## 5. Credential Bundles and Configuration Support
+<a name="credential-bundles-collections-and-configuration-support"></a>
+## 5. Credential Bundles, Collections and Configuration Support
 
 <a name="the-bundles-concept"></a>
 ### 5.1. The Bundles Concept
@@ -416,7 +448,7 @@ The package [se.swedenconnect.security.credential.bundle](https://github.com/swe
 
 - [DefaultCredentialBundleRegistry](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/DefaultCredentialBundleRegistry.java) - Default implementation of the [CredentialBundles](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundles.java) and [CredentialBundleRegistry](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundleRegistry.java) interfaces.
 
-- [ConfigurationCredentialBundleRegistrar](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/ConfigurationCredentialBundleRegistrar.java) - An implementation of the [CredentialBundleRegistrar](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundleRegistrar.java) interface that sets up a [CredentialBundles](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundles.java) based on the a supplied [CredentialBundlesConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/CredentialBundlesConfiguration.java) (see section [5.2](#configuration-support) below).
+- [ConfigurationCredentialBundleRegistrar](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/ConfigurationCredentialBundleRegistrar.java) - An implementation of the [CredentialBundleRegistrar](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundleRegistrar.java) interface that sets up a [CredentialBundles](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundles.java) based on the a supplied [CredentialBundlesConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/CredentialBundlesConfiguration.java) (see [Section 5.3](#configuration-support) below).
 
 The below example shows how a [CredentialBundles](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundles.java) is constructed.
 
@@ -430,7 +462,7 @@ registrar.register(bundle);
 // bundle is now populated with all stores and credentials available from the configuration object.
 ```
 
-:raised_hand: When using the Spring Boot Starter, a fully populated [CredentialBundles](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundles.java) bean will be injected automatically based on the credentials configuration. See section [8.3](#the-spring-boot-starter-for-credentials-support), [The Spring Boot Starter for Credentials Support](#the-spring-boot-starter-for-credentials-support).
+:raised_hand: When using the Spring Boot Starter, a fully populated [CredentialBundles](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundles.java) bean will be injected automatically based on the credentials configuration. See [Section 8.3, The Spring Boot Starter for Credentials Support](#the-spring-boot-starter-for-credentials-support).
 
 Once a [CredentialBundles](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundles.java) object has been set up, it can be queried for registered keystores and credentials.
 
@@ -440,8 +472,41 @@ final CredentialBundles bundles = ...;
 final PkiCredential credential1 = bundles.getCredential("cred1");
 ```
 
+<a name="pki-credential-collection"></a>
+### 5.2. PkiCredentialCollection
+
+The [PkiCredentialCollection](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredentialCollection.java) class is intended for applications that need to configure several credentials, for example a SAML Identity Provider that has a signature key, an encryption key and possibly other keys.
+
+By using any of the pre-defined [Predicate](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Predicate.html)s, or by supplying a custom [Predicate](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Predicate.html), a specific credential is returned from the collection.
+
+The pre-defined [Predicate](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Predicate.html)s are:
+
+- `isRsa` - Predicate that tells whether a credential holds an RSA key.
+
+- `isEc` - Predicate that tells whether a credential holds an EC key.
+
+- `isHardwareCredential` - Predicate that tells whether a credential is a hardware credential, i.e., stored on an HSM.
+
+- `keyId(id)` - Method that returns a Predicate that checks if a credential has a given key ID.
+
+- `usage(u)` - Method that returns a Predicate that checks if a credential has a given usage.
+
+- `signatureUsage` - Predicate that checks if the credential has the `signing` usage.
+
+- `encryptionUsage` - Predicate that checks if the credential has the `encryption` usage.
+
+- `unspecifiedUsage` - Predicate that checks if the credential does not have a specified usage.
+
+- `isActive` - Predicate that checks if the credential is "active", meaning that the current time is within the `active-from` and `active-to` properties. If no such properties are set, the credential is assumed to be active.
+
+- `noLongerActive` - Predicate that checks if the credential is no longer active, meaning that the `active-to` metadata setting is before the current time.
+
+- `isNotYetActive` - Predicate that tells whether the credential is "not yet active", meaning that the `active-from` metadata setting is after the current time.
+
+- `forFutureSigning` - Predicate that tells if a credential is intended to be the signing credential in the future. It is a combination of `signatureUsage` and `isNotYetActive`.
+
 <a name="configuration-support"></a>
-### 5.2. Configuration Support
+### 5.3. Configuration Support
 
 The package [se.swedenconnect.security.credential.config](https://github.com/swedenconnect/credentials-support/tree/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config) contains interfaces for configuring [KeyStore](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/security/KeyStore.html) and [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) instances.
 
@@ -453,14 +518,14 @@ The following configuration interfaces and classes are available:
 
 | Interface | Class | Description |
 | :--- | :--- | :--- |
-| [StoreConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/StoreConfiguration.java) | [StoreConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/StoreConfigurationProperties.java) | Configuration for creating a [KeyStore](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/security/KeyStore.html). This includes configuration support for configuring a PKCS#11 [KeyStore](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/security/KeyStore.html).<br />See [5.2.1](#store-configuration-properties). |
-| [PemCredentialConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/PemCredentialConfiguration.java) | [PemCredentialConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/PemCredentialConfigurationProperties.java) | Configuration for creating a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) using PEM-encoded certificate(s)/public keys and private keys. Both references to resources and inline PEM-encodings are supported.<br />See [5.2.3](#pem-credential-configuration-properties). |
-| [StoreCredentialConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/StoreCredentialConfiguration.java) | [StoreCredentialConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/StoreCredentialConfigurationProperties.java) | Configuration for creating a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) backed by a [KeyStore](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/security/KeyStore.html).<br />See [5.2.4](#store-credential-configuration-properties). |
-| [PkiCredentialConfiguration](https://github.com/swedenconnect/credentials-support/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/PkiCredentialConfiguration.java) | [PkiCredentialConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/PkiCredentialConfigurationProperties.java) | Configuration support for configuring a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) outside of the bundles concept. One, and exactly one, of `bundle`, `jks` or `pem` must be supplied.<br />See [5.2.5](#pki-credential-configuration-properties). |
-| [CredentialBundlesConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/CredentialBundlesConfiguration.java) | [CredentialBundlesConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/CredentialBundlesConfigurationProperties.java) | Configuration for bundles of credentials and keystores.<br />If both PEM and JKS (keystore) credentials are configured, the ID:s assigned must be unique for all credentials, i.e., the same ID can not be used for PEM and JKS.<br />See [5.2.6](#credential-bundles-configuration-properties). |
+| [StoreConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/StoreConfiguration.java) | [StoreConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/StoreConfigurationProperties.java) | Configuration for creating a [KeyStore](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/security/KeyStore.html). This includes configuration support for configuring a PKCS#11 [KeyStore](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/security/KeyStore.html).<br />See [5.3.1](#store-configuration-properties). |
+| [PemCredentialConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/PemCredentialConfiguration.java) | [PemCredentialConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/PemCredentialConfigurationProperties.java) | Configuration for creating a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) using PEM-encoded certificate(s)/public keys and private keys. Both references to resources and inline PEM-encodings are supported.<br />See [5.3.3](#pem-credential-configuration-properties). |
+| [StoreCredentialConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/StoreCredentialConfiguration.java) | [StoreCredentialConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/StoreCredentialConfigurationProperties.java) | Configuration for creating a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) backed by a [KeyStore](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/security/KeyStore.html).<br />See [5.3.4](#store-credential-configuration-properties). |
+| [PkiCredentialConfiguration](https://github.com/swedenconnect/credentials-support/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/PkiCredentialConfiguration.java) | [PkiCredentialConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/PkiCredentialConfigurationProperties.java) | Configuration support for configuring a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) outside of the bundles concept. One, and exactly one, of `bundle`, `jks` or `pem` must be supplied.<br />See [5.3.5](#pki-credential-configuration-properties). |
+| [CredentialBundlesConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/CredentialBundlesConfiguration.java) | [CredentialBundlesConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/CredentialBundlesConfigurationProperties.java) | Configuration for bundles of credentials and keystores.<br />If both PEM and JKS (keystore) credentials are configured, the ID:s assigned must be unique for all credentials, i.e., the same ID can not be used for PEM and JKS.<br />See [5.3.6](#credential-bundles-configuration-properties). |
 
 <a name="store-configuration-properties"></a>
-#### 5.2.1. StoreConfigurationProperties
+#### 5.3.1. StoreConfigurationProperties
 
 Configuration for creating a [KeyStore](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/security/KeyStore.html).
 
@@ -492,7 +557,7 @@ Additional configuration of PKCS11 key stores.
 | `slot-list-index` | The slot index to use. | Integer |
 
 <a name="base-credential-configuration-properties"></a>
-#### 5.2.2. BaseCredentialConfigurationProperties
+#### 5.3.2. BaseCredentialConfigurationProperties
 
 the [AbstractBaseCredentialConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/AbstractBaseCredentialConfigurationProperties.java) class is a base class that is used by both [PemCredentialConfigurationProperties](#pem-credential-configuration-properties) and [StoreCredentialConfigurationProperties](#store-credential-configuration-properties). It defines properties that are common for all type of credentials.
 
@@ -505,7 +570,7 @@ the [AbstractBaseCredentialConfigurationProperties](https://github.com/swedencon
 | `metadata` | Additional metadata in the form of key-value:s | [Map](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html) where both keys and values are Strings |
 
 <a name="pem-credential-configuration-properties"></a>
-#### 5.2.3. PemCredentialConfigurationProperties
+#### 5.3.3. PemCredentialConfigurationProperties
 
 Configuration for creating a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) using PEM-encoded certificate(s)/public keys and private keys. Both references to resources and inline PEM-encodings are supported.
 
@@ -558,7 +623,7 @@ credential:
 ```
 
 <a name="store-credential-configuration-properties"></a>
-#### 5.2.4. StoreCredentialConfigurationProperties
+#### 5.3.4. StoreCredentialConfigurationProperties
 
 Configuration for creating a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) backed by a [KeyStore](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/security/KeyStore.html).
 
@@ -607,7 +672,7 @@ credential:
 The above example illustrates how two JKS-credentials are configured. The first one refers to an already configured keystore and the other configures the store inline. Also note how metadata is configured for the first credential.
 
 <a name="pki-credential-configuration-properties"></a>
-#### 5.2.5. PkiCredentialConfigurationProperties
+#### 5.3.5. PkiCredentialConfigurationProperties
 
 The [PkiCredentialConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/PkiCredentialConfigurationProperties.java) is not used when setting up a credential using the [Bundles Concept](#the-bundles-concept). It is aimed to be used as the primary configuration object when a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) is to be configured directly in an application.
 
@@ -622,7 +687,7 @@ The [PkiCredentialConfigurationProperties](https://github.com/swedenconnect/cred
 Study the [TestConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/softhsm/src/main/java/se/swedenconnect/security/credential/test/TestConfigurationProperties.java) and [TestConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/softhsm/src/main/java/se/swedenconnect/security/credential/test/TestConfiguration.java) in the application example for how a [PkiCredentialConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/PkiCredentialConfigurationProperties.java) class can be used in an application's configuration to inject a credential (from a bundle or directly configured).
 
 <a name="credential-bundles-configuration-properties"></a>
-#### 5.2.6. CredentialBundlesConfigurationProperties
+#### 5.3.6. CredentialBundlesConfigurationProperties
 
 The [CredentialBundlesConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/CredentialBundlesConfigurationProperties.java) class is the main configuration class for setting up a [CredentialBundles](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundles.java) bean (see [5.1](#the-bundles-concept) above).
 
@@ -631,9 +696,6 @@ The [CredentialBundlesConfigurationProperties](https://github.com/swedenconnect/
 | `keystore` | Map of key store ID:s and key store configurations. | Map where keys are Strings (ID:s) and the values are [StoreConfigurationProperties](#store-configuration-properties). |
 | `pem` | Map of credential ID:s and PEM based credential configurations. | Map where keys are Strings (ID:s) and the values are [PemCredentialConfigurationProperties](#pem-credential-configuration-properties). |
 | `jks` | Map of credential ID:s and key store based credential configurations. | Map where keys are Strings (ID:s) and the values are [StoreCredentialConfigurationProperties](#store-credential-configuration-properties). |
-| `monitoring.enabled` | Spring Boot only.<br />Whether credential monitoring is enabled. If enabled, a [CredentialMonitorBean](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/monitoring/CredentialMonitorBean.java) is set up to monitor all credentials (that are configured for monitoring). | Boolean |
-| `monitoring.test-interval` | Spring Boot only.<br />The interval between tests of credentials. The default is 10 minutes. | [Duration](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/Duration.html) |
-| `monitoring.health-endpoint-enabled` | Spring Boot only.<br />Whether a HealthEndpoint for monitoring should be set up. See section [8.3.1](#credential-monitoring-health-endpoint), [Credential Monitoring Health Endpoint](#credential-monitoring-health-endpoint). | Boolean |
 
 :exclamation: If both PEM and JKS (keystore) credentials are configured, the ID:s assigned must be unique for all credentials, i.e., the same ID can not be used for PEM and JKS.
 
@@ -712,12 +774,53 @@ credential:
           6gE2jgKrhq3F/BbqbDEk7mTfHw==
           -----END PRIVATE KEY-----
         name: "Test5"
-
-    monitoring:
-      enabled: true
-      test-interval: 10m
-      health-endpoint-enabled: true
 ```
+
+<a name="pki-credential-collection-configuration-properties"></a>
+#### 5.3.7. PkiCredentialCollectionConfigurationProperties
+
+The [PkiCredentialCollectionConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/PkiCredentialCollectionConfigurationProperties.java) class in the main configuration class for creating a [PkiCredentialCollection](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredentialCollection.java) bean (see [5.2](#pki-credential-collection) above).
+
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| `credentials` | A list of [PkiCredentialConfigurationProperties](#pki-credential-configuration-properties) objects. | List of [PkiCredentialConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/PkiCredentialConfigurationProperties.java) |
+
+**Example:**
+
+```yml
+credential:
+  collection:
+    bundles:
+      jks:
+        cred1:
+          ...
+    credentials:
+      - bundle: cred1
+      - jks:
+          name: "IdP Signing"
+          store:
+            location: file:/opt/keys/example.p12
+            password: secret
+            type: PKCS12
+          key:
+            alias: signing
+          usage: signing
+```
+
+The credentials of the collection can either refer to a bundle, or be configured "in place".
+
+<a name="spring-credential-configuration-properties"></a>
+#### 5.3.8. SpringCredentialConfigurationProperties
+
+The Spring Boot Starter, as described in [Section 8.3](#the-spring-boot-starter-for-credentials-support), defines the class [SpringCredentialConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring-boot-starter/src/main/java/se/swedenconnect/security/credential/spring/autoconfigure/SpringCredentialConfigurationProperties.html). This class is the main Spring Boot configuration properties (having the key `credential`) class for autowiring bundles, collections and monitoring.
+
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| `bundles` | Configuration properties for bundles of credentials and key stores. See [Section 5.3.6](#credential-bundles-configuration-properties) above | [CredentialBundlesConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/CredentialBundlesConfigurationProperties.java) |
+| `collection` | Configuration for setting up a [PkiCredentialCollection](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredentialCollection.java) bean. See [Section 5.3.7](#pki-credential-collection-configuration-properties) above. | [PkiCredentialCollectionConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/PkiCredentialCollectionConfigurationProperties.java) |
+| `monitoring.enabled` | Whether credential monitoring is enabled. If enabled, a [CredentialMonitorBean](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/monitoring/CredentialMonitorBean.java) is set up to monitor all credentials (that are configured for monitoring). | Boolean |
+| `monitoring.test-interval` | The interval between tests of credentials. The default is 10 minutes. | [Duration](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/Duration.html) |
+| `monitoring.health-endpoint-enabled` | Whether a HealthEndpoint for monitoring should be set up. See [Section 8.3.1, Credential Monitoring Health Endpoint](#credential-monitoring-health-endpoint). | Boolean |
 
 <a name="monitoring"></a>
 ## 6. Monitoring
@@ -842,7 +945,7 @@ By including the **credentials-support-spring** artifact, the Credential Support
 <a name="spring-factories"></a>
 ### 8.1. Spring Factories
 
-The **credentials-support-spring**, offers the [se.swedenconnect.security.credential.spring.factory.PkiCredentialFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring/src/main/java/se/swedenconnect/security/credential/spring/factory/PkiCredentialFactoryBean.java). This is a Spring-style factory that accepts different credential configuration objects (see [5.2](#configuration-support)).
+The **credentials-support-spring**, offers the [se.swedenconnect.security.credential.spring.factory.PkiCredentialFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring/src/main/java/se/swedenconnect/security/credential/spring/factory/PkiCredentialFactoryBean.java). This is a Spring-style factory that accepts different credential configuration objects (see [5.3](#configuration-support)).
 
 > The [se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring/src/main/java/se/swedenconnect/security/credential/factory/PkiCredentialFactoryBean.java) previously used in earlier versions of the **credentials-support** library has been deprecated and will be removed in future versions.
 
@@ -878,9 +981,9 @@ If the Spring Boot starter is used, these converters will be automatically insta
 
 The **credentials-support-spring-boot-starter** gives a number of useful features:
 
-- Injection of a fully populated [CredentialBundles](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundles.java) bean. This bean is populated based on the configuration described in section [5](#credential-bundles-and-configuration-support), [Credential Bundles and Configuration Support](#credential-bundles-and-configuration-support).
+- Injection of a fully populated [CredentialBundles](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/bundle/CredentialBundles.java) bean. This bean is populated based on the configuration described in [Section 5, Credential Bundles, Collections and Configuration Support](#credential-bundles-collections-and-configuration-support).
 
-- Automatic registration of the converters documented in section [8.2](#spring-converters), [Spring Converters](#spring-converters).
+- Automatic registration of the converters documented in [Section 8.2, Spring Converters](#spring-converters).
 
 - The creation and injection of a scheduled [CredentialMonitorBean](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/monitoring/CredentialMonitorBean.java) bean.
 
@@ -921,7 +1024,7 @@ If everything is looking good (no failed tests of reloads), an output like the f
 }
 ```
 
-The `credential-name` holds the configured name for the credential (see section [3.1](#credential-name)).
+The `credential-name` holds the configured name for the credential (see [Section 3.1](#credential-name)).
 
 An error may look like:
 
@@ -967,7 +1070,11 @@ The health endpoint delivers a details-map, where the `credentials` key holds a 
 
 The library **credentials-support-opensaml** contains the [OpenSamlCredential](https://github.com/swedenconnect/credentials-support/blob/main/opensaml/src/main/java/se/swedenconnect/security/credential/opensaml/OpenSamlCredential.java) class which is a class that wraps a [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) as an OpenSAML [X509Credential](https://shibboleth.net/api/java-opensaml/5.0.0/org/opensaml/security/x509/X509Credential.html). This enables us to use the configuration support of the **credentials-support** library and use our credentials in an OpenSAML context.
 
-The **credentials-support-opensaml** library also defines the [OpenSamlCredentialTransformerFunction](https://github.com/swedenconnect/credentials-support/blob/main/opensaml/src/main/java/se/swedenconnect/security/credential/opensaml/OpenSamlCredentialTransformerFunction.java), which can be supplied to the `transform` method of an existing [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) and create an [OpenSamlCredential](https://github.com/swedenconnect/credentials-support/blob/main/opensaml/src/main/java/se/swedenconnect/security/credential/opensaml/OpenSamlCredential.java) instance.  
+The **credentials-support-opensaml** library also defines the following transformers:
+
+- [OpenSamlCredentialTransformerFunction](https://github.com/swedenconnect/credentials-support/blob/main/opensaml/src/main/java/se/swedenconnect/security/credential/opensaml/OpenSamlCredentialTransformerFunction.java), which can be supplied to the `transform` method of an existing [PkiCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredential.java) and create an [OpenSamlCredential](https://github.com/swedenconnect/credentials-support/blob/main/opensaml/src/main/java/se/swedenconnect/security/credential/opensaml/OpenSamlCredential.java) instance.
+
+- [KeyDescriptorTransformerFunction](https://github.com/swedenconnect/credentials-support/blob/main/opensaml/src/main/java/se/swedenconnect/security/credential/opensaml/KeyDescriptorTransformerFunction.java), which can be used to create a SAML `md:KeyDescriptor` element to be included in SAML metadata.
 
 <a name="nimbus-support"></a>
 ## 10. Nimbus Support

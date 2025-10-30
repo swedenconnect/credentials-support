@@ -35,18 +35,16 @@ import java.util.Optional;
  * @author Martin Lindström
  */
 @ConditionalOnBean({ CredentialMonitorBean.class, TaskScheduler.class })
-@ConditionalOnProperty(
-    prefix = "credential.bundles.monitoring", name = "enabled", havingValue = "true", matchIfMissing = false)
 @AutoConfiguration
 @AutoConfigureAfter({ SpringCredentialBundlesAutoConfiguration.class })
 public class MonitorSchedulerAutoConfiguration implements SchedulingConfigurer {
 
   private final TaskScheduler taskScheduler;
   private final CredentialMonitorBean monitorBean;
-  private final SpringCredentialBundlesConfigurationProperties properties;
+  private final SpringCredentialConfigurationProperties properties;
 
   public MonitorSchedulerAutoConfiguration(final TaskScheduler taskScheduler, final CredentialMonitorBean monitorBean,
-      final SpringCredentialBundlesConfigurationProperties properties) {
+      final SpringCredentialConfigurationProperties properties) {
     this.taskScheduler = taskScheduler;
     this.monitorBean = monitorBean;
     this.properties = properties;

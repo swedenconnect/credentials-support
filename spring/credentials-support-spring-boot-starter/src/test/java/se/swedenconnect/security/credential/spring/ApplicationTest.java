@@ -32,6 +32,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import se.swedenconnect.security.credential.AbstractReloadablePkiCredential;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.PkiCredentialCollection;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 import se.swedenconnect.security.credential.bundle.CredentialBundleRegistrar;
 import se.swedenconnect.security.credential.bundle.CredentialBundleRegistry;
@@ -55,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Martin Lindström
@@ -105,6 +107,7 @@ class ApplicationTest {
     assertDoesNotThrow(() -> this.applicationContext.getBean(PropertyToPrivateKeyConverter.class));
     assertDoesNotThrow(() -> this.applicationContext.getBean(PkiCredentialReferenceConverter.class));
     assertDoesNotThrow(() -> this.applicationContext.getBean(KeyStoreReferenceConverter.class));
+    assertDoesNotThrow(() -> this.applicationContext.getBean(PkiCredentialCollection.class));
   }
 
   @DisplayName("Tests that converters are used")
@@ -148,6 +151,10 @@ class ApplicationTest {
     final PkiCredential testP11 = bundles.getCredential("testP11");
     assertEquals("TestPkcs11", testP11.getName());
 
+    final PkiCredentialCollection collection = this.applicationContext.getBean(PkiCredentialCollection.class);
+    assertTrue(collection.getCredentials().size() == 2);
+    assertNotNull(collection.getCredentials(c -> "Test2-x".equals(c.getName())));
+    assertNotNull(collection.getCredentials(c -> "Test1".equals(c.getName())));
   }
 
   @DisplayName("Tests that metadata properties are assigned")
