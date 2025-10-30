@@ -17,6 +17,7 @@ package se.swedenconnect.security.credential.opensaml;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.x509.X509Credential;
 import se.swedenconnect.security.credential.PkiCredential;
 
@@ -42,6 +43,15 @@ public class OpenSamlCredentialTransformerFunction implements Function<PkiCreden
   public X509Credential apply(@Nonnull final PkiCredential credential) {
     final OpenSamlCredential openSamlCredential = new OpenSamlCredential(credential);
     openSamlCredential.setEntityId(this.entityIdFunction.apply(credential));
+
+    final String usage = credential.getMetadata().getUsage();
+    if (PkiCredential.Metadata.USAGE_SIGNING.equals(usage)) {
+      openSamlCredential.setUsageType(UsageType.SIGNING);
+    }
+    else if (PkiCredential.Metadata.USAGE_ENCRYPTION.equals(usage)) {
+      openSamlCredential.setUsageType(UsageType.ENCRYPTION);
+    }
+
     return openSamlCredential;
   }
 

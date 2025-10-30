@@ -17,10 +17,7 @@ package se.swedenconnect.security.credential.spring.autoconfigure;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import se.swedenconnect.security.credential.config.properties.CredentialBundlesConfigurationProperties;
-
-import java.time.Duration;
 
 /**
  * Configuration properties for bundles of credentials and key stores.
@@ -28,41 +25,15 @@ import java.time.Duration;
  * @author Martin Lindström
  * @see CredentialBundlesConfigurationProperties
  */
-@ConfigurationProperties("credential.bundles")
 public class SpringCredentialBundlesConfigurationProperties extends CredentialBundlesConfigurationProperties {
 
   /**
-   * Configuration for monitoring credentials.
+   * Configuration for monitoring credentials. This property is deprecated. Use the "credential.monitoring" setting
+   * instead.
    */
   @Getter
-  private final MonitoringProperties monitoring = new MonitoringProperties();
-
-  /**
-   * For monitoring.
-   */
-  public static class MonitoringProperties {
-
-    /**
-     * Whether credential monitoring is enabled.
-     */
-    @Getter
-    @Setter
-    private boolean enabled;
-
-    /**
-     * The interval between tests of credentials. The default is 10 minutes.
-     */
-    @Getter
-    @Setter
-    private Duration testInterval = Duration.ofMinutes(10);
-
-    /**
-     * Whether a HealthEndpoint for monitoring should be set up.
-     */
-    @Getter
-    @Setter
-    private boolean healthEndpointEnabled;
-
-  }
+  @Setter
+  @Deprecated
+  private SpringCredentialConfigurationProperties.MonitoringProperties monitoring;
 
 }

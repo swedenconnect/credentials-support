@@ -18,16 +18,19 @@ package se.swedenconnect.security.credential.spring.autoconfigure;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
+import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.PkiCredentialCollection;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 import se.swedenconnect.security.credential.bundle.ConfigurationCredentialBundleRegistrar;
 import se.swedenconnect.security.credential.bundle.CredentialBundleRegistrar;
@@ -35,6 +38,7 @@ import se.swedenconnect.security.credential.bundle.CredentialBundleRegistry;
 import se.swedenconnect.security.credential.bundle.CredentialBundles;
 import se.swedenconnect.security.credential.bundle.DefaultCredentialBundleRegistry;
 import se.swedenconnect.security.credential.config.ConfigurationResourceLoader;
+import se.swedenconnect.security.credential.config.PkiCredentialConfiguration;
 import se.swedenconnect.security.credential.factory.PkiCredentialFactory;
 import se.swedenconnect.security.credential.monitoring.CredentialMonitorBean;
 import se.swedenconnect.security.credential.monitoring.DefaultCredentialMonitorBean;
@@ -42,19 +46,22 @@ import se.swedenconnect.security.credential.spring.actuator.CredentialMonitorHea
 import se.swedenconnect.security.credential.spring.config.SpringConfigurationResourceLoader;
 import se.swedenconnect.security.credential.spring.monitoring.CredentialMonitoringCallbacks;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- * Autoconfiguration class for setting up credential bundles.
+ * Autoconfiguration class for setting up credential bundles, collections and monitoring.
  *
  * @author Martin Lindström
  */
 @AutoConfiguration
-@EnableConfigurationProperties(SpringCredentialBundlesConfigurationProperties.class)
+@EnableConfigurationProperties(SpringCredentialConfigurationProperties.class)
 public class SpringCredentialBundlesAutoConfiguration {
 
   /** Configuration properties. */
-  private final SpringCredentialBundlesConfigurationProperties properties;
+  private final SpringCredentialConfigurationProperties properties;
 
   /** Spring resource loader. */
   private final ResourceLoader resourceLoader;
@@ -68,7 +75,7 @@ public class SpringCredentialBundlesAutoConfiguration {
    * @param properties configuration properties
    */
   public SpringCredentialBundlesAutoConfiguration(
-      final SpringCredentialBundlesConfigurationProperties properties, final ResourceLoader resourceLoader) {
+      final SpringCredentialConfigurationProperties properties, final ResourceLoader resourceLoader) {
     this.properties = properties;
     this.resourceLoader = resourceLoader;
   }
@@ -92,7 +99,7 @@ public class SpringCredentialBundlesAutoConfiguration {
    */
   @Bean
   CredentialBundleRegistrar credentialsBundlesRegistrar(final ConfigurationResourceLoader configurationResourceLoader) {
-    return new ConfigurationCredentialBundleRegistrar(this.properties, configurationResourceLoader);
+    return new ConfigurationCredentialBundleRegistrar(this.properties.getBundles(), configurationResourceLoader);
   }
 
   /**
@@ -126,27 +133,38 @@ public class SpringCredentialBundlesAutoConfiguration {
   }
 
   /**
+   * Creates a {@link PkiCredentialCollection} bean named {@code credential-collection}.
+   *
+   * @param pkiCredentialFactory the credential factory
+   * @return a {@link PkiCredentialCollection} bean
+   * @throws Exception for errors creating the credentials
+   */
+  @Bean("credential-collection")
+  PkiCredentialCollection pkiCredentialCollection(final PkiCredentialFactory pkiCredentialFactory) throws Exception {
+    return this.properties.getCollection().credentials().isPresent()
+        ? pkiCredentialFactory.createCredentialCollection(this.properties.getCollection())
+        : new PkiCredentialCollection(Collections.emptyList());
+  }
+
+  /**
    * Creates a {@link CredentialMonitorBean}.
    *
-   * @param credentialBundles the bundles holding all credentials
+   * @param credentialBundles the bundles holding credentials
+   * @param collection a collection that also holds credentials
    * @param eventPublisher for publishing events
    * @return a {@link DefaultCredentialMonitorBean}
    */
   @ConditionalOnMissingBean(CredentialMonitorBean.class)
-  @ConditionalOnProperty(
-      prefix = "credential.bundles.monitoring", name = "enabled", havingValue = "true", matchIfMissing = false)
+  @ConditionalOnExpression(
+      "T(java.lang.Boolean).parseBoolean('${credential.bundles.monitoring.enabled:false}') " +
+          "or T(java.lang.Boolean).parseBoolean('${credential.monitoring.enabled:false}')")
   @Bean
-  DefaultCredentialMonitorBean credentialMonitorBean(
-      final CredentialBundles credentialBundles, final ApplicationEventPublisher eventPublisher) {
+  DefaultCredentialMonitorBean credentialMonitorBean(final CredentialBundles credentialBundles,
+      @Qualifier("credential-collection") final PkiCredentialCollection collection,
+      final ApplicationEventPublisher eventPublisher) {
 
-    final List<String> ids = credentialBundles.getRegisteredCredentials();
-    final List<ReloadablePkiCredential> credentials = ids.stream()
-        .map(credentialBundles::getCredential)
-        .filter(ReloadablePkiCredential.class::isInstance)
-        .map(ReloadablePkiCredential.class::cast)
-        .filter(c -> c.getTestFunction() != null)
-        .toList();
-
+    final List<ReloadablePkiCredential> credentials = getCredentialsForMonitoring(
+        credentialBundles, collection, this.properties);
     final CredentialMonitoringCallbacks callbacks = new CredentialMonitoringCallbacks(eventPublisher);
 
     final DefaultCredentialMonitorBean monitorBean = new DefaultCredentialMonitorBean(credentials);
@@ -159,14 +177,53 @@ public class SpringCredentialBundlesAutoConfiguration {
     return monitorBean;
   }
 
+  static List<ReloadablePkiCredential> getCredentialsForMonitoring(
+      final CredentialBundles credentialBundles, final PkiCredentialCollection collection,
+      final SpringCredentialConfigurationProperties properties) {
+    final List<String> ids = credentialBundles.getRegisteredCredentials();
+    final List<ReloadablePkiCredential> credentials = ids.stream()
+        .map(credentialBundles::getCredential)
+        .filter(ReloadablePkiCredential.class::isInstance)
+        .map(ReloadablePkiCredential.class::cast)
+        .filter(c -> c.getTestFunction() != null)
+        .collect(Collectors.toList());
+
+    final List<PkiCredential> collectionCredentials = Optional.ofNullable(collection.getCredentials())
+        .orElseGet(Collections::emptyList);
+    for (int i = 0; i < properties.getCollection().getCredentials().size(); i++) {
+      final PkiCredentialConfiguration conf = properties.getCollection().getCredentials().get(i);
+      // Bundles are already handled above. We only check the other credentials from the collection.
+      if (conf.bundle().isEmpty()) {
+        if (collectionCredentials.get(i) instanceof final ReloadablePkiCredential reloadablePkiCredential) {
+          if (reloadablePkiCredential.getTestFunction() != null) {
+            credentials.add(reloadablePkiCredential);
+          }
+        }
+      }
+    }
+    return credentials;
+  }
+
   /**
    * Configuration for the optional actuator.
    */
   @Configuration
   @ConditionalOnClass(HealthIndicator.class)
-  @ConditionalOnProperty(
-      prefix = "credential.bundles.monitoring", name = "health-endpoint-enabled", havingValue = "true", matchIfMissing = false)
+  @ConditionalOnExpression(
+      "T(java.lang.Boolean).parseBoolean('${credential.bundles.monitoring.health-endpoint-enabled:false}') " +
+          "or T(java.lang.Boolean).parseBoolean('${credential.monitoring.health-endpoint-enabled:false}')")
   public static class ActuatorHealthConfiguration {
+
+    private final SpringCredentialConfigurationProperties properties;
+
+    /**
+     * Constructor.
+     *
+     * @param properties the {@link SpringCredentialConfigurationProperties}
+     */
+    public ActuatorHealthConfiguration(final SpringCredentialConfigurationProperties properties) {
+      this.properties = properties;
+    }
 
     /**
      * Creates a {@link CredentialMonitorHealthIndicator} component. If we have defined a
@@ -174,26 +231,20 @@ public class SpringCredentialBundlesAutoConfiguration {
      * "passive" mode listening for events, and if not, it sets up its own monitor.
      *
      * @param credentialBundles credential bundles (needed for active mode)
+     * @param collection a collection that also holds credentials
      * @param defaultCredentialMonitorBean optional monitor bean that may be used
      * @return a {@link CredentialMonitorHealthIndicator} bean
      */
     @ConditionalOnMissingBean(CredentialMonitorHealthIndicator.class)
     @Bean("credential-monitor")
     CredentialMonitorHealthIndicator credentialMonitor(final CredentialBundles credentialBundles,
+        @Qualifier("credential-collection") final PkiCredentialCollection collection,
         @Autowired(required = false) @Nullable final DefaultCredentialMonitorBean defaultCredentialMonitorBean) {
-      if (defaultCredentialMonitorBean != null) {
-        return new CredentialMonitorHealthIndicator();
-      }
-      else {
-        final List<String> ids = credentialBundles.getRegisteredCredentials();
-        final List<ReloadablePkiCredential> credentials = ids.stream()
-            .map(credentialBundles::getCredential)
-            .filter(ReloadablePkiCredential.class::isInstance)
-            .map(ReloadablePkiCredential.class::cast)
-            .filter(c -> c.getTestFunction() != null)
-            .toList();
-        return new CredentialMonitorHealthIndicator(credentials);
-      }
+
+      return defaultCredentialMonitorBean != null
+          ? new CredentialMonitorHealthIndicator()
+          : new CredentialMonitorHealthIndicator(getCredentialsForMonitoring(
+              credentialBundles, collection, this.properties));
     }
 
   }

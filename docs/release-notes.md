@@ -8,6 +8,25 @@
 
 ## Release Notes
 
+### 2.1.0
+
+**Date:**
+
+- Introduced the [PkiCredentialCollection](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredentialCollection.html) class that enables easier handling of several credentials.
+
+- Also, [PkiCredentialCollectionConfiguration](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/config/PkiCredentialCollectionConfiguration.html) and [PkiCredentialCollectionConfigurationProperties](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/config/properties/PkiCredentialCollectionConfigurationProperties.html)
+were added for configuration of a [PkiCredentialCollection](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredentialCollection.html). Also, the method `createCredentialCollection` was added to [PkiCredentialFactory](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/factory/PkiCredentialFactory.html).
+
+- Using Spring Boot configuration, a [PkiCredentialCollection](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredentialCollection.html) bean can now be automatically created by providing configuration under the `credential.collection.*` property.
+
+- The [PkiCredential.Metadata](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredential.Metadata.html) class has been extended with additional credential metadata properties:
+    - `usage` - For assigning a credential usage, for example "signing" or "encryption".
+    - `active-to` and `active-from` - For enabling "future signing credentials" and "previous encryption credentials".
+
+- The [OpenSamlMetadataProperties](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/opensaml/OpenSamlMetadataProperties.html) class was extended with the `encryption-methods` property that enables assigning SAML metadata encryption methods to an encryption credential.
+
+- Introduced the [KeyDescriptorTransformerFunction](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/opensaml/OpenSamlMetadataProperties.html) that may be used to create a SAML metadata `md:KeyDescriptor` element.
+
 ### 2.0.7
 
 **Date:** 2025-09-12

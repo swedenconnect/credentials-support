@@ -38,18 +38,13 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * A function that transforms a {@link PkiCredential} into an {@link JWK}.
@@ -58,26 +53,43 @@ import java.util.stream.Collectors;
  */
 public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
 
+  /** Default function for getting the key use. Note that if key ops are set, no use is returned. */
+  public static final Function<PkiCredential, KeyUse> defaultKeyUseFunction = c -> {
+    if (Optional.ofNullable(JwkMetadataProperties.getKeyOps(c.getMetadata()))
+        .filter(s -> !s.isEmpty()).isPresent()) {
+      return null;
+    }
+    return JwkMetadataProperties.getKeyUse(c.getMetadata());
+  };
+
+  /** Default function for getting the key operation property. */
+  public static final Function<PkiCredential, Set<KeyOperation>> defaultKeyOpsFunction =
+      c -> JwkMetadataProperties.getKeyOps(c.getMetadata());
+
+  /** Default algorithm for getting the JOSE algorithm. */
+  public static final Function<PkiCredential, Algorithm> defaultAlgorithmFunction =
+      c -> JwkMetadataProperties.getJoseAlgorithm(c.getMetadata());
+
   /** KeyID calculation function. */
   private Function<PkiCredential, String> keyIdFunction = new DefaultKeyIdFunction();
 
   /** Function for the key use property. */
-  private Function<PkiCredential, KeyUse> keyUseFunction = new DefaultKeyUseFunction();
+  private Function<PkiCredential, KeyUse> keyUseFunction = defaultKeyUseFunction;
 
   /** Function for the key ops property. */
-  private Function<PkiCredential, Set<KeyOperation>> keyOpsFunction = new DefaultKeyOpsFunction();
+  private Function<PkiCredential, Set<KeyOperation>> keyOpsFunction = defaultKeyOpsFunction;
 
   /** Function for the alg property. */
-  private Function<PkiCredential, Algorithm> algorithmFunction = new DefaultAlgorithmFunction();
+  private Function<PkiCredential, Algorithm> algorithmFunction = defaultAlgorithmFunction;
 
   /** For thumbprints. */
   private static final MessageDigest sha256;
 
   /** Customizers to be applied after defaults */
-  private final List<Function<RSAKey.Builder,RSAKey.Builder>> rsaCustomizers = new ArrayList<>();
+  private final List<Function<RSAKey.Builder, RSAKey.Builder>> rsaCustomizers = new ArrayList<>();
 
   /** Customizers to be applied after defaults */
-  private final List<Function<ECKey.Builder,ECKey.Builder>> ecCustomizers = new ArrayList<>();
+  private final List<Function<ECKey.Builder, ECKey.Builder>> ecCustomizers = new ArrayList<>();
 
   static {
     try {
@@ -122,7 +134,6 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
           .notBeforeTime(Optional.ofNullable(credential.getMetadata().getIssuedAt()).map(Date::from).orElse(null))
           .expirationTime(Optional.ofNullable(credential.getMetadata().getExpiresAt()).map(Date::from).orElse(null));
 
-
       this.rsaCustomizers.forEach(customizer -> customizer.apply(builder));
       jwk = builder.build();
     }
@@ -141,7 +152,7 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
         builder.privateKey(credential.getPrivateKey());
       }
 
-       builder
+      builder
           .keyStore(credential instanceof KeyStoreCredential ? ((KeyStoreCredential) credential).getKeyStore() : null)
           .keyID(this.keyIdFunction.apply(credential))
           .keyUse(this.keyUseFunction.apply(credential))
@@ -185,6 +196,7 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   /**
    * Customizes the function to remove the {@link java.security.KeyStore} of any created
    * {@link com.nimbusds.jose.jwk.JWK} which makes keys unserializable.
+   *
    * @return this instance
    */
   public JwkTransformerFunction serializable() {
@@ -250,7 +262,7 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   /**
    * Assigns the function that returns the key use property (JWK {@code use} property).
    * <p>
-   * The default implementation is {@link DefaultKeyUseFunction}.
+   * The default implementation is {@link #defaultKeyUseFunction}.
    * </p>
    *
    * @param keyUseFunction the function
@@ -263,7 +275,7 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   /**
    * Assigns the function that returns a set of {@link KeyOperation}s.
    * <p>
-   * The default implementation is {@link DefaultKeyOpsFunction}.
+   * The default implementation is {@link #defaultKeyOpsFunction}.
    * </p>
    *
    * @param keyOpsFunction the function
@@ -275,7 +287,7 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   /**
    * Assigns the function that returns the JOSE algorithm.
    * <p>
-   * The default implementation is {@link DefaultAlgorithmFunction}.
+   * The default implementation is {@link #defaultAlgorithmFunction}.
    * </p>
    *
    * @param algorithmFunction the function
@@ -326,128 +338,6 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
       catch (final Exception e) {
         return null;
       }
-    }
-  }
-
-  /**
-   * Default implementation of the function that returns the {@link KeyUse} for a credential.
-   */
-  public static final class DefaultKeyUseFunction implements Function<PkiCredential, KeyUse> {
-
-    /**
-     * Will use the {@code key-use} property from the metadata, and if not present, use the certificate to calculate the
-     * usage.
-     */
-    @Override
-    @Nullable
-    public KeyUse apply(@Nonnull final PkiCredential credential) {
-      return Optional.ofNullable(credential.getMetadata().getProperties().get(JwkMetadataProperties.KEY_USE_PROPERTY))
-          .map(ku -> {
-            if (ku instanceof final KeyUse keyUse) {
-              return keyUse;
-            }
-            else if (ku instanceof final String keyUseString) {
-              return new KeyUse(keyUseString);
-            }
-            else {
-              throw new IllegalArgumentException("Unknown key use type: " + ku.getClass().getName());
-            }
-          })
-          .orElseGet(() -> Optional.ofNullable(credential.getCertificate())
-              .map(KeyUse::from)
-              .orElse(null));
-    }
-  }
-
-  /**
-   * Default implementation of the function that returns a set of {@link KeyOperation}s for a credential.
-   */
-  public static class DefaultKeyOpsFunction implements Function<PkiCredential, Set<KeyOperation>> {
-
-    /**
-     * Returns a {@link Set} of {@link KeyOperation}s if the metadata property {@code key-ops} is assigned to any of the
-     * following:
-     * <ul>
-     * <li>A {@link Collection} of {@link KeyOperation} objects.</li>
-     * <li>A single {@link KeyOperation} object.</li>
-     * <li>An array of {@link KeyOperation} objects.</li>
-     * <li>A comma separated string with key operations (see valid string values in {@link KeyOperation}).</li>
-     * </ul>
-     */
-    @Override
-    @Nullable
-    public Set<KeyOperation> apply(@Nonnull final PkiCredential credential) {
-      final Object metadata = credential.getMetadata().getProperties().get(JwkMetadataProperties.KEY_OPS_PROPERTY);
-      if (metadata == null) {
-        return null;
-      }
-      if (metadata instanceof final KeyOperation keyOperation) {
-        return Set.of(keyOperation);
-      }
-      else if (metadata instanceof final KeyOperation[] keyOperations) {
-        return new HashSet<>(Arrays.asList(keyOperations));
-      }
-      else if (metadata instanceof final String keyOpString) {
-        try {
-          return KeyOperation.parse(Arrays.asList(keyOpString.split(",")));
-        }
-        catch (final ParseException e) {
-          throw new IllegalArgumentException("Invalid key operation set: " + keyOpString, e);
-        }
-      }
-      else if (metadata instanceof final Collection<?> keyOperations) {
-        return keyOperations.stream()
-            .map(k -> {
-              if (k instanceof final KeyOperation keyOperation) {
-                return keyOperation;
-              }
-              else if (k instanceof final String keyOpString) {
-                try {
-                  return KeyOperation.parse(List.of(keyOpString)).stream().findFirst().orElse(null);
-                }
-                catch (final ParseException e) {
-                  throw new IllegalArgumentException("Invalid key operation: " + keyOpString, e);
-                }
-              }
-              else {
-                throw new IllegalArgumentException("Invalid type of key operation: " + k.getClass().getName());
-              }
-            })
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
-      }
-      else {
-        throw new IllegalArgumentException("Invalid key operation type: " + metadata.getClass().getName());
-      }
-    }
-  }
-
-  /**
-   * Default implementation of the function that returns the JOSE algorithm ({@code alg} property).
-   */
-  public static final class DefaultAlgorithmFunction implements Function<PkiCredential, Algorithm> {
-
-    /**
-     * If the credential metadata property {@code jose-alg} is assigned to an {@link Algorithm} or string, an
-     * {@link Algorithm} is returned, otherwise {@code null}.
-     */
-    @Override
-    @Nullable
-    public Algorithm apply(@Nonnull final PkiCredential credential) {
-      return Optional.ofNullable(credential.getMetadata().getProperties()
-              .get(JwkMetadataProperties.JOSE_ALGORITHM_PROPERTY))
-          .map(a -> {
-            if (a instanceof final Algorithm algorithm) {
-              return algorithm;
-            }
-            else if (a instanceof final String algorithmString) {
-              return new Algorithm(algorithmString);
-            }
-            else {
-              throw new IllegalArgumentException("Unknown type for the JOSE algorithm: " + a.getClass().getName());
-            }
-          })
-          .orElse(null);
     }
   }
 

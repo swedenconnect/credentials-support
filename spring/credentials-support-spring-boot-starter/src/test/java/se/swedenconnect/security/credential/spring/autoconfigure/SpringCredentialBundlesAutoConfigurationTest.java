@@ -81,8 +81,8 @@ class SpringCredentialBundlesAutoConfigurationTest {
             "credential.bundles.jks.test1.key.alias=test1",
             "credential.bundles.jks.test1.key.key-password=secret",
             "credential.bundles.jks.test1.monitor=true",
-            "credential.bundles.monitoring.enabled=true",
-            "credential.bundles.monitoring.health-endpoint-enabled=true")
+            "credential.monitoring.enabled=true",
+            "credential.monitoring.health-endpoint-enabled=true")
         .run(context -> Assertions.assertThat(context).hasSingleBean(CredentialMonitorHealthIndicator.class));
   }
 }

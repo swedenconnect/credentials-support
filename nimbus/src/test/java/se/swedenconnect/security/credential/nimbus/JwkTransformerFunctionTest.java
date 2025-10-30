@@ -186,14 +186,29 @@ class JwkTransformerFunctionTest {
     assertNotNull(jwk);
     assertEquals(KeyUse.SIGNATURE, jwk.getKeyUse());
 
-    credential.getMetadata().getProperties().put(JwkMetadataProperties.KEY_USE_PROPERTY, KeyUse.ENCRYPTION.getValue());
+    JwkMetadataProperties.setKeyUse(credential.getMetadata(), KeyUse.ENCRYPTION);
     final JWK jwk2 = function.apply(credential);
     assertNotNull(jwk2);
     assertEquals(KeyUse.ENCRYPTION, jwk2.getKeyUse());
 
-    credential.getMetadata().getProperties().put(JwkMetadataProperties.KEY_USE_PROPERTY, 10);
-    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> function.apply(credential));
-    assertEquals("Unknown key use type: java.lang.Integer", ex.getMessage());
+    JwkMetadataProperties.setKeyUse(credential.getMetadata(), KeyUse.SIGNATURE.identifier());
+    final JWK jwk3 = function.apply(credential);
+    assertNotNull(jwk3);
+    assertEquals(KeyUse.SIGNATURE, jwk3.getKeyUse());
+
+    // Also picks up usage ...
+    JwkMetadataProperties.setKeyUse(credential.getMetadata(), (String) null);
+    credential.getMetadata().setUsage(PkiCredential.Metadata.USAGE_SIGNING);
+    final JWK jwk4 = function.apply(credential);
+    assertNotNull(jwk4);
+    assertEquals(KeyUse.SIGNATURE, jwk4.getKeyUse());
+
+    // If key-ops are set, no key-use is produced
+    JwkMetadataProperties.setKeyUse(credential.getMetadata(), KeyUse.ENCRYPTION);
+    JwkMetadataProperties.setKeyOps(credential.getMetadata(), Set.of(KeyOperation.DECRYPT, KeyOperation.ENCRYPT));
+    final JWK jwk5 = function.apply(credential);
+    assertNotNull(jwk5);
+    assertNull(jwk5.getKeyUse());
   }
 
   @Test
@@ -224,15 +239,15 @@ class JwkTransformerFunctionTest {
     assertTrue(keyOps.contains(KeyOperation.SIGN));
     assertEquals(3, keyOps.size());
 
-    credential.getMetadata().getProperties().put(JwkMetadataProperties.KEY_OPS_PROPERTY, KeyOperation.DECRYPT);
+    JwkMetadataProperties.setKeyOps(credential.getMetadata(), List.of(KeyOperation.DECRYPT.identifier()));
     jwk = function.apply(credential);
     assertNotNull(jwk);
     keyOps = jwk.getKeyOperations();
     assertTrue(keyOps.contains(KeyOperation.DECRYPT));
     assertEquals(1, keyOps.size());
 
-    credential.getMetadata().getProperties().put(JwkMetadataProperties.KEY_OPS_PROPERTY,
-        new KeyOperation[] { KeyOperation.DECRYPT, KeyOperation.ENCRYPT, KeyOperation.SIGN });
+    JwkMetadataProperties.setKeyOps(credential.getMetadata(),
+        Set.of(KeyOperation.DECRYPT, KeyOperation.ENCRYPT, KeyOperation.SIGN));
     jwk = function.apply(credential);
     assertNotNull(jwk);
     keyOps = jwk.getKeyOperations();
@@ -241,40 +256,10 @@ class JwkTransformerFunctionTest {
     assertTrue(keyOps.contains(KeyOperation.SIGN));
     assertEquals(3, keyOps.size());
 
-    credential.getMetadata().getProperties().put(JwkMetadataProperties.KEY_OPS_PROPERTY,
-        List.of(KeyOperation.DECRYPT.identifier(), KeyOperation.ENCRYPT.identifier(), KeyOperation.SIGN.identifier()));
-    jwk = function.apply(credential);
-    assertNotNull(jwk);
-    keyOps = jwk.getKeyOperations();
-    assertTrue(keyOps.contains(KeyOperation.DECRYPT));
-    assertTrue(keyOps.contains(KeyOperation.ENCRYPT));
-    assertTrue(keyOps.contains(KeyOperation.SIGN));
-    assertEquals(3, keyOps.size());
-
-    credential.getMetadata().getProperties().put(JwkMetadataProperties.KEY_OPS_PROPERTY, "decrypt,encrypt,sign");
-    jwk = function.apply(credential);
-    assertNotNull(jwk);
-    keyOps = jwk.getKeyOperations();
-    assertTrue(keyOps.contains(KeyOperation.DECRYPT));
-    assertTrue(keyOps.contains(KeyOperation.ENCRYPT));
-    assertTrue(keyOps.contains(KeyOperation.SIGN));
-    assertEquals(3, keyOps.size());
-
-    credential.getMetadata().getProperties().put(JwkMetadataProperties.KEY_OPS_PROPERTY, "decrypt,encrypt,unknown");
-    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> function.apply(credential));
-    assertEquals("Invalid key operation set: decrypt,encrypt,unknown", ex.getMessage());
-
-    credential.getMetadata().getProperties().put(JwkMetadataProperties.KEY_OPS_PROPERTY, List.of(1, 2, 3));
-    ex = assertThrows(IllegalArgumentException.class, () -> function.apply(credential));
-    assertEquals("Invalid type of key operation: java.lang.Integer", ex.getMessage());
-
-    credential.getMetadata().getProperties().put(JwkMetadataProperties.KEY_OPS_PROPERTY, List.of("sign", "unknown"));
-    ex = assertThrows(IllegalArgumentException.class, () -> function.apply(credential));
-    assertEquals("Invalid key operation: unknown", ex.getMessage());
-
-    credential.getMetadata().getProperties().put(JwkMetadataProperties.KEY_OPS_PROPERTY, 78);
-    ex = assertThrows(IllegalArgumentException.class, () -> function.apply(credential));
-    assertEquals("Invalid key operation type: java.lang.Integer", ex.getMessage());
+    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        () -> JwkMetadataProperties.setKeyOps(credential.getMetadata(),
+            List.of(KeyOperation.DECRYPT.identifier(), "unknown")));
+    assertEquals("Invalid key operation(s): [decrypt, unknown]", ex.getMessage());
   }
 
   @Test
@@ -304,15 +289,10 @@ class JwkTransformerFunctionTest {
     assertNotNull(jwk);
     assertEquals(JWSAlgorithm.RS256, jwk.getAlgorithm());
 
-    credential.getMetadata().getProperties()
-        .put(JwkMetadataProperties.JOSE_ALGORITHM_PROPERTY, JWSAlgorithm.RS256.getName());
+    JwkMetadataProperties.setJoseAlgorithm(credential.getMetadata(), JWSAlgorithm.RS256.getName());
     jwk = function.apply(credential);
     assertNotNull(jwk);
     assertEquals(JWSAlgorithm.RS256, jwk.getAlgorithm());
-
-    credential.getMetadata().getProperties().put(JwkMetadataProperties.JOSE_ALGORITHM_PROPERTY, 17);
-    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> function.apply(credential));
-    assertEquals("Unknown type for the JOSE algorithm: java.lang.Integer", ex.getMessage());
   }
 
   @Test

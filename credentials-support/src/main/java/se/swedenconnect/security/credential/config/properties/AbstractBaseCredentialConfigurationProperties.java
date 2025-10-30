@@ -61,6 +61,27 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
   private Instant expiresAt;
 
   /**
+   * Active-from metadata property.
+   */
+  @Setter
+  @Getter
+  private Instant activeFrom;
+
+  /**
+   * Active-to metadata property.
+   */
+  @Setter
+  @Getter
+  private Instant activeTo;
+
+  /**
+   * The usage metadata property.
+   */
+  @Setter
+  @Getter
+  private String usage;
+
+  /**
    * Credential metadata properties.
    */
   @Getter
@@ -92,6 +113,24 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
 
   /** {@inheritDoc} */
   @Override
+  public Optional<Instant> activeFrom() {
+    return Optional.ofNullable(this.getActiveFrom());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Optional<Instant> activeTo() {
+    return Optional.ofNullable(this.getActiveTo());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Optional<String> usage() {
+    return Optional.ofNullable(this.getUsage());
+  }
+
+  /** {@inheritDoc} */
+  @Override
   public Optional<Map<String, String>> metadata() {
     return Optional.of(this.getMetadata());
   }
@@ -108,13 +147,15 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
     final AbstractBaseCredentialConfigurationProperties that = (AbstractBaseCredentialConfigurationProperties) o;
     return Objects.equals(this.name, that.name) && Objects.equals(this.keyId, that.keyId)
         && Objects.equals(this.issuedAt, that.issuedAt) && Objects.equals(this.expiresAt, that.expiresAt)
-        && Objects.equals(this.metadata, that.metadata);
+        && Objects.equals(this.activeFrom, that.activeFrom) && Objects.equals(this.activeTo, that.activeTo)
+        && Objects.equals(this.usage, that.usage) && Objects.equals(this.metadata, that.metadata);
   }
 
   /** {@inheritDoc} */
   @Override
   public int hashCode() {
-    return Objects.hash(this.name, this.keyId, this.issuedAt, this.expiresAt, this.metadata);
+    return Objects.hash(this.name, this.keyId, this.issuedAt, this.expiresAt, this.activeFrom, this.activeTo,
+        this.usage, this.metadata);
   }
 
 }

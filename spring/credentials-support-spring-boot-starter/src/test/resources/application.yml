@@ -108,10 +108,22 @@ credential:
           -----END PRIVATE KEY-----
         name: "Test5"
 
-    monitoring:
-      enabled: true
-      test-interval: 10m
-      health-endpoint-enabled: true
+  collection:
+    credentials:
+      - bundle: test1
+      - jks:
+          name: "Test2-x"
+          store:
+            location: classpath:test-2.p12
+            password: secret
+            type: PKCS12
+          key:
+            alias: test2
+
+  monitoring:
+    enabled: true
+    test-interval: 10m
+    health-endpoint-enabled: true
 
 test:
   object1:
