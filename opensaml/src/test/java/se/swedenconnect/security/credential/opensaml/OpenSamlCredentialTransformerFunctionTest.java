@@ -18,6 +18,7 @@ package se.swedenconnect.security.credential.opensaml;
 import org.cryptacular.io.ClassPathResource;
 import org.cryptacular.io.Resource;
 import org.junit.jupiter.api.Test;
+import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.x509.X509Credential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -60,7 +61,7 @@ class OpenSamlCredentialTransformerFunctionTest {
     final PkiCredential cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());
     cred.getMetadata().getProperties().put(OpenSamlMetadataProperties.ENTITY_ID_PROPERTY, "https://www.example.com");
 
-    final Function<PkiCredential, X509Credential> transformer = new OpenSamlCredentialTransformerFunction();
+    final Function<PkiCredential, X509Credential> transformer = OpenSamlCredentialTransformerFunction.function();
     final X509Credential samlCredential = transformer.apply(cred);
     assertNotNull(samlCredential);
     assertEquals("https://www.example.com", samlCredential.getEntityId());
@@ -70,10 +71,30 @@ class OpenSamlCredentialTransformerFunctionTest {
   public void testTransformCredentialWithCustomEntityId() throws Exception {
     final PkiCredential cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());
 
-    final OpenSamlCredentialTransformerFunction transformer = new OpenSamlCredentialTransformerFunction();
-    transformer.setEntityIdFunction(c -> "https://www.acme.com");
+    final OpenSamlCredentialTransformerFunction transformer = OpenSamlCredentialTransformerFunction.function()
+        .withEntityIdFunction(c -> "https://www.acme.com");
     final X509Credential samlCredential = transformer.apply(cred);
     assertNotNull(samlCredential);
     assertEquals("https://www.acme.com", samlCredential.getEntityId());
+  }
+
+  @Test
+  public void testTransformUsage() throws Exception {
+    final PkiCredential cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());
+    cred.getMetadata().setUsage(PkiCredential.Metadata.USAGE_SIGNING);
+    final OpenSamlCredentialTransformerFunction transformer = OpenSamlCredentialTransformerFunction.function();
+    final X509Credential samlCredential = transformer.apply(cred);
+    assertNotNull(samlCredential);
+    assertEquals(UsageType.SIGNING, samlCredential.getUsageType());
+  }
+
+  @Test
+  public void testTransformWithCustomUsage() throws Exception {
+    final PkiCredential cred = new KeyStoreCredential(this.keyStore, "test", "secret".toCharArray());
+    final OpenSamlCredentialTransformerFunction transformer = OpenSamlCredentialTransformerFunction.function()
+        .withUsageTypeFunction(c -> UsageType.SIGNING);
+    final X509Credential samlCredential = transformer.apply(cred);
+    assertNotNull(samlCredential);
+    assertEquals(UsageType.SIGNING, samlCredential.getUsageType());
   }
 }

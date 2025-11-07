@@ -97,7 +97,7 @@ class JwkTransformerFunctionTest {
   void testRsaKeyPair() {
     final PkiCredential credential = new BasicCredential(this.rsaCert.getPublicKey(), this.rsaPrivateKey);
 
-    final JwkTransformerFunction function = new JwkTransformerFunction();
+    final JwkTransformerFunction function = JwkTransformerFunction.function();
     final JWK jwk = function.apply(credential);
     assertNotNull(jwk);
 
@@ -169,8 +169,7 @@ class JwkTransformerFunctionTest {
   void testKeyIdCustomFunction() throws Exception {
     final PkiCredential credential = new KeyStoreCredential(this.keyStore, ALIAS_RSA, PW);
 
-    final JwkTransformerFunction function = new JwkTransformerFunction();
-    function.setKeyIdFunction(c -> "12345");
+    final JwkTransformerFunction function = JwkTransformerFunction.function().withKeyIdFunction(c -> "12345");
     final JWK jwk = function.apply(credential);
     assertNotNull(jwk);
     assertEquals("12345", jwk.getKeyID());
@@ -216,8 +215,8 @@ class JwkTransformerFunctionTest {
     final PkiCredential credential = new KeyStoreCredential(this.keyStore, ALIAS_RSA, PW);
     credential.getMetadata().getProperties().put(JwkMetadataProperties.KEY_USE_PROPERTY, KeyUse.SIGNATURE);
 
-    final JwkTransformerFunction function = new JwkTransformerFunction();
-    function.setKeyUseFunction(keyUse -> KeyUse.ENCRYPTION);
+    final JwkTransformerFunction function = JwkTransformerFunction.function()
+        .withKeyUseFunction(keyUse -> KeyUse.ENCRYPTION);
     final JWK jwk = function.apply(credential);
     assertNotNull(jwk);
     assertEquals(KeyUse.ENCRYPTION, jwk.getKeyUse());
@@ -266,8 +265,8 @@ class JwkTransformerFunctionTest {
   void testKeyOperationsCustomFunction() throws Exception {
     final PkiCredential credential = new KeyStoreCredential(this.keyStore, ALIAS_RSA, PW);
 
-    final JwkTransformerFunction function = new JwkTransformerFunction();
-    function.setKeyOpsFunction(keyOps -> Set.of(KeyOperation.DECRYPT, KeyOperation.ENCRYPT, KeyOperation.SIGN));
+    final JwkTransformerFunction function = JwkTransformerFunction.function()
+        .withKeyOpsFunction(keyOps -> Set.of(KeyOperation.DECRYPT, KeyOperation.ENCRYPT, KeyOperation.SIGN));
 
     final JWK jwk = function.apply(credential);
     assertNotNull(jwk);
@@ -299,8 +298,8 @@ class JwkTransformerFunctionTest {
   void testAlgorithmCustomFunction() throws Exception {
     final PkiCredential credential = new KeyStoreCredential(this.keyStore, ALIAS_RSA, PW);
 
-    final JwkTransformerFunction function = new JwkTransformerFunction();
-    function.setAlgorithmFunction(c -> JWSAlgorithm.RS256);
+    final JwkTransformerFunction function = JwkTransformerFunction.function()
+        .withAlgorithmFunction(c -> JWSAlgorithm.RS256);
 
     final JWK jwk = function.apply(credential);
     assertNotNull(jwk);
@@ -310,7 +309,7 @@ class JwkTransformerFunctionTest {
   @Test
   void testRSAKeyIsSerializable() throws KeyStoreException {
 
-    //Tries to serialize jwk, throws UncheckedIOException if jwk is not serializable
+    // Tries to serialize jwk, throws UncheckedIOException if jwk is not serializable
     final BiConsumer<JwkTransformerFunction, PkiCredential> jwkSerialize = (function, pki) -> {
       try {
         new ObjectOutputStream(new ByteArrayOutputStream()).writeObject(function.apply(pki));

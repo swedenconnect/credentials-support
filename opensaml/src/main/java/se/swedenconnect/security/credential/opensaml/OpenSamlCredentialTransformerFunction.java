@@ -16,7 +16,6 @@
 package se.swedenconnect.security.credential.opensaml;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import org.opensaml.security.credential.UsageType;
 import org.opensaml.security.x509.X509Credential;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -32,8 +31,40 @@ import java.util.function.Function;
  */
 public class OpenSamlCredentialTransformerFunction implements Function<PkiCredential, X509Credential> {
 
+  /** Accesses the {@code entity-id} metadata property from the supplied credential. */
+  public static final Function<PkiCredential, String> defaultEntityIdFunction = c ->
+      OpenSamlMetadataProperties.getEntityId(c.getMetadata());
+
+  /** Determines the credential usage. */
+  public static final Function<PkiCredential, UsageType> defaultUsageTypeFunction = c ->
+      Optional.ofNullable(c.getMetadata().getUsage())
+          .map(u -> PkiCredential.Metadata.USAGE_SIGNING.equalsIgnoreCase(u)
+              ? UsageType.SIGNING
+              : PkiCredential.Metadata.USAGE_ENCRYPTION.equalsIgnoreCase(u)
+                  ? UsageType.ENCRYPTION : null)
+          .orElse(null);
+
   /** Function for getting the entityID to assign to the OpenSAML credential. */
-  private Function<PkiCredential, String> entityIdFunction = new DefaultEntityIdFunction();
+  private Function<PkiCredential, String> entityIdFunction = defaultEntityIdFunction;
+
+  /** Function for getting the usage for the credential. */
+  private Function<PkiCredential, UsageType> usageTypeFunction = defaultUsageTypeFunction;
+
+  /**
+   * Constructor.
+   */
+  public OpenSamlCredentialTransformerFunction() {
+  }
+
+  /**
+   * Creates a {@link OpenSamlCredentialTransformerFunction}.
+   *
+   * @return a a {@link OpenSamlCredentialTransformerFunction}
+   */
+  @Nonnull
+  public static OpenSamlCredentialTransformerFunction function() {
+    return new OpenSamlCredentialTransformerFunction();
+  }
 
   /**
    * Transforms the supplied {@link PkiCredential} into an {@link X509Credential}.
@@ -42,47 +73,58 @@ public class OpenSamlCredentialTransformerFunction implements Function<PkiCreden
   @Nonnull
   public X509Credential apply(@Nonnull final PkiCredential credential) {
     final OpenSamlCredential openSamlCredential = new OpenSamlCredential(credential);
-    openSamlCredential.setEntityId(this.entityIdFunction.apply(credential));
-
-    final String usage = credential.getMetadata().getUsage();
-    if (PkiCredential.Metadata.USAGE_SIGNING.equals(usage)) {
-      openSamlCredential.setUsageType(UsageType.SIGNING);
-    }
-    else if (PkiCredential.Metadata.USAGE_ENCRYPTION.equals(usage)) {
-      openSamlCredential.setUsageType(UsageType.ENCRYPTION);
-    }
+    Optional.ofNullable(this.entityIdFunction.apply(credential))
+        .ifPresent(openSamlCredential::setEntityId);
+    Optional.ofNullable(this.usageTypeFunction.apply(credential))
+        .ifPresent(openSamlCredential::setUsageType);
 
     return openSamlCredential;
   }
 
   /**
-   * Assigns the function that gets the SAML entity ID to add to the OpenSAML credential.
+   * Customizes this function with a function that gets the entityID for the credential.
    * <p>
-   * The default implementation is the {@link DefaultEntityIdFunction}.
+   * The default implementation is the {@link #defaultEntityIdFunction}.
    * </p>
    *
    * @param entityIdFunction the function
+   * @return this instance
    */
+  @Nonnull
+  public OpenSamlCredentialTransformerFunction withEntityIdFunction(
+      @Nonnull final Function<PkiCredential, String> entityIdFunction) {
+    this.entityIdFunction = Objects.requireNonNull(entityIdFunction, "entityIdFunction must not be null");
+    return this;
+  }
+
+  /**
+   * Assigns the function that gets the SAML entity ID to add to the OpenSAML credential.
+   * <p>
+   * The default implementation is the {@link #defaultEntityIdFunction}.
+   * </p>
+   *
+   * @param entityIdFunction the function
+   * @deprecated use {@link #withEntityIdFunction(Function)} instead
+   */
+  @Deprecated(since = "2.1.0", forRemoval = true)
   public void setEntityIdFunction(@Nonnull final Function<PkiCredential, String> entityIdFunction) {
     this.entityIdFunction = Objects.requireNonNull(entityIdFunction, "entityIdFunction must not be null");
   }
 
   /**
-   * Default implementation of the function getting the SAML entityID to assign.
+   * Customizes this function with a function the gets the credential usage type.
+   * <p>
+   * The default implementation is the {@link #defaultUsageTypeFunction}.
+   * </p>
+   *
+   * @param usageTypeFunction the function
+   * @return this instance
    */
-  public static final class DefaultEntityIdFunction implements Function<PkiCredential, String> {
-
-    /**
-     * Accesses the {@code entity-id} metadata property from the supplied credential.
-     */
-    @Override
-    @Nullable
-    public String apply(@Nonnull final PkiCredential credential) {
-      return Optional.ofNullable(
-              credential.getMetadata().getProperties().get(OpenSamlMetadataProperties.ENTITY_ID_PROPERTY))
-          .map(String.class::cast)
-          .orElse(null);
-    }
+  @Nonnull
+  public OpenSamlCredentialTransformerFunction withUsageTypeFunction(
+      @Nonnull final Function<PkiCredential, UsageType> usageTypeFunction) {
+    this.usageTypeFunction = Objects.requireNonNull(usageTypeFunction, "usageTypeFunction must not be null");
+    return this;
   }
 
 }
