@@ -107,6 +107,7 @@ public class KeyDescriptorTransformerFunction implements Function<PkiCredential,
    * {@link org.opensaml.saml.saml2.metadata.EntityDescriptor EntityDescriptor}.
    * <p>
    * Unless changed with the withXXX method, the method will process the following parameters:
+   * </p>
    * <ul>
    * <li>
    * The credential name - The name, as given by {@link PkiCredential#getName()} will be used as value for the
@@ -124,7 +125,6 @@ public class KeyDescriptorTransformerFunction implements Function<PkiCredential,
    * {@link #defaultEncryptionMethodsFunction}.
    * </li>
    * </ul>
-   * </p>
    *
    * @param credential the credential
    * @return a {@link KeyDescriptor}

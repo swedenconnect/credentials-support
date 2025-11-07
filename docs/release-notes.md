@@ -10,7 +10,7 @@
 
 ### 2.1.0
 
-**Date:**
+**Date:** 2025-11-07
 
 - Introduced the [PkiCredentialCollection](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredentialCollection.html) class that enables easier handling of several credentials.
 
