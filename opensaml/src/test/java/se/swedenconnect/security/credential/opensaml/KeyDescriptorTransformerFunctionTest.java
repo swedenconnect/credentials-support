@@ -61,6 +61,23 @@ public class KeyDescriptorTransformerFunctionTest {
   }
 
   @Test
+  void testKeyName() throws Exception {
+    final PkiCredential credential = new KeyStoreCredential(this.keyStore, "rsa", "secret".toCharArray());
+
+    final KeyDescriptor keyDescriptor = credential.transform(KeyDescriptorTransformerFunction.function());
+    Assertions.assertEquals(credential.getName(), keyDescriptor.getKeyInfo().getKeyNames().get(0).getValue());
+  }
+
+  @Test
+  void testKeyNameCustom() throws Exception {
+    final PkiCredential credential = new KeyStoreCredential(this.keyStore, "rsa", "secret".toCharArray());
+
+    final KeyDescriptor keyDescriptor = credential.transform(KeyDescriptorTransformerFunction.function()
+        .withKeyNameFunction(c -> "Signing"));
+    Assertions.assertEquals("Signing", keyDescriptor.getKeyInfo().getKeyNames().get(0).getValue());
+  }
+
+  @Test
   void testUnspecifiedUsageWithCertificate() throws Exception {
     final PkiCredential credential = new KeyStoreCredential(this.keyStore, "rsa", "secret".toCharArray());
     final KeyDescriptorTransformerFunction func = new KeyDescriptorTransformerFunction();
@@ -92,6 +109,18 @@ public class KeyDescriptorTransformerFunctionTest {
   }
 
   @Test
+  void testUsageCustom() throws Exception {
+    final PkiCredential credential = new KeyStoreCredential(this.keyStore, "rsa", "secret".toCharArray());
+
+    final KeyDescriptorTransformerFunction func = KeyDescriptorTransformerFunction.function()
+        .withUsageTypeFunction(c -> UsageType.SIGNING);
+    final KeyDescriptor keyDescriptor = func.apply(credential);
+
+    Assertions.assertNotNull(keyDescriptor);
+    Assertions.assertEquals(UsageType.SIGNING, keyDescriptor.getUse());
+  }
+
+  @Test
   void testEncryptionMethods() throws Exception {
     final PkiCredential credential = new KeyStoreCredential(this.keyStore, "rsa", "secret".toCharArray());
     credential.getMetadata().setUsage(PkiCredential.Metadata.USAGE_ENCRYPTION);
@@ -111,6 +140,38 @@ public class KeyDescriptorTransformerFunctionTest {
 
     Assertions.assertTrue(keyDescriptor.getEncryptionMethods().stream()
         .anyMatch(m -> "http://www.w3.org/2009/xmlenc11#aes256-gcm".equals(m.getAlgorithm())));
+
+    final EncryptionMethod em = keyDescriptor.getEncryptionMethods().stream()
+        .filter(m -> "http://www.w3.org/2009/xmlenc11#rsa-oaep".equals(m.getAlgorithm()))
+        .findFirst()
+        .orElse(null);
+    Assertions.assertNotNull(em);
+    final DigestMethod dm =
+        em.getUnknownXMLObjects().stream()
+            .filter(DigestMethod.class::isInstance)
+            .map(DigestMethod.class::cast)
+            .filter(a -> "http://www.w3.org/2000/09/xmldsig#sha1".equals(a.getAlgorithm()))
+            .findFirst()
+            .orElse(null);
+    Assertions.assertNotNull(dm);
+  }
+
+  @Test
+  void testEncryptionMethodsCustom() throws Exception {
+    final PkiCredential credential = new KeyStoreCredential(this.keyStore, "rsa", "secret".toCharArray());
+    credential.getMetadata().setUsage(PkiCredential.Metadata.USAGE_ENCRYPTION);
+
+    final KeyDescriptorTransformerFunction func = KeyDescriptorTransformerFunction.function()
+        .withEncryptionMethodsFunction((c, u) -> {
+          return List.of(EncryptionMethodMetadata.parseMethod(
+                  "http://www.w3.org/2009/xmlenc11#rsa-oaep;digest-method=http://www.w3.org/2000/09/xmldsig#sha1")
+              .toEncryptionMethod());
+        });
+
+    final KeyDescriptor keyDescriptor = func.apply(credential);
+
+    Assertions.assertNotNull(keyDescriptor);
+    Assertions.assertEquals(UsageType.ENCRYPTION, keyDescriptor.getUse());
 
     final EncryptionMethod em = keyDescriptor.getEncryptionMethods().stream()
         .filter(m -> "http://www.w3.org/2009/xmlenc11#rsa-oaep".equals(m.getAlgorithm()))

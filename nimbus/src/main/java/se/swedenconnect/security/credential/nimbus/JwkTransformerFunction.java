@@ -101,11 +101,27 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   }
 
   /**
+   * Constructor.
+   */
+  public JwkTransformerFunction() {
+  }
+
+  /**
+   * Creates a {@link JwkTransformerFunction} with default settings.
+   *
+   * @return a {@link JwkTransformerFunction}
+   */
+  @Nonnull
+  public static JwkTransformerFunction function() {
+    return new JwkTransformerFunction();
+  }
+
+  /**
    * Transforms the supplied {@link PkiCredential} into an {@link JWK}.
    */
   @Override
-  public JWK apply(
-      @Nonnull final PkiCredential credential) {
+  @Nonnull
+  public JWK apply(@Nonnull final PkiCredential credential) {
 
     final JWK jwk;
 
@@ -176,19 +192,25 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   }
 
   /**
+   * Customizes this function with a generic function that may modify RSA keys.
+   *
    * @param customizer to apply after default properties is set for key
    * @return this instance
    */
-  public JwkTransformerFunction withRsaCustomizer(final Function<RSAKey.Builder, RSAKey.Builder> customizer) {
+  @Nonnull
+  public JwkTransformerFunction withRsaCustomizer(@Nonnull final Function<RSAKey.Builder, RSAKey.Builder> customizer) {
     this.rsaCustomizers.add(customizer);
     return this;
   }
 
   /**
+   * Customizes this function with a generic function that may modify EC keys.
+   *
    * @param customizer to apply after default properties is set for key
    * @return this instance
    */
-  public JwkTransformerFunction withEcKeyCustomizer(final Function<ECKey.Builder, ECKey.Builder> customizer) {
+  @Nonnull
+  public JwkTransformerFunction withEcKeyCustomizer(@Nonnull final Function<ECKey.Builder, ECKey.Builder> customizer) {
     this.ecCustomizers.add(customizer);
     return this;
   }
@@ -199,52 +221,24 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
    *
    * @return this instance
    */
+  @Nonnull
   public JwkTransformerFunction serializable() {
-    return this.withRsaCustomizer(b -> b.keyStore(null))
-        .withEcKeyCustomizer(b -> b.keyStore(null));
+    return this.withRsaCustomizer(b -> b.keyStore(null)).withEcKeyCustomizer(b -> b.keyStore(null));
   }
 
   /**
-   * Converts the certificate chain of a credential into a list of encodings.
+   * Customizes the function with a custom function for calculating the key ID property (JWK {@code kid} property).
+   * <p>
+   * The default implementation is {@link DefaultKeyIdFunction}.
+   * </p>
    *
-   * @param chain the chain (possibly empty)
-   * @return a list of Base64 encodings, or {@code null} if no certificates are available
+   * @param keyIdFunction the function
+   * @return this instance
    */
-  @Nullable
-  private static List<Base64> toX5c(@Nonnull final List<X509Certificate> chain) {
-    if (chain.isEmpty()) {
-      return null;
-    }
-    return chain.stream()
-        .map(c -> {
-          try {
-            return Base64.encode(c.getEncoded());
-          }
-          catch (final CertificateEncodingException e) {
-            throw new RuntimeException(e);
-          }
-        })
-        .toList();
-  }
-
-  /**
-   * Calculates the X.509 certificate SHA-256 thumbprint.
-   *
-   * @param certificate the certificate (may be {@code null})
-   * @return the SHA-256 thumbprint, or {@code null}
-   */
-  @Nullable
-  private static Base64URL toX5t256(@Nonnull final X509Certificate certificate) {
-    return Optional.ofNullable(certificate)
-        .map(c -> {
-          try {
-            return Base64URL.encode(sha256.digest(certificate.getEncoded()));
-          }
-          catch (final CertificateEncodingException e) {
-            throw new RuntimeException(e);
-          }
-        })
-        .orElse(null);
+  @Nonnull
+  public JwkTransformerFunction withKeyIdFunction(@Nonnull final Function<PkiCredential, String> keyIdFunction) {
+    this.keyIdFunction = Objects.requireNonNull(keyIdFunction, "keyIdFunction must not be null");
+    return this;
   }
 
   /**
@@ -254,9 +248,26 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
    * </p>
    *
    * @param keyIdFunction the function
+   * @deprecated use {@link #withKeyIdFunction(Function)} instead
    */
+  @Deprecated(since = "2.1.0", forRemoval = true)
   public void setKeyIdFunction(@Nonnull final Function<PkiCredential, String> keyIdFunction) {
-    this.keyIdFunction = Objects.requireNonNull(keyIdFunction, "keyIdFunction must not be null");
+    this.withKeyIdFunction(keyIdFunction);
+  }
+
+  /**
+   * Customizes this function with a function for getting the key use property (JWK {@code use} property).
+   * <p>
+   * The default implementation is {@link #defaultKeyUseFunction}.
+   * </p>
+   *
+   * @param keyUseFunction the function
+   * @return this instance
+   */
+  @Nonnull
+  public JwkTransformerFunction withKeyUseFunction(@Nonnull final Function<PkiCredential, KeyUse> keyUseFunction) {
+    this.keyUseFunction = Objects.requireNonNull(keyUseFunction, "keyUseFunction must not be null");
+    return this;
   }
 
   /**
@@ -266,10 +277,27 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
    * </p>
    *
    * @param keyUseFunction the function
+   * @deprecated use {@link #withKeyUseFunction(Function)} instead
    */
+  @Deprecated(since = "2.1.0", forRemoval = true)
   public void setKeyUseFunction(
       @Nonnull final Function<PkiCredential, KeyUse> keyUseFunction) {
     this.keyUseFunction = Objects.requireNonNull(keyUseFunction, "keyUseFunction must not be null");
+  }
+
+  /**
+   * Customizes this function with a function that returns a set of {@link KeyOperation}s.
+   * <p>
+   * The default implementation is {@link #defaultKeyOpsFunction}.
+   * </p>
+   *
+   * @param keyOpsFunction the function
+   * @return this instance
+   */
+  public JwkTransformerFunction withKeyOpsFunction(
+      @Nonnull final Function<PkiCredential, Set<KeyOperation>> keyOpsFunction) {
+    this.keyOpsFunction = Objects.requireNonNull(keyOpsFunction, "keyOpsFunction must not be null");
+    return this;
   }
 
   /**
@@ -279,9 +307,27 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
    * </p>
    *
    * @param keyOpsFunction the function
+   * @deprecated use {@link #withKeyOpsFunction(Function)} instead
    */
+  @Deprecated(since = "2.1.0", forRemoval = true)
   public void setKeyOpsFunction(@Nonnull final Function<PkiCredential, Set<KeyOperation>> keyOpsFunction) {
-    this.keyOpsFunction = Objects.requireNonNull(keyOpsFunction, "keyOpsFunction must not be null");
+    this.withKeyOpsFunction(keyOpsFunction);
+  }
+
+  /**
+   * Customizes this function with a function that returns the JOSE algorithm.
+   * <p>
+   * The default implementation is {@link #defaultAlgorithmFunction}.
+   * </p>
+   *
+   * @param algorithmFunction the function
+   * @return this instance
+   */
+  @Nonnull
+  public JwkTransformerFunction withAlgorithmFunction(
+      @Nonnull final Function<PkiCredential, Algorithm> algorithmFunction) {
+    this.algorithmFunction = Objects.requireNonNull(algorithmFunction, "algorithmFunction must not be null");
+    return this;
   }
 
   /**
@@ -291,9 +337,11 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
    * </p>
    *
    * @param algorithmFunction the function
+   * @deprecated use {@link #withAlgorithmFunction(Function)} instead
    */
+  @Deprecated(since = "2.1.0", forRemoval = true)
   public void setAlgorithmFunction(@Nonnull final Function<PkiCredential, Algorithm> algorithmFunction) {
-    this.algorithmFunction = Objects.requireNonNull(algorithmFunction, "algorithmFunction must not be null");
+    this.withAlgorithmFunction(algorithmFunction);
   }
 
   /**
@@ -339,6 +387,49 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
         return null;
       }
     }
+  }
+
+  /**
+   * Converts the certificate chain of a credential into a list of encodings.
+   *
+   * @param chain the chain (possibly empty)
+   * @return a list of Base64 encodings, or {@code null} if no certificates are available
+   */
+  @Nullable
+  private static List<Base64> toX5c(@Nonnull final List<X509Certificate> chain) {
+    if (chain.isEmpty()) {
+      return null;
+    }
+    return chain.stream()
+        .map(c -> {
+          try {
+            return Base64.encode(c.getEncoded());
+          }
+          catch (final CertificateEncodingException e) {
+            throw new RuntimeException(e);
+          }
+        })
+        .toList();
+  }
+
+  /**
+   * Calculates the X.509 certificate SHA-256 thumbprint.
+   *
+   * @param certificate the certificate (may be {@code null})
+   * @return the SHA-256 thumbprint, or {@code null}
+   */
+  @Nullable
+  private static Base64URL toX5t256(@Nonnull final X509Certificate certificate) {
+    return Optional.ofNullable(certificate)
+        .map(c -> {
+          try {
+            return Base64URL.encode(sha256.digest(certificate.getEncoded()));
+          }
+          catch (final CertificateEncodingException e) {
+            throw new RuntimeException(e);
+          }
+        })
+        .orElse(null);
   }
 
 }
