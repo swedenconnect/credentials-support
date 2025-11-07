@@ -33,16 +33,16 @@ import java.util.stream.Stream;
  * When represented in properties files as the value for the {@link OpenSamlMetadataProperties#ENCRYPTION_METHODS}
  * metadata property, a string format according to the following format is used:
  * </p>
- * <pre>
- * <encryption-algorithm-uri>[;key-size=<size-in-bits>][;oaep-params=<base64-params>][;digest-method=<digest-method-uri>]
+ * <pre>{@code
+ * <encryption-algorithm-uri>[;key-size=<size-in-bits>][;oaep-params=<base64-params>][;digest-method=<digest-method-uri>]}
  * </pre>
  * <p>Example:</p>
- * <pre>
+ * <pre>{@code
  * <md:EncryptionMethod xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
  *   <ds:DigestMethod xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
  * </md:EncryptionMethod>
  *
- * "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p;digest-method=http://www.w3.org/2000/09/xmldsig#sha1"
+ * "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p;digest-method=http://www.w3.org/2000/09/xmldsig#sha1"}
  * </pre>
  *
  * @author Martin Lindström
