@@ -57,6 +57,9 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /** The keystore. */
   private final KeyStore keyStore;
 
+  /** The cached private key. */
+  private PrivateKey privateKey;
+
   /** The alias to the entry holding the key pair. */
   private final String alias;
 
@@ -118,11 +121,13 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
       final DefaultCredentialTestFunction testFunction = new DefaultCredentialTestFunction();
       testFunction.setProvider(Optional.ofNullable(this.keyStore.getProvider()).map(Provider::getName).orElse(null));
       this.setTestFunction(testFunction);
+
+      this.reloader = new Pkcs11KeyStoreReloader(this.keyPassword);
     }
 
     // Assert that everything looks good by loading the key and certificate ...
     //
-    this.getPrivateKey();
+    this.loadPrivateKey();
     if (certificateChain == null) {
       this.certificates = this.loadCertificateChain();
     }
@@ -151,12 +156,15 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public synchronized PrivateKey getPrivateKey() {
+  public PrivateKey getPrivateKey() {
+    return this.privateKey;
+  }
+
+  private synchronized void loadPrivateKey() throws SecurityException {
     try {
       final Key key = this.keyStore.getKey(this.alias, this.keyPassword);
-
-      if (key instanceof final PrivateKey privateKey) {
-        return privateKey;
+      if (key instanceof final PrivateKey pk) {
+        this.privateKey = pk;
       }
       else {
         throw new SecurityException("No private key entry found for '%s'".formatted(this.alias));
@@ -221,14 +229,11 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   }
 
   /**
-   * Returns the key store reloader and creates a default one if it has not been installed (for hardware tokens).
+   * Returns the key store reloader.
    *
    * @return the {@link KeyStoreReloader}
    */
-  private synchronized KeyStoreReloader getReloader() {
-    if (this.reloader == null && this.isHardwareCredential()) {
-      this.reloader = new Pkcs11KeyStoreReloader(this.keyPassword);
-    }
+  private KeyStoreReloader getReloader() {
     return this.reloader;
   }
 
@@ -237,7 +242,7 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
    * will reload the private key.
    */
   @Override
-  public synchronized void reload() throws Exception {
+  public void reload() throws Exception {
     //
     // Note: We log only on trace level since the monitor driving the reloading is responsible
     // for the actual logging.
@@ -248,10 +253,10 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
     if (keyStoreReloader != null) {
       try {
         log.trace("Reloading private key of credential '{}' ...", this.getName());
-        keyStoreReloader.reload(this.keyStore);
-
-        // Now, access the private key ...
-        this.getPrivateKey();
+        synchronized (this) {
+          keyStoreReloader.reload(this.keyStore);
+          this.loadPrivateKey();
+        }
 
         log.trace("Reloading private key of credential '{}' successful", this.getName());
       }
