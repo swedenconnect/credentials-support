@@ -8,6 +8,14 @@
 
 ## Release Notes
 
+### 2.1.1
+
+**Date:** 
+
+- Access to the private key for `KeyStoreCredential` objects were synchornized,
+which led to long waits when many threads tried to access the same key. This has
+been changed and no synchronization is needed anymore.
+
 ### 2.1.0
 
 **Date:** 2025-11-07
