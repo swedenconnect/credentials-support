@@ -129,7 +129,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
   /** {@inheritDoc} */
   @Nonnull
   @Override
-  public synchronized PrivateKey getPrivateKey() {
+  public PrivateKey getPrivateKey() {
     return this.privateKey;
   }
 
@@ -152,7 +152,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
    * Is called if the connection to the device has been lost. In those cases we reload the private key.
    */
   @Override
-  public synchronized void reload() throws Exception {
+  public void reload() throws Exception {
 
     // Note: We log only on trace level since the monitor driving the reloading is responsible
     // for the actual logging.
@@ -160,6 +160,7 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
     final Provider provider = this.configuration.getProvider();
     log.trace("Reloading private key under alias '{}' for provider '{}' ...", this.alias, provider.getName());
     this.privateKey = this.privateKeyAccessor.get(provider, this.alias, this.pin);
+
     log.trace("Private key under alias '{}' for provider '{}' was reloaded", this.alias, provider.getName());
   }
 

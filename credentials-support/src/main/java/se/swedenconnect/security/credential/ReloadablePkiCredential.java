@@ -20,7 +20,7 @@ import jakarta.annotation.Nullable;
 import java.util.function.Supplier;
 
 /**
- * An interface for credentials are "testable" and "reloadable".
+ * An interface for credentials that are "testable" and "reloadable".
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)

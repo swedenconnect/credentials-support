@@ -93,46 +93,49 @@ public abstract class AbstractSunPkcs11Configuration implements Pkcs11Configurat
   /** {@inheritDoc} */
   @Override
   @Nonnull
-  public synchronized Provider getProvider() throws Pkcs11ConfigurationException {
+  public Provider getProvider() throws Pkcs11ConfigurationException {
     if (this.provider == null) {
-      Provider p = Security.getProvider(this.getBaseProviderName());
-      if (p == null) {
-        throw new Pkcs11ConfigurationException("Failed to get the '%s' provider".formatted(this.getBaseProviderName()));
-      }
-      if (p.isConfigured()) {
-        if (this.getConfigurationData() != null) {
+      synchronized (this) {
+        Provider p = Security.getProvider(this.getBaseProviderName());
+        if (p == null) {
           throw new Pkcs11ConfigurationException(
-              "Provider is statically configured - No configuratiom data must be supplied");
+              "Failed to get the '%s' provider".formatted(this.getBaseProviderName()));
         }
-        this.provider = p;
-      }
-      else if (this.getConfigurationData() == null) {
-        throw new Pkcs11ConfigurationException("Missing configuration data");
-      }
-      else {
-        // Configure it, and get a new provider instance ...
-        //
-        final String configData = this.getConfigurationData();
-        log.debug("Configuring '{}' provider with the following configuration data: {}",
-            this.getBaseProviderName(), configData);
-        try {
-          p = p.configure(configData);
+        if (p.isConfigured()) {
+          if (this.getConfigurationData() != null) {
+            throw new Pkcs11ConfigurationException(
+                "Provider is statically configured - No configuratiom data must be supplied");
+          }
+          this.provider = p;
         }
-        catch (final InvalidParameterException e) {
-          throw new Pkcs11ConfigurationException(
-              "Failed to configure '%s' provider".formatted(this.getBaseProviderName()), e);
-        }
-        log.debug("{} provider successfully configured - Provider name: {}", this.getBaseProviderName(), p.getName());
-
-        // Install it ...
-        //
-        final int result = Security.addProvider(p);
-        if (result == -1) {
-          log.info("A provider with the name '{}' has already been installed, re-using it ...", p.getName());
-          this.provider = Security.getProvider(p.getName());
+        else if (this.getConfigurationData() == null) {
+          throw new Pkcs11ConfigurationException("Missing configuration data");
         }
         else {
-          this.provider = p;
+          // Configure it, and get a new provider instance ...
+          //
+          final String configData = this.getConfigurationData();
+          log.debug("Configuring '{}' provider with the following configuration data: {}",
+              this.getBaseProviderName(), configData);
+          try {
+            p = p.configure(configData);
+          }
+          catch (final InvalidParameterException e) {
+            throw new Pkcs11ConfigurationException(
+                "Failed to configure '%s' provider".formatted(this.getBaseProviderName()), e);
+          }
+          log.debug("{} provider successfully configured - Provider name: {}", this.getBaseProviderName(), p.getName());
+
+          // Install it ...
+          //
+          final int result = Security.addProvider(p);
+          if (result == -1) {
+            log.info("A provider with the name '{}' has already been installed, re-using it ...", p.getName());
+            this.provider = Security.getProvider(p.getName());
+          }
+          else {
+            this.provider = p;
+          }
         }
       }
     }
