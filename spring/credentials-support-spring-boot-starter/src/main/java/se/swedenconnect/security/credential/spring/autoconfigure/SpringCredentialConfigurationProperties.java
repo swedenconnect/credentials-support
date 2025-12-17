@@ -67,8 +67,8 @@ public class SpringCredentialConfigurationProperties implements InitializingBean
       this.collection.setCredentials(Collections.emptyList());
     }
     if (this.monitoring == null) {
-      log.warn("credential.bundles.monitoring.* is assigned - use credential.monitoring.* instead");
       if (this.bundles.getMonitoring() != null) {
+        log.warn("credential.bundles.monitoring.* is assigned - use credential.monitoring.* instead");
         this.monitoring = this.bundles.getMonitoring();
         this.bundles.setMonitoring(null);
       }

@@ -13,30 +13,56 @@
 **Date:**
 
 - Access to the private key for `KeyStoreCredential` objects were synchornized,
-which led to long waits when many threads tried to access the same key. This has
-been changed and no synchronization is needed anymore.
+  which led to long waits when many threads tried to access the same key. This has
+  been changed and no synchronization is needed anymore.
+  See <https://github.com/swedenconnect/credentials-support/issues/102>.
 
 - The `DefaultCredentialTestFunction` was updated to test decryption for
-credentials that are marked as encryption/decryption credentials.
+  credentials that are marked as encryption/decryption credentials.
+  See <https://github.com/swedenconnect/credentials-support/issues/101>.
+
+- The log warning `credential.bundles.monitoring.* is assigned - use credential.monitoring.* instead` was issued even
+  though no monitoring was configured. This has been fixed.
+  See <https://github.com/swedenconnect/credentials-support/issues/98>.
 
 ### 2.1.0
 
 **Date:** 2025-11-07
 
-- Introduced the [PkiCredentialCollection](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredentialCollection.html) class that enables easier handling of several credentials.
+- Introduced
+  the [PkiCredentialCollection](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredentialCollection.html)
+  class that enables easier handling of several credentials.
 
-- Also, [PkiCredentialCollectionConfiguration](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/config/PkiCredentialCollectionConfiguration.html) and [PkiCredentialCollectionConfigurationProperties](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/config/properties/PkiCredentialCollectionConfigurationProperties.html)
-were added for configuration of a [PkiCredentialCollection](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredentialCollection.html). Also, the method `createCredentialCollection` was added to [PkiCredentialFactory](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/factory/PkiCredentialFactory.html).
+-
 
-- Using Spring Boot configuration, a [PkiCredentialCollection](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredentialCollection.html) bean can now be automatically created by providing configuration under the `credential.collection.*` property.
+Also, [PkiCredentialCollectionConfiguration](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/config/PkiCredentialCollectionConfiguration.html)
+and [PkiCredentialCollectionConfigurationProperties](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/config/properties/PkiCredentialCollectionConfigurationProperties.html)
+were added for configuration of
+a [PkiCredentialCollection](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredentialCollection.html).
+Also, the method `createCredentialCollection` was added
+to [PkiCredentialFactory](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/factory/PkiCredentialFactory.html).
 
-- The [PkiCredential.Metadata](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredential.Metadata.html) class has been extended with additional credential metadata properties:
-    - `usage` - For assigning a credential usage, for example "signing" or "encryption".
-    - `active-to` and `active-from` - For enabling "future signing credentials" and "previous encryption credentials".
+- Using Spring Boot configuration,
+  a [PkiCredentialCollection](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredentialCollection.html)
+  bean can now be automatically created by providing configuration under the `credential.collection.*` property.
 
-- The [OpenSamlMetadataProperties](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/opensaml/OpenSamlMetadataProperties.html) class was extended with the `encryption-methods` property that enables assigning SAML metadata encryption methods to an encryption credential.
+-
 
-- Introduced the [KeyDescriptorTransformerFunction](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/opensaml/OpenSamlMetadataProperties.html) that may be used to create a SAML metadata `md:KeyDescriptor` element.
+The [PkiCredential.Metadata](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/PkiCredential.Metadata.html)
+class has been extended with additional credential metadata properties:
+
+- `usage` - For assigning a credential usage, for example "signing" or "encryption".
+- `active-to` and `active-from` - For enabling "future signing credentials" and "previous encryption credentials".
+
+-
+
+The [OpenSamlMetadataProperties](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/opensaml/OpenSamlMetadataProperties.html)
+class was extended with the `encryption-methods` property that enables assigning SAML metadata encryption methods to an
+encryption credential.
+
+- Introduced
+  the [KeyDescriptorTransformerFunction](https://docs.swedenconnect.se/credentials-support/apidoc/se/swedenconnect/security/credential/opensaml/OpenSamlMetadataProperties.html)
+  that may be used to create a SAML metadata `md:KeyDescriptor` element.
 
 ### 2.0.7
 
