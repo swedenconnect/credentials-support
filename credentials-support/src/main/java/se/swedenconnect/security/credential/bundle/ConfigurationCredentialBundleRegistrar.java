@@ -181,7 +181,7 @@ public class ConfigurationCredentialBundleRegistrar implements CredentialBundleR
     /**
      * Constructor.
      *
-     * @param location the location to the file based key store
+     * @param location the location to the file-based key store
      * @param password the key store password
      * @param resourceLoader for loading resources
      */

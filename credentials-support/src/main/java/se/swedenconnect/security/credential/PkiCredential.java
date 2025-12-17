@@ -158,7 +158,7 @@ public interface PkiCredential {
     String USAGE_ENCRYPTION = "encryption";
 
     /**
-     * Usage value indicating thet a credential is used for metadata signing, for example SAML metadata, or OIDC entity
+     * Usage value indicating that a credential is used for metadata signing, for example SAML metadata, or OIDC entity
      * statements.
      */
     String USAGE_METADATA_SIGNING = "metadata-signing";

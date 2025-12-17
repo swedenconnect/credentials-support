@@ -18,6 +18,7 @@ package se.swedenconnect.security.credential;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PreDestroy;
+import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
@@ -57,9 +58,6 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /** The keystore. */
   private final KeyStore keyStore;
 
-  /** The cached private key. */
-  private PrivateKey privateKey;
-
   /** The alias to the entry holding the key pair. */
   private final String alias;
 
@@ -74,6 +72,9 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
 
   /** For reloading the keystore. */
   private KeyStoreReloader reloader;
+
+  /** The cached private key. */
+  private PrivateKey privateKey;
 
   /**
    * Constructor taking a {@link KeyStore} and the key entry alias and a key password.
@@ -271,8 +272,8 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   }
 
   /** {@inheritDoc} */
-  @Nonnull
   @Override
+  @Nonnull
   protected String getDefaultName() {
     if (KeyStoreFactory.PKCS11_KEYSTORE_TYPE.equalsIgnoreCase(this.keyStore.getType())) {
       return "%s-%s-%s".formatted(this.keyStore.getProvider().getName(), this.alias,

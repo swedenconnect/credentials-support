@@ -10,11 +10,14 @@
 
 ### 2.1.1
 
-**Date:** 
+**Date:**
 
 - Access to the private key for `KeyStoreCredential` objects were synchornized,
 which led to long waits when many threads tried to access the same key. This has
 been changed and no synchronization is needed anymore.
+
+- The `DefaultCredentialTestFunction` was updated to test decryption for
+credentials that are marked as encryption/decryption credentials.
 
 ### 2.1.0
 

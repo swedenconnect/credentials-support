@@ -15,8 +15,10 @@
  */
 package se.swedenconnect.security.credential;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
+import java.security.Provider;
 import java.util.function.Supplier;
 
 /**
@@ -28,7 +30,7 @@ import java.util.function.Supplier;
 public interface ReloadablePkiCredential extends PkiCredential {
 
   /**
-   * A credential may be monitored to ensure that it is functional. This can be useful when using for example
+   * A credential may be monitored to ensure that it is functional. This can be useful when using, for example,
    * credentials residing on hardware devices where the connection may be lost. If a credential implementation should be
    * "testable" it must return a function for testing itself. This function ({@link Supplier}) returns an
    * {@link Exception} for test failures and {@code null} for success.

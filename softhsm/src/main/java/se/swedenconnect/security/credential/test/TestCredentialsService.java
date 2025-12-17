@@ -19,10 +19,12 @@ import org.opensaml.security.x509.X509Credential;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
 import javax.crypto.Cipher;
 import java.security.Signature;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 /**
  * Service responsible for testing the credentials.
@@ -52,9 +54,12 @@ public class TestCredentialsService {
   }
 
   public String test() {
-    return this.testSignAndVerify(this.rsa1) + System.lineSeparator() + System.lineSeparator()
-        + this.testSignAndVerify(this.rsa1b) + System.lineSeparator() + System.lineSeparator()
-        + this.testSignAndVerify(this.rsa2) + System.lineSeparator();
+    return this.testSignAndVerify(this.rsa1) + System.lineSeparator()
+        + this.testTestFunctions(this.rsa1) + System.lineSeparator() + System.lineSeparator()
+        + this.testSignAndVerify(this.rsa1b) + System.lineSeparator()
+        + this.testTestFunctions(this.rsa1b) + System.lineSeparator() + System.lineSeparator()
+        + this.testSignAndVerify(this.rsa2) + System.lineSeparator()
+        + this.testTestFunctions(this.rsa2);
   }
 
   private String testSignAndVerify(final PkiCredential credential) {
@@ -103,6 +108,30 @@ public class TestCredentialsService {
           .append(System.lineSeparator());
     }
 
+    return sb.toString();
+  }
+
+  private String testTestFunctions(final PkiCredential credential) {
+    final StringBuilder sb = new StringBuilder();
+    sb.append("Testing test function for credential ").append(credential.getName()).append(System.lineSeparator());
+    if (credential instanceof final ReloadablePkiCredential reloadableCredential) {
+      final Supplier<Exception> testFunction = reloadableCredential.getTestFunction();
+      if (testFunction != null) {
+        final Exception ex = testFunction.get();
+        if (ex == null) {
+          sb.append("    Test function executed and was successful").append(System.lineSeparator());
+        }
+        else {
+          sb.append("    Test function executed and failed: ").append(ex.getMessage()).append(System.lineSeparator());
+        }
+      }
+      else {
+        sb.append("    No test function installed ...").append(System.lineSeparator());
+      }
+    }
+    else {
+      sb.append("    No test function installed ...").append(System.lineSeparator());
+    }
     return sb.toString();
   }
 

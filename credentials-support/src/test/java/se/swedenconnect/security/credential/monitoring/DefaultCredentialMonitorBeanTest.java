@@ -18,13 +18,16 @@ package se.swedenconnect.security.credential.monitoring;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
