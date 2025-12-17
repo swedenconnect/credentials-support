@@ -23,7 +23,9 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
@@ -153,6 +155,7 @@ public class ManagedPkiCredential extends AbstractReloadablePkiCredential {
 
   /**
    * Will
+   *
    * @param name the name
    */
   @Override

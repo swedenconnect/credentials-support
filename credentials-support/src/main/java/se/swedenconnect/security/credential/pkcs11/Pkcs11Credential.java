@@ -18,6 +18,7 @@ package se.swedenconnect.security.credential.pkcs11;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PreDestroy;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.security.credential.AbstractReloadablePkiCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;

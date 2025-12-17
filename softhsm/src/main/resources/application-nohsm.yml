@@ -13,6 +13,7 @@ credential:
         name: RSA1
         certificates: classpath:credentials/rsa1.crt
         private-key: classpath:credentials/rsa1.key
+        usage: signing
     jks:
       rsa1b:
         name: RSA1B
@@ -20,6 +21,7 @@ credential:
         key:
           alias: rsa1b
           key-password: secret
+        usage: encryption
 
 test:
   # Example of how we use references to inject key stores and credentials in a configuration properties object.

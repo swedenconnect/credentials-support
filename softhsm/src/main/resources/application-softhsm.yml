@@ -19,6 +19,7 @@ credential:
           alias: rsa1
           key-password: 1234
           certificates: classpath:credentials/rsa1.crt
+        usage: signing
       rsa1b:
         name: RSA1B
         store-reference: p11-store
@@ -26,6 +27,7 @@ credential:
         key:
           alias: rsa1b
           key-password: 1234
+        usage: encryption
 
 test:
   # Example of how we use references to inject key stores and credentials in a configuration properties object.
