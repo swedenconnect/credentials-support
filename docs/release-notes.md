@@ -10,7 +10,7 @@
 
 ### 2.1.1
 
-**Date:**
+**Date:** 2025-12-18
 
 - Access to the private key for `KeyStoreCredential` objects were synchornized,
   which led to long waits when many threads tried to access the same key. This has
