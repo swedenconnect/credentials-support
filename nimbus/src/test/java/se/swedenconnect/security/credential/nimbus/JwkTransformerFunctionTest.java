@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -84,7 +85,25 @@ class JwkTransformerFunctionTest {
 
     assertEquals(KeyType.RSA, jwk.getKeyType());
     assertTrue(jwk.isPrivate());
-    assertNotNull(jwk.getKeyStore());
+    assertNull(jwk.getKeyStore()); // Keystore is not used (anymore)
+    assertEquals(jwk.computeThumbprint().toString(), jwk.getKeyID());
+    assertNotNull(jwk.getX509CertChain());
+    assertNotNull(jwk.getX509CertSHA256Thumbprint());
+    assertNotNull(jwk.getIssueTime());
+    assertNotNull(jwk.getNotBeforeTime());
+    assertNotNull(jwk.getExpirationTime());
+  }
+
+  @Test
+  void testRsaPublic() throws Exception {
+    final PkiCredential credential = new KeyStoreCredential(this.keyStore, ALIAS_RSA, PW);
+
+    final JwkTransformerFunction function = JwkTransformerFunction.publicJwkFunction();
+    final JWK jwk = function.apply(credential);
+    assertNotNull(jwk);
+
+    assertEquals(KeyType.RSA, jwk.getKeyType());
+    assertFalse(jwk.isPrivate());
     assertEquals(jwk.computeThumbprint().toString(), jwk.getKeyID());
     assertNotNull(jwk.getX509CertChain());
     assertNotNull(jwk.getX509CertSHA256Thumbprint());
@@ -122,7 +141,20 @@ class JwkTransformerFunctionTest {
 
     assertEquals(KeyType.EC, jwk.getKeyType());
     assertTrue(jwk.isPrivate());
-    assertNotNull(jwk.getKeyStore());
+    assertNull(jwk.getKeyStore()); // Keystore is not used (anymore)
+    assertEquals(jwk.computeThumbprint().toString(), jwk.getKeyID());
+  }
+
+  void testEcPublic() throws Exception {
+    final PkiCredential credential = new KeyStoreCredential(this.keyStore, ALIAS_EC, PW);
+
+    final JwkTransformerFunction function = new JwkTransformerFunction().publicJwk();
+    final JWK jwk = function.apply(credential);
+    assertNotNull(jwk);
+
+    assertEquals(KeyType.EC, jwk.getKeyType());
+    assertFalse(jwk.isPrivate());
+    assertNull(jwk.getKeyStore()); // Keystore is not used (anymore)
     assertEquals(jwk.computeThumbprint().toString(), jwk.getKeyID());
   }
 
@@ -326,14 +358,14 @@ class JwkTransformerFunctionTest {
 
     final JwkTransformerFunction defaultFunction = new JwkTransformerFunction();
 
-    Assertions.assertThrows(UncheckedIOException.class, () -> jwkSerialize.accept(defaultFunction, credential));
+    Assertions.assertDoesNotThrow(() -> jwkSerialize.accept(defaultFunction, credential));
     Assertions.assertDoesNotThrow(() -> jwkSerialize.accept(customizedFunction, credential));
   }
 
   @Test
   void testEcKeyIsSerializable() throws KeyStoreException {
 
-    //Tries to serialize jwk, throws UncheckedIOException if jwk is not serializable
+    // Tries to serialize jwk, throws UncheckedIOException if jwk is not serializable
     final BiConsumer<JwkTransformerFunction, PkiCredential> jwkSerialize = (function, pki) -> {
       try {
         new ObjectOutputStream(new ByteArrayOutputStream()).writeObject(function.apply(pki));
@@ -350,7 +382,7 @@ class JwkTransformerFunctionTest {
 
     final JwkTransformerFunction defaultFunction = new JwkTransformerFunction();
 
-    Assertions.assertThrows(UncheckedIOException.class, () -> jwkSerialize.accept(defaultFunction, credential));
+    Assertions.assertDoesNotThrow(() -> jwkSerialize.accept(defaultFunction, credential));
     Assertions.assertDoesNotThrow(() -> jwkSerialize.accept(customizedFunction, credential));
   }
 
