@@ -25,6 +25,12 @@
   though no monitoring was configured. This has been fixed.
   See <https://github.com/swedenconnect/credentials-support/issues/98>.
 
+- The `JwkTransformerFunction.serializable()` method has been deprecated, since the JWK will be serializable in all
+  cases, i.e., no `KeyStore` is included in the JWK anymore.
+
+- The customizer method `JwkTransformerFunction.publicJwk()` was introduces so that the `JwkTransformerFunction` can be
+  used to create a JWK to be included in metadata.
+
 ### 2.1.0
 
 **Date:** 2025-11-07

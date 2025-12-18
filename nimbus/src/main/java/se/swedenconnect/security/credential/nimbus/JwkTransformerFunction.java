@@ -26,7 +26,6 @@ import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.Base64URL;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 
 import java.security.MessageDigest;
@@ -91,6 +90,9 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   /** Customizers to be applied after defaults */
   private final List<Function<ECKey.Builder, ECKey.Builder>> ecCustomizers = new ArrayList<>();
 
+  /** Whether the created JWK should be a "public" JWK, i.e., not containing private key material. */
+  private boolean publicJwk = false;
+
   static {
     try {
       sha256 = MessageDigest.getInstance("SHA-256");
@@ -117,6 +119,16 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   }
 
   /**
+   * Creates a {@link JwkTransformerFunction} that creates a "public" JWK, i.e., not containing private key material.
+   *
+   * @return a {@link JwkTransformerFunction}
+   */
+  @Nonnull
+  public static JwkTransformerFunction publicJwkFunction() {
+    return new JwkTransformerFunction().publicJwk();
+  }
+
+  /**
    * Transforms the supplied {@link PkiCredential} into an {@link JWK}.
    */
   @Override
@@ -130,16 +142,17 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
     if (publicKey instanceof final RSAPublicKey rsaPublicKey) {
       final RSAKey.Builder builder = new RSAKey.Builder(rsaPublicKey);
 
-      // Special handling of PKCS#11 keys ...
-      if (credential.getPrivateKey() instanceof final RSAPrivateKey rsaPrivateKey) {
-        builder.privateKey(rsaPrivateKey);
-      }
-      else {
-        builder.privateKey(credential.getPrivateKey());
+      if (!this.publicJwk) {
+        // Special handling of PKCS#11 keys ...
+        if (credential.getPrivateKey() instanceof final RSAPrivateKey rsaPrivateKey) {
+          builder.privateKey(rsaPrivateKey);
+        }
+        else {
+          builder.privateKey(credential.getPrivateKey());
+        }
       }
 
       builder
-          .keyStore(credential instanceof KeyStoreCredential ? ((KeyStoreCredential) credential).getKeyStore() : null)
           .keyID(this.keyIdFunction.apply(credential))
           .keyUse(this.keyUseFunction.apply(credential))
           .keyOperations(this.keyOpsFunction.apply(credential))
@@ -160,16 +173,17 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
       }
       final ECKey.Builder builder = new ECKey.Builder(curve, ecPublicKey);
 
-      // Special handling of PKCS#11 keys ...
-      if (credential.getPrivateKey() instanceof final ECPrivateKey ecPrivateKey) {
-        builder.privateKey(ecPrivateKey);
-      }
-      else {
-        builder.privateKey(credential.getPrivateKey());
+      if (!this.publicJwk) {
+        // Special handling of PKCS#11 keys ...
+        if (credential.getPrivateKey() instanceof final ECPrivateKey ecPrivateKey) {
+          builder.privateKey(ecPrivateKey);
+        }
+        else {
+          builder.privateKey(credential.getPrivateKey());
+        }
       }
 
       builder
-          .keyStore(credential instanceof KeyStoreCredential ? ((KeyStoreCredential) credential).getKeyStore() : null)
           .keyID(this.keyIdFunction.apply(credential))
           .keyUse(this.keyUseFunction.apply(credential))
           .keyOperations(this.keyOpsFunction.apply(credential))
@@ -188,13 +202,24 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
       throw new IllegalArgumentException("Unsupported key type: " + publicKey.getAlgorithm());
     }
 
-    return jwk;
+    return this.publicJwk ? jwk.toPublicJWK() : jwk;
+  }
+
+  /**
+   * Customizes the function so that it creates a "public" JWK, i.e., not containing private key material.
+   *
+   * @return this instance
+   */
+  @Nonnull
+  public JwkTransformerFunction publicJwk() {
+    this.publicJwk = true;
+    return this;
   }
 
   /**
    * Customizes this function with a generic function that may modify RSA keys.
    *
-   * @param customizer to apply after default properties is set for key
+   * @param customizer to apply after default properties are set for the key
    * @return this instance
    */
   @Nonnull
@@ -206,7 +231,7 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   /**
    * Customizes this function with a generic function that may modify EC keys.
    *
-   * @param customizer to apply after default properties is set for key
+   * @param customizer to apply after default properties are set for the key
    * @return this instance
    */
   @Nonnull
@@ -216,12 +241,15 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   }
 
   /**
-   * Customizes the function to remove the {@link java.security.KeyStore} of any created
+   * Customizes the function to remove the {@link java.security.KeyStore KeyStore} of any created
    * {@link com.nimbusds.jose.jwk.JWK} which makes keys unserializable.
    *
    * @return this instance
+   * @deprecated the {@link java.security.KeyStore KeyStore} is no longer used in the function, and therefore does
+   *     nothing
    */
   @Nonnull
+  @Deprecated(since = "2.1.1", forRemoval = true)
   public JwkTransformerFunction serializable() {
     return this.withRsaCustomizer(b -> b.keyStore(null)).withEcKeyCustomizer(b -> b.keyStore(null));
   }
