@@ -22,9 +22,16 @@ import org.cryptacular.util.KeyPairUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.security.KeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.X509Certificate;
 
 /**
  * Utility methods for handling public and private keys.
@@ -163,6 +170,62 @@ public class KeyUtils {
     catch (final IOException e) {
       throw new KeyException("IO error", e);
     }
+  }
+
+  /**
+   * Verifies whether a given public key and private key are compatible.
+   *
+   * @param pub the public key to be checked
+   * @param priv the private key to be checked
+   * @return {@code true} if the keys are compatible; {@code false} otherwise
+   * @throws IllegalArgumentException if an error occurs during the compatibility check, such as unsupported key algorithm
+   */
+  public static boolean isCompatible(final PublicKey pub, final PrivateKey priv) {
+    if (!pub.getAlgorithm().equals(priv.getAlgorithm())) {
+      return false;
+    }
+    try {
+      final String sigAlg = signatureAlgForKey(pub);
+      final Signature signature = Signature.getInstance(sigAlg);
+
+      final byte[] msg = new byte[32];
+      SecureRandom.getInstanceStrong().nextBytes(msg);
+
+      // sign
+      signature.initSign(priv);
+      signature.update(msg);
+      final byte[] signatureBytes = signature.sign();
+
+      // verify
+      signature.initVerify(pub);
+      signature.update(msg);
+      return signature.verify(signatureBytes);
+    }
+    catch (InvalidKeyException | NoSuchAlgorithmException | SignatureException e) {
+      throw new IllegalArgumentException(e);
+    }
+
+  }
+
+  private static String signatureAlgForKey(final PublicKey pub) {
+    return switch (pub.getAlgorithm()) {
+      case "EC" -> "SHA256withECDSA";
+      case "RSA" -> "SHA256withRSA";
+      case "DSA" -> "SHA256withDSA";
+      default -> throw new IllegalArgumentException("Unsupported key alg: " + pub.getAlgorithm());
+    };
+  }
+
+  /**
+   * Verifies whether the public key of a given X509Certificate and a private key are compatible.
+   *
+   * @param cert the X509Certificate containing the public key to be checked
+   * @param priv the private key to be checked
+   * @return {@code true} if the public key from the certificate and the private key are compatible; {@code false} otherwise
+   * @throws IllegalArgumentException if an error occurs during the compatibility check, such as unsupported key algorithm
+   */
+  public static boolean isCompatible(final X509Certificate cert, final PrivateKey priv) {
+    return isCompatible(cert.getPublicKey(), priv);
   }
 
   // Hidden

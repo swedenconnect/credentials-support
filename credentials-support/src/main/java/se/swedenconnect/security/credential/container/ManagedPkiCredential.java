@@ -21,6 +21,7 @@ import org.cryptacular.util.KeyPairUtil;
 import se.swedenconnect.security.credential.AbstractReloadablePkiCredential;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
+import se.swedenconnect.security.credential.utils.KeyUtils;
 
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -100,7 +101,7 @@ public class ManagedPkiCredential extends AbstractReloadablePkiCredential {
       throw new IllegalArgumentException("At least one certificate is required");
     }
     // Assert that this will still be a valid key pair ...
-    if (!KeyPairUtil.isKeyPair(certificates.get(0).getPublicKey(), this.getPrivateKey())) {
+    if (!KeyUtils.isCompatible(certificates.get(0), this.getPrivateKey())) {
       throw new IllegalArgumentException(
           "Public key from entity certificate and private key do not make up a valid key pair");
     }
