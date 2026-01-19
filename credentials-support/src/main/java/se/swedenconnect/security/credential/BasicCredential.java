@@ -61,17 +61,11 @@ public class BasicCredential extends AbstractPkiCredential {
    *
    * @param publicKey the public key
    * @param privateKey the private key
-   * @throws IllegalArgumentException if the public and private key does not make up a valid key pair
    */
-  public BasicCredential(@Nonnull final PublicKey publicKey, @Nonnull final PrivateKey privateKey)
-      throws IllegalArgumentException {
+  public BasicCredential(@Nonnull final PublicKey publicKey, @Nonnull final PrivateKey privateKey) {
     this.publicKey = Objects.requireNonNull(publicKey, "publicKey must not be null");
     this.privateKey = Objects.requireNonNull(privateKey, "privateKey must not be null");
     this.certificates = null;
-
-    if (!KeyPairUtil.isKeyPair(this.publicKey, this.privateKey)) {
-      throw new IllegalArgumentException("Public and private key do not make up a valid key pair");
-    }
   }
 
   /**
@@ -79,18 +73,11 @@ public class BasicCredential extends AbstractPkiCredential {
    *
    * @param certificate the certificate
    * @param privateKey the private key
-   * @throws IllegalArgumentException if the public key from the certificate and private key does not make up a
-   *     valid key pair
    */
-  public BasicCredential(@Nonnull final X509Certificate certificate, @Nonnull final PrivateKey privateKey)
-      throws IllegalArgumentException {
+  public BasicCredential(@Nonnull final X509Certificate certificate, @Nonnull final PrivateKey privateKey) {
     this.privateKey = Objects.requireNonNull(privateKey, "privateKey must not be null");
     this.certificates = List.of(Objects.requireNonNull(certificate, "certificate must not be null"));
     this.publicKey = null;
-
-    if (!KeyPairUtil.isKeyPair(this.getCertificate().getPublicKey(), privateKey)) {
-      throw new IllegalArgumentException("Public key from certificate and private key do not make up a valid key pair");
-    }
     this.updateMetadataValidityProperties();
   }
 
@@ -108,10 +95,6 @@ public class BasicCredential extends AbstractPkiCredential {
 
     if (this.certificates.isEmpty()) {
       throw new IllegalArgumentException("certificates must not be empty");
-    }
-    if (!KeyPairUtil.isKeyPair(this.getCertificate().getPublicKey(), privateKey)) {
-      throw new IllegalArgumentException(
-          "Public key from entity certificate and private key do not make up a valid key pair");
     }
     this.updateMetadataValidityProperties();
   }

@@ -117,27 +117,6 @@ class BasicCredentialTest {
   }
 
   @Test
-  void testBadKeyPair() {
-    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-        () -> new BasicCredential(this.cert.getPublicKey(), this.privateKey2));
-    assertEquals("Public and private key do not make up a valid key pair", ex.getMessage());
-  }
-
-  @Test
-  void testBadKeyPair2() {
-    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-        () -> new BasicCredential(this.cert, this.privateKey2));
-    assertEquals("Public key from certificate and private key do not make up a valid key pair", ex.getMessage());
-  }
-
-  @Test
-  void testBadKeyPair3() {
-    final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-        () -> new BasicCredential(List.of(this.cert), this.privateKey2));
-    assertEquals("Public key from entity certificate and private key do not make up a valid key pair", ex.getMessage());
-  }
-
-  @Test
   void testEmptyChain() {
     final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
         () -> new BasicCredential(List.of(), this.privateKey));
