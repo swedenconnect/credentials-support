@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 
+#
+# Copyright 2020-2026 Sweden Connect
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 usage() {
     echo "Usage: $0 [options...]" >&2
     echo
@@ -64,7 +79,7 @@ KEY_ID=1000
 for keydir in "/opt/keys"/*
 do
 	ALIAS=$(basename "$keydir")
-	
+
 	echo "Importing key from $keydir"
 	KEY_FILE=$keydir/key.pem
 	pkcs11-tool --module $MODULE -p $PIN -l -w $KEY_FILE -y privkey -a $ALIAS -d $KEY_ID --usage-sign --usage-decrypt
@@ -72,9 +87,9 @@ do
 	echo "Importing key from $keydir"
 	CERT_FILE=$keydir/cert.crt
 	pkcs11-tool --module $MODULE -p $PIN -l -w $CERT_FILE -y cert -a $ALIAS -d $KEY_ID
-	
+
 	KEY_ID=$(( $KEY_ID + 1 ))
-	
+
 done
 
 
