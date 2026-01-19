@@ -99,11 +99,6 @@ public class ManagedPkiCredential extends AbstractReloadablePkiCredential {
     if (Objects.requireNonNull(certificates, "certificates must not be null").isEmpty()) {
       throw new IllegalArgumentException("At least one certificate is required");
     }
-    // Assert that this will still be a valid key pair ...
-    if (!KeyPairUtil.isKeyPair(certificates.get(0).getPublicKey(), this.getPrivateKey())) {
-      throw new IllegalArgumentException(
-          "Public key from entity certificate and private key do not make up a valid key pair");
-    }
     this.managedCertificates = Collections.unmodifiableList(certificates);
 
     if (this.updateCertificateCallback != null) {

@@ -8,6 +8,13 @@
 
 ## Release Notes
 
+### 2.1.2
+
+**Date:** 2026-01-19
+
+- Bug described by [IS-108](https://github.com/swedenconnect/credentials-support/issues/108), where
+  key compatibility checked failed when using PKCS#11.
+
 ### 2.1.1
 
 **Date:** 2025-12-18
