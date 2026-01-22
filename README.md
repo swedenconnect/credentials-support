@@ -833,6 +833,8 @@ By implementing the [CredentialMonitorBean](https://github.com/swedenconnect/cre
 
 The [DefaultCredentialMonitorBean](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/monitoring/DefaultCredentialMonitorBean.java) is the default implementation of this interface. It can be configured with a number of callbacks that can be used for raising alarms or produce audit logs.
 
+Note: When using HSM:s and setting requirements on the keys, it is essential that the usage for the credential is reflected in the configuration. Otherwise, the default test function may try to perform a signature for key that only supports encryption/decryption.
+
 > The [The Spring Boot Starter for Credentials Support](#the-spring-boot-starter-for-credentials-support) creates a monitor bean automatically based on the credential configuration.
 
 <a name="credential-containers"></a>
