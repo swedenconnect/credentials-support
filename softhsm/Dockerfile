@@ -1,4 +1,4 @@
-FROM docker.sunet.se/openjdk-jre-luna:luna7.4-jre17
+FROM docker.sunet.se/openjdk-jre-luna:luna7.4-jre21
 
 ENV DEBIAN_FRONTEND=noninteractive
 
