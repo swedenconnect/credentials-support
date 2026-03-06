@@ -48,11 +48,12 @@ public class X509Utils {
    * @return {@code true} if the given string holds a PEM-encoding and {@code false} otherwise
    */
   public static boolean isInlinedPem(@Nonnull final String location) {
-    if (location.length() <= PemUtil.HEADER_BEGIN.length()) {
-      // We'll get StringIndexOutOfBoundsException otherwise ...
+    try {
+      return PemUtil.isPem(location.getBytes());
+    }
+    catch (final Exception ignored) {
       return false;
     }
-    return PemUtil.isPem(location.getBytes());
   }
 
   /**
