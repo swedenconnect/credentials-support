@@ -10,7 +10,7 @@
 
 ### 2.2.0
 
-**Date:**
+**Date:** 2026-03-06
 
 - Upgrade to Spring Boot 4, Spring 7. Also, Java 21 is now the minimum supported version.
 
