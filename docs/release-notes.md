@@ -8,6 +8,12 @@
 
 ## Release Notes
 
+### 2.2.1
+
+**Date:** 2026-04-24
+
+- Upgrade of dependencies.
+
 ### 2.2.0
 
 **Date:** 2026-03-06
