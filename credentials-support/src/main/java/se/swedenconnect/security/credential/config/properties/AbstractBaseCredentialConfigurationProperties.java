@@ -15,8 +15,8 @@
  */
 package se.swedenconnect.security.credential.config.properties;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.security.credential.config.BaseCredentialConfiguration;
 
 import java.time.Instant;
@@ -35,57 +35,185 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
   /**
    * The name of the credential.
    */
-  @Setter
-  @Getter
   private String name;
 
   /**
    * Key identifier metadata property.
    */
-  @Setter
-  @Getter
   private String keyId;
 
   /**
    * Issued-at metadata property.
    */
-  @Setter
-  @Getter
   private Instant issuedAt;
 
   /**
    * Expires-at metadata property.
    */
-  @Setter
-  @Getter
   private Instant expiresAt;
 
   /**
    * Active-from metadata property.
    */
-  @Setter
-  @Getter
   private Instant activeFrom;
 
   /**
    * Active-to metadata property.
    */
-  @Setter
-  @Getter
   private Instant activeTo;
 
   /**
    * The usage metadata property.
    */
-  @Setter
-  @Getter
   private String usage;
 
   /**
    * Credential metadata properties.
    */
-  @Getter
   private final Map<String, String> metadata = new HashMap<>();
+
+  /**
+   * Gets the name of the credential.
+   *
+   * @return the credential name
+   */
+  @Nullable
+  public String getName() {
+    return this.name;
+  }
+
+  /**
+   * Assigns the name of the credential.
+   *
+   * @param name the credential name
+   */
+  public void setName(@Nullable final String name) {
+    this.name = name;
+  }
+
+  /**
+   * Gets the key identifier metadata property.
+   *
+   * @return the key identifier
+   */
+  @Nullable
+  public String getKeyId() {
+    return this.keyId;
+  }
+
+  /**
+   * Assigns the key identifier metadata property.
+   *
+   * @param keyId the key identifier
+   */
+  public void setKeyId(@Nullable final String keyId) {
+    this.keyId = keyId;
+  }
+
+  /**
+   * Gets the issued-at metadata property.
+   *
+   * @return the issued-at instant
+   */
+  @Nullable
+  public Instant getIssuedAt() {
+    return this.issuedAt;
+  }
+
+  /**
+   * Assigns the issued-at metadata property.
+   *
+   * @param issuedAt the issued-at instant
+   */
+  public void setIssuedAt(@Nullable final Instant issuedAt) {
+    this.issuedAt = issuedAt;
+  }
+
+  /**
+   * Gets the expires-at metadata property.
+   *
+   * @return the expires-at instant
+   */
+  @Nullable
+  public Instant getExpiresAt() {
+    return this.expiresAt;
+  }
+
+  /**
+   * Assigns the expires-at metadata property.
+   *
+   * @param expiresAt the expires-at instant
+   */
+  public void setExpiresAt(@Nullable final Instant expiresAt) {
+    this.expiresAt = expiresAt;
+  }
+
+  /**
+   * Gets the active-from metadata property.
+   *
+   * @return the active-from instant
+   */
+  @Nullable
+  public Instant getActiveFrom() {
+    return this.activeFrom;
+  }
+
+  /**
+   * Assigns the active-from metadata property.
+   *
+   * @param activeFrom the active-from instant
+   */
+  public void setActiveFrom(@Nullable final Instant activeFrom) {
+    this.activeFrom = activeFrom;
+  }
+
+  /**
+   * Gets the active-to metadata property.
+   *
+   * @return the active-to instant
+   */
+  @Nullable
+  public Instant getActiveTo() {
+    return this.activeTo;
+  }
+
+  /**
+   * Assigns the active-to metadata property.
+   *
+   * @param activeTo the active-to instant
+   */
+  public void setActiveTo(@Nullable final Instant activeTo) {
+    this.activeTo = activeTo;
+  }
+
+  /**
+   * Gets the usage metadata property.
+   *
+   * @return the usage
+   */
+  @Nullable
+  public String getUsage() {
+    return this.usage;
+  }
+
+  /**
+   * Assigns the usage metadata property.
+   *
+   * @param usage the usage
+   */
+  public void setUsage(@Nullable final String usage) {
+    this.usage = usage;
+  }
+
+  /**
+   * Gets the credential metadata properties.
+   *
+   * @return a (mutable) map of metadata properties
+   */
+  @Nonnull
+  public Map<String, String> getMetadata() {
+    return this.metadata;
+  }
 
   /** {@inheritDoc} */
   @Override

@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import lombok.Setter;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 import se.swedenconnect.security.credential.monitoring.CredentialMonitorBean;
@@ -38,27 +37,22 @@ import se.swedenconnect.security.credential.monitoring.CredentialMonitorBean;
 //@EnableScheduling
 public class SpringBootTest {
 
-  @Setter
   @Autowired(required = false)
   @Qualifier("credential1")
   private PkiCredential credential1;
 
-  @Setter
   @Autowired(required = false)
   @Qualifier("credential2")
   private PkiCredential credential2;
 
-  @Setter
   @Autowired(required = false)
   @Qualifier("credential3")
   private ReloadablePkiCredential credential3;
 
-  @Setter
   @Autowired(required = false)
   @Qualifier("credential4")
   private ReloadablePkiCredential credential4;
 
-  @Setter
   @Autowired
   private CredentialMonitorBean credentialMonitorBean;
 
@@ -105,4 +99,50 @@ public class SpringBootTest {
 
 
    */
+
+  /**
+   * Assigns the {@code credential1} property.
+   *
+   * @param credential1 the {@code credential1} property
+   */
+  public void setCredential1(final PkiCredential credential1) {
+    this.credential1 = credential1;
+  }
+
+  /**
+   * Assigns the {@code credential2} property.
+   *
+   * @param credential2 the {@code credential2} property
+   */
+  public void setCredential2(final PkiCredential credential2) {
+    this.credential2 = credential2;
+  }
+
+  /**
+   * Assigns the {@code credential3} property.
+   *
+   * @param credential3 the {@code credential3} property
+   */
+  public void setCredential3(final ReloadablePkiCredential credential3) {
+    this.credential3 = credential3;
+  }
+
+  /**
+   * Assigns the {@code credential4} property.
+   *
+   * @param credential4 the {@code credential4} property
+   */
+  public void setCredential4(final ReloadablePkiCredential credential4) {
+    this.credential4 = credential4;
+  }
+
+  /**
+   * Assigns the {@code credentialMonitorBean} property.
+   *
+   * @param credentialMonitorBean the {@code credentialMonitorBean} property
+   */
+  public void setCredentialMonitorBean(final CredentialMonitorBean credentialMonitorBean) {
+    this.credentialMonitorBean = credentialMonitorBean;
+  }
+
 }

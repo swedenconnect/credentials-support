@@ -16,7 +16,6 @@
 package se.swedenconnect.security.credential.monitoring;
 
 import jakarta.annotation.Nonnull;
-import lombok.NonNull;
 import org.cryptacular.io.ClassPathResource;
 import org.cryptacular.io.Resource;
 import org.junit.jupiter.api.Assertions;

@@ -21,8 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import lombok.Setter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -35,7 +33,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class TestApplication implements CommandLineRunner {
 
-  @Setter
   @Autowired
   private TestCredentialsService testCredentialsService;
 
@@ -64,6 +61,15 @@ public class TestApplication implements CommandLineRunner {
     System.out.println("RUNNING TESTS");
     System.out.println("");
     System.out.print(this.testCredentialsService.test());
+  }
+
+  /**
+   * Assigns the test credentials service.
+   *
+   * @param testCredentialsService the service
+   */
+  public void setTestCredentialsService(final TestCredentialsService testCredentialsService) {
+    this.testCredentialsService = testCredentialsService;
   }
 
 }

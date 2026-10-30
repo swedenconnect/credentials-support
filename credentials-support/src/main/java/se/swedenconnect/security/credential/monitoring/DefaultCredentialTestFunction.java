@@ -15,7 +15,8 @@
  */
 package se.swedenconnect.security.credential.monitoring;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
@@ -40,8 +41,10 @@ import java.util.function.Function;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Slf4j
 public class DefaultCredentialTestFunction implements Function<ReloadablePkiCredential, Exception> {
+
+  /** Logger instance. */
+  private static final Logger log = LoggerFactory.getLogger(DefaultCredentialTestFunction.class);
 
   /** The name of the security provider to use. May be {@code null}. */
   private String provider;

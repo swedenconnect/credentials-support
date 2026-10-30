@@ -15,8 +15,7 @@
  */
 package se.swedenconnect.security.credential.config.properties;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.security.credential.config.StoreConfiguration;
 
 import java.util.Objects;
@@ -32,29 +31,21 @@ public class StoreConfigurationProperties implements StoreConfiguration {
   /**
    * Location of the resource containing the store content.
    */
-  @Getter
-  @Setter
   private String location;
 
   /**
    * Password used to access the store.
    */
-  @Getter
-  @Setter
   private String password;
 
   /**
    * Type of the store to create, e.g., JKS, PKCS12 or PKCS11.
    */
-  @Getter
-  @Setter
   private String type;
 
   /**
    * Security provider for the store.
    */
-  @Getter
-  @Setter
   private String provider;
 
   /**
@@ -62,9 +53,102 @@ public class StoreConfigurationProperties implements StoreConfiguration {
    * configuration needs to be supplied. Note that the security provider used must support PKCS#11 via the KeyStoreSpi
    * interface. The "SunPKCS11" is such a provider.
    */
-  @Getter
-  @Setter
   private Pkcs11ConfigurationProperties pkcs11;
+
+  /**
+   * Gets the location of the resource containing the store content.
+   *
+   * @return the store location
+   */
+  @Nullable
+  public String getLocation() {
+    return this.location;
+  }
+
+  /**
+   * Assigns the location of the resource containing the store content.
+   *
+   * @param location the store location
+   */
+  public void setLocation(@Nullable final String location) {
+    this.location = location;
+  }
+
+  /**
+   * Gets the password used to access the store.
+   *
+   * @return the store password
+   */
+  @Nullable
+  public String getPassword() {
+    return this.password;
+  }
+
+  /**
+   * Assigns the password used to access the store.
+   *
+   * @param password the store password
+   */
+  public void setPassword(@Nullable final String password) {
+    this.password = password;
+  }
+
+  /**
+   * Gets the type of the store to create, e.g., JKS, PKCS12 or PKCS11.
+   *
+   * @return the store type
+   */
+  @Nullable
+  public String getType() {
+    return this.type;
+  }
+
+  /**
+   * Assigns the type of the store to create, e.g., JKS, PKCS12 or PKCS11.
+   *
+   * @param type the store type
+   */
+  public void setType(@Nullable final String type) {
+    this.type = type;
+  }
+
+  /**
+   * Gets the security provider for the store.
+   *
+   * @return the security provider name
+   */
+  @Nullable
+  public String getProvider() {
+    return this.provider;
+  }
+
+  /**
+   * Assigns the security provider for the store.
+   *
+   * @param provider the security provider name
+   */
+  public void setProvider(@Nullable final String provider) {
+    this.provider = provider;
+  }
+
+  /**
+   * Gets the additional PKCS#11 configuration.
+   *
+   * @return the PKCS#11 configuration
+   */
+  @Nullable
+  public Pkcs11ConfigurationProperties getPkcs11() {
+    return this.pkcs11;
+  }
+
+  /**
+   * Assigns the additional PKCS#11 configuration.
+   *
+   * @param pkcs11 the PKCS#11 configuration
+   */
+  public void setPkcs11(@Nullable final Pkcs11ConfigurationProperties pkcs11) {
+    this.pkcs11 = pkcs11;
+  }
 
   /** {@inheritDoc} */
   @Override
@@ -104,17 +188,51 @@ public class StoreConfigurationProperties implements StoreConfiguration {
     /**
      * The complete path of the PKCS#11 configuration file with which the PKCS#11 device is configured.
      */
-    @Getter
-    @Setter
     private String configurationFile;
 
     /**
      * As an alternative to providing the PKCS#11 configuration file, each PKCS#11 setting can be provided separately.
      * This property holds these detailed settings.
      */
-    @Getter
-    @Setter
     private Pkcs11SettingsProperties settings;
+
+    /**
+     * Gets the complete path of the PKCS#11 configuration file.
+     *
+     * @return the PKCS#11 configuration file
+     */
+    @Nullable
+    public String getConfigurationFile() {
+      return this.configurationFile;
+    }
+
+    /**
+     * Assigns the complete path of the PKCS#11 configuration file.
+     *
+     * @param configurationFile the PKCS#11 configuration file
+     */
+    public void setConfigurationFile(@Nullable final String configurationFile) {
+      this.configurationFile = configurationFile;
+    }
+
+    /**
+     * Gets the detailed PKCS#11 settings (alternative to a configuration file).
+     *
+     * @return the PKCS#11 settings
+     */
+    @Nullable
+    public Pkcs11SettingsProperties getSettings() {
+      return this.settings;
+    }
+
+    /**
+     * Assigns the detailed PKCS#11 settings (alternative to a configuration file).
+     *
+     * @param settings the PKCS#11 settings
+     */
+    public void setSettings(@Nullable final Pkcs11SettingsProperties settings) {
+      this.settings = settings;
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -156,30 +274,98 @@ public class StoreConfigurationProperties implements StoreConfiguration {
       /**
        * The PKCS#11 library path.
        */
-      @Getter
-      @Setter
       private String library;
 
       /**
        * The name of the PKCS#11 slot.
        */
-      @Getter
-      @Setter
       private String name;
 
       /**
        * The slot number/id to use.
        */
-      @Getter
-      @Setter
       private String slot;
 
       /**
        * The slot index to use.
        */
-      @Getter
-      @Setter
       private Integer slotListIndex;
+
+      /**
+       * Gets the PKCS#11 library path.
+       *
+       * @return the library path
+       */
+      @Nullable
+      public String getLibrary() {
+        return this.library;
+      }
+
+      /**
+       * Assigns the PKCS#11 library path.
+       *
+       * @param library the library path
+       */
+      public void setLibrary(@Nullable final String library) {
+        this.library = library;
+      }
+
+      /**
+       * Gets the name of the PKCS#11 slot.
+       *
+       * @return the slot name
+       */
+      @Nullable
+      public String getName() {
+        return this.name;
+      }
+
+      /**
+       * Assigns the name of the PKCS#11 slot.
+       *
+       * @param name the slot name
+       */
+      public void setName(@Nullable final String name) {
+        this.name = name;
+      }
+
+      /**
+       * Gets the slot number/id to use.
+       *
+       * @return the slot number/id
+       */
+      @Nullable
+      public String getSlot() {
+        return this.slot;
+      }
+
+      /**
+       * Assigns the slot number/id to use.
+       *
+       * @param slot the slot number/id
+       */
+      public void setSlot(@Nullable final String slot) {
+        this.slot = slot;
+      }
+
+      /**
+       * Gets the slot index to use.
+       *
+       * @return the slot index
+       */
+      @Nullable
+      public Integer getSlotListIndex() {
+        return this.slotListIndex;
+      }
+
+      /**
+       * Assigns the slot index to use.
+       *
+       * @param slotListIndex the slot index
+       */
+      public void setSlotListIndex(@Nullable final Integer slotListIndex) {
+        this.slotListIndex = slotListIndex;
+      }
 
       /** {@inheritDoc} */
       @Override

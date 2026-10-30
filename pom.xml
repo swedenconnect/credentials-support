@@ -168,13 +168,6 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.46</version>
-      <scope>provided</scope>
-    </dependency>
-
     <!-- For testing -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>

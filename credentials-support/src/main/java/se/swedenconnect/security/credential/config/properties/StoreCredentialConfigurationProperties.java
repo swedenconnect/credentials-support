@@ -15,8 +15,7 @@
  */
 package se.swedenconnect.security.credential.config.properties;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.security.credential.config.StoreConfiguration;
 import se.swedenconnect.security.credential.config.StoreCredentialConfiguration;
 
@@ -35,8 +34,6 @@ public class StoreCredentialConfigurationProperties extends AbstractBaseCredenti
   /**
    * Configuration for the KeyStore holding the key pair entry. Mutually exclusive with the store-reference property.
    */
-  @Getter
-  @Setter
   @org.springframework.boot.context.properties.NestedConfigurationProperty
   private StoreConfigurationProperties store;
 
@@ -44,24 +41,94 @@ public class StoreCredentialConfigurationProperties extends AbstractBaseCredenti
    * A store reference. As an alternative to giving the key store configuration, a reference to a key store
    * configuration may be given. This feature may be used when one key store holds several keys.
    */
-  @Getter
-  @Setter
   private String storeReference;
 
   /**
    * Whether the credential should be prepared for monitoring. If set, a test function and a KeyStoreReloader will be
    * assigned.
    */
-  @Getter
-  @Setter
   private Boolean monitor;
 
   /**
    * Configuration for the key pair entry of the store.
    */
-  @Getter
-  @Setter
   private KeyConfigurationProperties key;
+
+  /**
+   * Gets the configuration for the KeyStore holding the key pair entry.
+   *
+   * @return the store configuration
+   */
+  @Nullable
+  public StoreConfigurationProperties getStore() {
+    return this.store;
+  }
+
+  /**
+   * Assigns the configuration for the KeyStore holding the key pair entry.
+   *
+   * @param store the store configuration
+   */
+  public void setStore(@Nullable final StoreConfigurationProperties store) {
+    this.store = store;
+  }
+
+  /**
+   * Gets the key store reference.
+   *
+   * @return the store reference
+   */
+  @Nullable
+  public String getStoreReference() {
+    return this.storeReference;
+  }
+
+  /**
+   * Assigns the key store reference.
+   *
+   * @param storeReference the store reference
+   */
+  public void setStoreReference(@Nullable final String storeReference) {
+    this.storeReference = storeReference;
+  }
+
+  /**
+   * Gets whether the credential should be prepared for monitoring.
+   *
+   * @return whether to monitor the credential
+   */
+  @Nullable
+  public Boolean getMonitor() {
+    return this.monitor;
+  }
+
+  /**
+   * Assigns whether the credential should be prepared for monitoring.
+   *
+   * @param monitor whether to monitor the credential
+   */
+  public void setMonitor(@Nullable final Boolean monitor) {
+    this.monitor = monitor;
+  }
+
+  /**
+   * Gets the configuration for the key pair entry of the store.
+   *
+   * @return the key configuration
+   */
+  @Nullable
+  public KeyConfigurationProperties getKey() {
+    return this.key;
+  }
+
+  /**
+   * Assigns the configuration for the key pair entry of the store.
+   *
+   * @param key the key configuration
+   */
+  public void setKey(@Nullable final KeyConfigurationProperties key) {
+    this.key = key;
+  }
 
   /** {@inheritDoc} */
   @Override
@@ -95,8 +162,6 @@ public class StoreCredentialConfigurationProperties extends AbstractBaseCredenti
     /**
      * The alias that identifies the key pair in the key store.
      */
-    @Getter
-    @Setter
     private String alias;
 
     /**
@@ -104,17 +169,70 @@ public class StoreCredentialConfigurationProperties extends AbstractBaseCredenti
      * typical example would be a PKCS#11 key store where the certificate of the key pair resides outside the HSM
      * device. This setting holds the location or content of the certificate or certificate chain in PEM format.
      */
-    @Getter
-    @Setter
     private String certificates;
 
     /**
      * The password to unlock the key entry identified by the given alias. If not given, the store password will be used
      * (in these cases, using a store reference will not function).
      */
-    @Getter
-    @Setter
     private String keyPassword;
+
+    /**
+     * Gets the alias that identifies the key pair in the key store.
+     *
+     * @return the key alias
+     */
+    @Nullable
+    public String getAlias() {
+      return this.alias;
+    }
+
+    /**
+     * Assigns the alias that identifies the key pair in the key store.
+     *
+     * @param alias the key alias
+     */
+    public void setAlias(@Nullable final String alias) {
+      this.alias = alias;
+    }
+
+    /**
+     * Gets the location or content of the certificate or certificate chain in PEM format.
+     *
+     * @return the certificate(s) location or content
+     */
+    @Nullable
+    public String getCertificates() {
+      return this.certificates;
+    }
+
+    /**
+     * Assigns the location or content of the certificate or certificate chain in PEM format.
+     *
+     * @param certificates the certificate(s) location or content
+     */
+    public void setCertificates(@Nullable final String certificates) {
+      this.certificates = certificates;
+    }
+
+    /**
+     * Gets the password to unlock the key entry identified by the given alias.
+     *
+     * @return the key password
+     */
+    @Nullable
+    public String getKeyPassword() {
+      return this.keyPassword;
+    }
+
+    /**
+     * Assigns the password to unlock the key entry identified by the given alias.
+     *
+     * @param keyPassword the key password
+     */
+    public void setKeyPassword(@Nullable final String keyPassword) {
+      this.keyPassword = keyPassword;
+    }
 
     /** {@inheritDoc} */
     @Override

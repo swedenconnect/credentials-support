@@ -15,8 +15,7 @@
  */
 package se.swedenconnect.security.credential.config.properties;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.security.credential.config.PemCredentialConfiguration;
 
 import java.util.Objects;
@@ -35,8 +34,6 @@ public class PemCredentialConfigurationProperties extends AbstractBaseCredential
    * Location or content of the public key in PEM format. This setting is mutually exclusive with the certificates
    * setting.
    */
-  @Getter
-  @Setter
   private String publicKey;
 
   /**
@@ -44,23 +41,93 @@ public class PemCredentialConfigurationProperties extends AbstractBaseCredential
    * supplied, the entity certificate, i.e., the certificate holding the public key of the key pair, must be placed
    * first. This setting is mutually exclusive with the public-key setting.
    */
-  @Getter
-  @Setter
   private String certificates;
 
   /**
    * Location or content of the private key in PEM format.
    */
-  @Getter
-  @Setter
   private String privateKey;
 
   /**
    * Password used to decrypt the private key (if this is given in encrypted format).
    */
-  @Getter
-  @Setter
   private String keyPassword;
+
+  /**
+   * Gets the location or content of the public key in PEM format.
+   *
+   * @return the public key location or content
+   */
+  @Nullable
+  public String getPublicKey() {
+    return this.publicKey;
+  }
+
+  /**
+   * Assigns the location or content of the public key in PEM format.
+   *
+   * @param publicKey the public key location or content
+   */
+  public void setPublicKey(@Nullable final String publicKey) {
+    this.publicKey = publicKey;
+  }
+
+  /**
+   * Gets the location or content of the certificate or certificate chain in PEM format.
+   *
+   * @return the certificate(s) location or content
+   */
+  @Nullable
+  public String getCertificates() {
+    return this.certificates;
+  }
+
+  /**
+   * Assigns the location or content of the certificate or certificate chain in PEM format.
+   *
+   * @param certificates the certificate(s) location or content
+   */
+  public void setCertificates(@Nullable final String certificates) {
+    this.certificates = certificates;
+  }
+
+  /**
+   * Gets the location or content of the private key in PEM format.
+   *
+   * @return the private key location or content
+   */
+  @Nullable
+  public String getPrivateKey() {
+    return this.privateKey;
+  }
+
+  /**
+   * Assigns the location or content of the private key in PEM format.
+   *
+   * @param privateKey the private key location or content
+   */
+  public void setPrivateKey(@Nullable final String privateKey) {
+    this.privateKey = privateKey;
+  }
+
+  /**
+   * Gets the password used to decrypt the private key.
+   *
+   * @return the private key password
+   */
+  @Nullable
+  public String getKeyPassword() {
+    return this.keyPassword;
+  }
+
+  /**
+   * Assigns the password used to decrypt the private key.
+   *
+   * @param keyPassword the private key password
+   */
+  public void setKeyPassword(@Nullable final String keyPassword) {
+    this.keyPassword = keyPassword;
+  }
 
   /** {@inheritDoc} */
   @Override

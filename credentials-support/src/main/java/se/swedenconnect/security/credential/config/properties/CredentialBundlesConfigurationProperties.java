@@ -15,8 +15,7 @@
  */
 package se.swedenconnect.security.credential.config.properties;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.security.credential.config.CredentialBundlesConfiguration;
 import se.swedenconnect.security.credential.config.PemCredentialConfiguration;
 import se.swedenconnect.security.credential.config.StoreConfiguration;
@@ -41,23 +40,74 @@ public class CredentialBundlesConfigurationProperties implements CredentialBundl
   /**
    * Map of key store ID:s and key store configurations.
    */
-  @Getter
-  @Setter
   private Map<String, StoreConfigurationProperties> keystore;
 
   /**
    * Map of credential ID:s and PEM based credential configurations.
    */
-  @Getter
-  @Setter
   private Map<String, PemCredentialConfigurationProperties> pem;
 
   /**
    * Map of credential ID:s and key store based credential configurations.
    */
-  @Getter
-  @Setter
   private Map<String, StoreCredentialConfigurationProperties> jks;
+
+  /**
+   * Gets the map of key store ID:s and key store configurations.
+   *
+   * @return a map of key store configurations
+   */
+  @Nullable
+  public Map<String, StoreConfigurationProperties> getKeystore() {
+    return this.keystore;
+  }
+
+  /**
+   * Assigns the map of key store ID:s and key store configurations.
+   *
+   * @param keystore a map of key store configurations
+   */
+  public void setKeystore(@Nullable final Map<String, StoreConfigurationProperties> keystore) {
+    this.keystore = keystore;
+  }
+
+  /**
+   * Gets the map of credential ID:s and PEM based credential configurations.
+   *
+   * @return a map of PEM based credential configurations
+   */
+  @Nullable
+  public Map<String, PemCredentialConfigurationProperties> getPem() {
+    return this.pem;
+  }
+
+  /**
+   * Assigns the map of credential ID:s and PEM based credential configurations.
+   *
+   * @param pem a map of PEM based credential configurations
+   */
+  public void setPem(@Nullable final Map<String, PemCredentialConfigurationProperties> pem) {
+    this.pem = pem;
+  }
+
+  /**
+   * Gets the map of credential ID:s and key store based credential configurations.
+   *
+   * @return a map of key store based credential configurations
+   */
+  @Nullable
+  public Map<String, StoreCredentialConfigurationProperties> getJks() {
+    return this.jks;
+  }
+
+  /**
+   * Assigns the map of credential ID:s and key store based credential configurations.
+   *
+   * @param jks a map of key store based credential configurations
+   */
+  public void setJks(@Nullable final Map<String, StoreCredentialConfigurationProperties> jks) {
+    this.jks = jks;
+  }
 
   /** {@inheritDoc} */
   @Override

@@ -19,10 +19,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.health.contributor.Health;
@@ -187,14 +183,16 @@ public class CredentialMonitorHealthIndicator implements HealthIndicator {
                 .build()));
   }
 
-  @Data
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Builder
+  /**
+   * Status for a monitored credential.
+   */
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
   public static class MonitorStatus {
 
+    /** Result value for a successful test or reload. */
     public static final String OK = "success";
+
+    /** Result value for a failed test or reload. */
     public static final String ERROR = "failure";
 
     @JsonProperty("credential-name")
@@ -218,6 +216,175 @@ public class CredentialMonitorHealthIndicator implements HealthIndicator {
     @JsonProperty("reload-exception")
     private String reloadException;
 
+    /**
+     * Default constructor.
+     */
+    public MonitorStatus() {
+    }
+
+    /**
+     * Constructor assigning all fields.
+     *
+     * @param credentialName the credential name
+     * @param testResult the test result
+     * @param testError the test error message
+     * @param testException the test exception class name
+     * @param reloadResult the reload result
+     * @param reloadError the reload error message
+     * @param reloadException the reload exception class name
+     */
+    public MonitorStatus(final String credentialName, final String testResult, final String testError,
+        final String testException, final String reloadResult, final String reloadError,
+        final String reloadException) {
+      this.credentialName = credentialName;
+      this.testResult = testResult;
+      this.testError = testError;
+      this.testException = testException;
+      this.reloadResult = reloadResult;
+      this.reloadError = reloadError;
+      this.reloadException = reloadException;
+    }
+
+    /**
+     * Creates a builder for {@link MonitorStatus} objects.
+     *
+     * @return a builder
+     */
+    public static MonitorStatusBuilder builder() {
+      return new MonitorStatusBuilder();
+    }
+
+    /**
+     * Gets the credential name.
+     *
+     * @return the credential name
+     */
+    public String getCredentialName() {
+      return this.credentialName;
+    }
+
+    /**
+     * Assigns the credential name.
+     *
+     * @param credentialName the credential name
+     */
+    public void setCredentialName(final String credentialName) {
+      this.credentialName = credentialName;
+    }
+
+    /**
+     * Gets the test result.
+     *
+     * @return the test result
+     */
+    public String getTestResult() {
+      return this.testResult;
+    }
+
+    /**
+     * Assigns the test result.
+     *
+     * @param testResult the test result
+     */
+    public void setTestResult(final String testResult) {
+      this.testResult = testResult;
+    }
+
+    /**
+     * Gets the test error message.
+     *
+     * @return the test error message
+     */
+    public String getTestError() {
+      return this.testError;
+    }
+
+    /**
+     * Assigns the test error message.
+     *
+     * @param testError the test error message
+     */
+    public void setTestError(final String testError) {
+      this.testError = testError;
+    }
+
+    /**
+     * Gets the test exception class name.
+     *
+     * @return the test exception class name
+     */
+    public String getTestException() {
+      return this.testException;
+    }
+
+    /**
+     * Assigns the test exception class name.
+     *
+     * @param testException the test exception class name
+     */
+    public void setTestException(final String testException) {
+      this.testException = testException;
+    }
+
+    /**
+     * Gets the reload result.
+     *
+     * @return the reload result
+     */
+    public String getReloadResult() {
+      return this.reloadResult;
+    }
+
+    /**
+     * Assigns the reload result.
+     *
+     * @param reloadResult the reload result
+     */
+    public void setReloadResult(final String reloadResult) {
+      this.reloadResult = reloadResult;
+    }
+
+    /**
+     * Gets the reload error message.
+     *
+     * @return the reload error message
+     */
+    public String getReloadError() {
+      return this.reloadError;
+    }
+
+    /**
+     * Assigns the reload error message.
+     *
+     * @param reloadError the reload error message
+     */
+    public void setReloadError(final String reloadError) {
+      this.reloadError = reloadError;
+    }
+
+    /**
+     * Gets the reload exception class name.
+     *
+     * @return the reload exception class name
+     */
+    public String getReloadException() {
+      return this.reloadException;
+    }
+
+    /**
+     * Assigns the reload exception class name.
+     *
+     * @param reloadException the reload exception class name
+     */
+    public void setReloadException(final String reloadException) {
+      this.reloadException = reloadException;
+    }
+
+    /**
+     * Gets the overall health status for the credential.
+     *
+     * @return the status
+     */
     @JsonIgnore
     public Status getStatus() {
       if (OK.equals(this.testResult)) {
@@ -227,6 +394,154 @@ public class CredentialMonitorHealthIndicator implements HealthIndicator {
         return Status.DOWN;
       }
       return WARNING;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(final Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || this.getClass() != o.getClass()) {
+        return false;
+      }
+      final MonitorStatus that = (MonitorStatus) o;
+      return Objects.equals(this.credentialName, that.credentialName)
+          && Objects.equals(this.testResult, that.testResult)
+          && Objects.equals(this.testError, that.testError)
+          && Objects.equals(this.testException, that.testException)
+          && Objects.equals(this.reloadResult, that.reloadResult)
+          && Objects.equals(this.reloadError, that.reloadError)
+          && Objects.equals(this.reloadException, that.reloadException);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+      return Objects.hash(this.credentialName, this.testResult, this.testError, this.testException,
+          this.reloadResult, this.reloadError, this.reloadException);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+      return "MonitorStatus(credentialName=" + this.credentialName + ", testResult=" + this.testResult
+          + ", testError=" + this.testError + ", testException=" + this.testException
+          + ", reloadResult=" + this.reloadResult + ", reloadError=" + this.reloadError
+          + ", reloadException=" + this.reloadException + ")";
+    }
+
+    /**
+     * Builder for {@link MonitorStatus} objects.
+     */
+    public static class MonitorStatusBuilder {
+
+      private String credentialName;
+
+      private String testResult;
+
+      private String testError;
+
+      private String testException;
+
+      private String reloadResult;
+
+      private String reloadError;
+
+      private String reloadException;
+
+      /**
+       * Default constructor.
+       */
+      MonitorStatusBuilder() {
+      }
+
+      /**
+       * Assigns the credential name.
+       *
+       * @param credentialName the credential name
+       * @return the builder
+       */
+      public MonitorStatusBuilder credentialName(final String credentialName) {
+        this.credentialName = credentialName;
+        return this;
+      }
+
+      /**
+       * Assigns the test result.
+       *
+       * @param testResult the test result
+       * @return the builder
+       */
+      public MonitorStatusBuilder testResult(final String testResult) {
+        this.testResult = testResult;
+        return this;
+      }
+
+      /**
+       * Assigns the test error message.
+       *
+       * @param testError the test error message
+       * @return the builder
+       */
+      public MonitorStatusBuilder testError(final String testError) {
+        this.testError = testError;
+        return this;
+      }
+
+      /**
+       * Assigns the test exception class name.
+       *
+       * @param testException the test exception class name
+       * @return the builder
+       */
+      public MonitorStatusBuilder testException(final String testException) {
+        this.testException = testException;
+        return this;
+      }
+
+      /**
+       * Assigns the reload result.
+       *
+       * @param reloadResult the reload result
+       * @return the builder
+       */
+      public MonitorStatusBuilder reloadResult(final String reloadResult) {
+        this.reloadResult = reloadResult;
+        return this;
+      }
+
+      /**
+       * Assigns the reload error message.
+       *
+       * @param reloadError the reload error message
+       * @return the builder
+       */
+      public MonitorStatusBuilder reloadError(final String reloadError) {
+        this.reloadError = reloadError;
+        return this;
+      }
+
+      /**
+       * Assigns the reload exception class name.
+       *
+       * @param reloadException the reload exception class name
+       * @return the builder
+       */
+      public MonitorStatusBuilder reloadException(final String reloadException) {
+        this.reloadException = reloadException;
+        return this;
+      }
+
+      /**
+       * Builds the {@link MonitorStatus} object.
+       *
+       * @return a {@link MonitorStatus} object
+       */
+      public MonitorStatus build() {
+        return new MonitorStatus(this.credentialName, this.testResult, this.testError, this.testException,
+            this.reloadResult, this.reloadError, this.reloadException);
+      }
     }
 
   }

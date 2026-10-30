@@ -15,7 +15,6 @@
  */
 package se.swedenconnect.security.credential.monitoring;
 
-import lombok.Getter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,12 +44,20 @@ public class CredentialMonitorTaskTest {
 
   public static class TestBean implements CredentialMonitorBean {
 
-    @Getter
     private int testCalled = 0;
 
     @Override
     public void test() {
       this.testCalled++;
+    }
+
+    /**
+     * Gets the number of times {@link #test()} has been called.
+     *
+     * @return the call count
+     */
+    public int getTestCalled() {
+      return this.testCalled;
     }
 
   }

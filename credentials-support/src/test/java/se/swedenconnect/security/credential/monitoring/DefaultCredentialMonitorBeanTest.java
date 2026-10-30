@@ -17,9 +17,6 @@ package se.swedenconnect.security.credential.monitoring;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
@@ -268,18 +265,25 @@ public class DefaultCredentialMonitorBeanTest {
 
   public static class SuccessConsumer implements Consumer<ReloadablePkiCredential> {
 
-    @Getter
     private final List<String> credentialNames = new ArrayList<>();
 
     @Override
     public void accept(final ReloadablePkiCredential t) {
       this.credentialNames.add(t.getName());
     }
+
+    /**
+     * Gets the names of the credentials passed to this consumer.
+     *
+     * @return a list of credential names
+     */
+    public List<String> getCredentialNames() {
+      return this.credentialNames;
+    }
   }
 
   public static class TestFunction implements Function<ReloadablePkiCredential, Exception> {
 
-    @Getter
     private int testCalled = 0;
 
     private Exception error = null;
@@ -302,16 +306,33 @@ public class DefaultCredentialMonitorBeanTest {
       }
       return ret;
     }
+
+    /**
+     * Gets the number of times the function has been invoked.
+     *
+     * @return the call count
+     */
+    public int getTestCalled() {
+      return this.testCalled;
+    }
   }
 
   public static class ReloadFailureCallback implements BiConsumer<ReloadablePkiCredential, Exception> {
 
-    @Getter
     private Exception receivedException;
 
     @Override
     public void accept(final ReloadablePkiCredential t, final Exception u) {
       this.receivedException = u;
+    }
+
+    /**
+     * Gets the exception received by this callback.
+     *
+     * @return the received exception, or {@code null}
+     */
+    public Exception getReceivedException() {
+      return this.receivedException;
     }
   }
 
@@ -319,13 +340,10 @@ public class DefaultCredentialMonitorBeanTest {
 
     private final Metadata metadata;
 
-    @Setter
     private String name = "TestCredential";
 
-    @Getter
     private int reloadCalled = 0;
 
-    @Setter
     private Exception reloadException = null;
 
     private Function<ReloadablePkiCredential, Exception> testFunction;
@@ -403,6 +421,33 @@ public class DefaultCredentialMonitorBeanTest {
     @Nonnull
     public String getName() {
       return this.name;
+    }
+
+    /**
+     * Assigns the credential name.
+     *
+     * @param name the name
+     */
+    public void setName(final String name) {
+      this.name = name;
+    }
+
+    /**
+     * Gets the number of times {@link #reload()} has been called.
+     *
+     * @return the call count
+     */
+    public int getReloadCalled() {
+      return this.reloadCalled;
+    }
+
+    /**
+     * Assigns the exception that {@link #reload()} should throw.
+     *
+     * @param reloadException the exception, or {@code null}
+     */
+    public void setReloadException(final Exception reloadException) {
+      this.reloadException = reloadException;
     }
   }
 

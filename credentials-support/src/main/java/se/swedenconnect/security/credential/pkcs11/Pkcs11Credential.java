@@ -18,8 +18,8 @@ package se.swedenconnect.security.credential.pkcs11;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PreDestroy;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import se.swedenconnect.security.credential.AbstractReloadablePkiCredential;
 import se.swedenconnect.security.credential.KeyStoreCredential;
 import se.swedenconnect.security.credential.PkiCredential;
@@ -44,8 +44,10 @@ import java.util.Optional;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Slf4j
 public class Pkcs11Credential extends AbstractReloadablePkiCredential {
+
+  /** Logger instance. */
+  private static final Logger log = LoggerFactory.getLogger(Pkcs11Credential.class);
 
   /** The PKCS#11 configuration for the token that holds this credential. */
   private final Pkcs11Configuration configuration;

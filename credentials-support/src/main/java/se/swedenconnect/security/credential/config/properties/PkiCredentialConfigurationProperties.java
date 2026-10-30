@@ -15,8 +15,7 @@
  */
 package se.swedenconnect.security.credential.config.properties;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.security.credential.config.PemCredentialConfiguration;
 import se.swedenconnect.security.credential.config.PkiCredentialConfiguration;
 import se.swedenconnect.security.credential.config.StoreCredentialConfiguration;
@@ -38,25 +37,76 @@ public class PkiCredentialConfigurationProperties implements PkiCredentialConfig
   /**
    * Pointer to a PkiCredential accessible via the CredentialBundles bean.
    */
-  @Getter
-  @Setter
   private String bundle;
 
   /**
    * Configuration for a JKS (Java KeyStore) based credential.
    */
-  @Getter
-  @Setter
   @org.springframework.boot.context.properties.NestedConfigurationProperty
   private StoreCredentialConfigurationProperties jks;
 
   /**
    * Configuration for a PEM-based credential.
    */
-  @Getter
-  @Setter
   @org.springframework.boot.context.properties.NestedConfigurationProperty
   private PemCredentialConfigurationProperties pem;
+
+  /**
+   * Gets the pointer to a PkiCredential accessible via the CredentialBundles bean.
+   *
+   * @return the bundle reference
+   */
+  @Nullable
+  public String getBundle() {
+    return this.bundle;
+  }
+
+  /**
+   * Assigns the pointer to a PkiCredential accessible via the CredentialBundles bean.
+   *
+   * @param bundle the bundle reference
+   */
+  public void setBundle(@Nullable final String bundle) {
+    this.bundle = bundle;
+  }
+
+  /**
+   * Gets the configuration for a JKS (Java KeyStore) based credential.
+   *
+   * @return the JKS credential configuration
+   */
+  @Nullable
+  public StoreCredentialConfigurationProperties getJks() {
+    return this.jks;
+  }
+
+  /**
+   * Assigns the configuration for a JKS (Java KeyStore) based credential.
+   *
+   * @param jks the JKS credential configuration
+   */
+  public void setJks(@Nullable final StoreCredentialConfigurationProperties jks) {
+    this.jks = jks;
+  }
+
+  /**
+   * Gets the configuration for a PEM-based credential.
+   *
+   * @return the PEM credential configuration
+   */
+  @Nullable
+  public PemCredentialConfigurationProperties getPem() {
+    return this.pem;
+  }
+
+  /**
+   * Assigns the configuration for a PEM-based credential.
+   *
+   * @param pem the PEM credential configuration
+   */
+  public void setPem(@Nullable final PemCredentialConfigurationProperties pem) {
+    this.pem = pem;
+  }
 
   /** {@inheritDoc} */
   @Override

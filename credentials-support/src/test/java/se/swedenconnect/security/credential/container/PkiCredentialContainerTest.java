@@ -15,7 +15,6 @@
  */
 package se.swedenconnect.security.credential.container;
 
-import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -25,6 +24,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.keytype.ECParameterSpecs;
 import se.swedenconnect.security.credential.container.keytype.EcKeyPairGeneratorFactory;
@@ -61,8 +62,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Slf4j
 public class PkiCredentialContainerTest {
+
+  /** Logger instance. */
+  private static final Logger log = LoggerFactory.getLogger(PkiCredentialContainerTest.class);
 
   @BeforeAll
   static void init() {
