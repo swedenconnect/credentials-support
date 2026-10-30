@@ -81,9 +81,6 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   /** Function for the alg property. */
   private Function<PkiCredential, Algorithm> algorithmFunction = defaultAlgorithmFunction;
 
-  /** For thumbprints. */
-  private static final MessageDigest sha256;
-
   /** Customizers to be applied after defaults */
   private final List<Function<RSAKey.Builder, RSAKey.Builder>> rsaCustomizers = new ArrayList<>();
 
@@ -92,15 +89,6 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
 
   /** Whether the created JWK should be a "public" JWK, i.e., not containing private key material. */
   private boolean publicJwk = false;
-
-  static {
-    try {
-      sha256 = MessageDigest.getInstance("SHA-256");
-    }
-    catch (final NoSuchAlgorithmException e) {
-      throw new SecurityException(e);
-    }
-  }
 
   /**
    * Constructor.
@@ -380,10 +368,14 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
     return Optional.ofNullable(certificate)
         .map(c -> {
           try {
-            return Base64URL.encode(sha256.digest(certificate.getEncoded()));
+            // A new MessageDigest instance for each call, since MessageDigest is not thread-safe ...
+            return Base64URL.encode(MessageDigest.getInstance("SHA-256").digest(certificate.getEncoded()));
           }
           catch (final CertificateEncodingException e) {
             throw new RuntimeException(e);
+          }
+          catch (final NoSuchAlgorithmException e) {
+            throw new SecurityException(e);
           }
         })
         .orElse(null);

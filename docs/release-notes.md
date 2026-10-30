@@ -20,6 +20,8 @@
   - `JwkTransformerFunction.serializable()`. Created JWKs are always serializable.
   - The `credential.bundles.monitoring.*` properties. Use `credential.monitoring.*`.
 
+- Fixed a thread-safety bug in [JwkTransformerFunction](https://github.com/swedenconnect/credentials-support/blob/main/nimbus/src/main/java/se/swedenconnect/security/credential/nimbus/JwkTransformerFunction.java). A single SHA-256 digest instance was shared between all threads, so JWKs created concurrently could get an incorrect `x5t#S256` thumbprint (or the call could fail).
+
 ### 2.2.1
 
 **Date:** 2026-04-24
