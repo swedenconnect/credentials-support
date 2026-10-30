@@ -53,7 +53,7 @@ public abstract class AbstractSunPkcs11Configuration implements Pkcs11Configurat
   public static final String DEFAULT_PROVIDER_NAME = "SunPKCS11";
 
   /** The security provider for this configuration. */
-  private Provider provider;
+  private volatile Provider provider;
 
   private final String baseProviderName;
 
@@ -96,6 +96,9 @@ public abstract class AbstractSunPkcs11Configuration implements Pkcs11Configurat
   public Provider getProvider() throws Pkcs11ConfigurationException {
     if (this.provider == null) {
       synchronized (this) {
+        if (this.provider != null) {
+          return this.provider;
+        }
         Provider p = Security.getProvider(this.getBaseProviderName());
         if (p == null) {
           throw new Pkcs11ConfigurationException(

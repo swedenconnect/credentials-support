@@ -82,14 +82,14 @@ public class SunPkcs11CertificatesAccessor implements Pkcs11CertificatesAccessor
   public X509Certificate[] get(@Nonnull final KeyStore keyStore, @Nonnull final String alias) throws KeyStoreException {
 
     final Object[] chain = keyStore.getCertificateChain(alias);
-    if (chain != null || chain.length > 0) {
+    if (chain != null && chain.length > 0) {
       return Arrays.stream(chain)
           .map(X509Certificate.class::cast)
           .toArray(X509Certificate[]::new);
     }
     else {
       final X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
-      if (alias != null) {
+      if (cert != null) {
         return new X509Certificate[] { cert };
       }
       else {

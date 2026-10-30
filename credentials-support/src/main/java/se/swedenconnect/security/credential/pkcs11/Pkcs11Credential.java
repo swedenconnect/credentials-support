@@ -64,8 +64,8 @@ public class Pkcs11Credential extends AbstractReloadablePkiCredential {
   /** The PIN (key password) needed to unlock the token. */
   private final char[] pin;
 
-  /** The cached private key. */
-  private PrivateKey privateKey;
+  /** The cached private key. Volatile since it is replaced when the credential is reloaded. */
+  private volatile PrivateKey privateKey;
 
   /** Certificates for the credential - cache. */
   private final List<X509Certificate> certificates;

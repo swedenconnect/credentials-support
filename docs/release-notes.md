@@ -30,9 +30,19 @@
 
 - [StoreConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/StoreConfigurationProperties.java) lacked `equals` and `hashCode`, so identical key store configurations were never found in the credential cache, and a PKCS#11 key store could be loaded twice.
 
+- After a reload of an HSM credential, other threads could keep using the old (no longer working) private key. The private key reference in [KeyStoreCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/KeyStoreCredential.java) and [Pkcs11Credential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/pkcs11/Pkcs11Credential.java) is now safely shared between threads.
+
+- Loading certificates from a PKCS#11 device using [SunPkcs11CertificatesAccessor](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/pkcs11/SunPkcs11CertificatesAccessor.java) failed with a `NullPointerException` when the key entry had no certificate chain, and could return an array holding `null` when no certificate was found.
+
+- A [KeyStoreCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/KeyStoreCredential.java) for a PKCS#11 key store could not be created without a key password, even though the password is documented as optional. Such a credential is now created without reload support.
+
+- The PIN held by the reloader of a PKCS#11 [KeyStoreCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/KeyStoreCredential.java) was not cleared from memory when the credential was destroyed.
+
 - The key store type `pkcs11` (lower case) was rejected by [KeyStoreFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/KeyStoreFactory.java) when no location was given, and not recognized by [KeyStoreFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring/src/main/java/se/swedenconnect/security/credential/spring/factory/KeyStoreFactoryBean.java). The type is now case-insensitive everywhere.
 
 - [EncryptionMethodMetadata](https://github.com/swedenconnect/credentials-support/blob/main/opensaml/src/main/java/se/swedenconnect/security/credential/opensaml/EncryptionMethodMetadata.java) did not trim the algorithm, so a space before `;` in an encryption method configuration ended up in the SAML metadata.
+
+- [AbstractSunPkcs11Configuration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/pkcs11/AbstractSunPkcs11Configuration.java) could configure and install the PKCS#11 provider twice if used from several threads at the same time.
 
 ### 2.2.1
 
