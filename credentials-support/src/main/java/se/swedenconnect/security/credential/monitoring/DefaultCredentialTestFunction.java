@@ -21,17 +21,22 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.ReloadablePkiCredential;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import java.math.BigInteger;
 import java.security.KeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -61,8 +66,8 @@ public class DefaultCredentialTestFunction implements Function<ReloadablePkiCred
   /** The data that is signed. */
   private static final byte[] TEST_DATA = "testdata".getBytes();
 
-  /** Cache for usage of a credential. */
-  private final Map<String, String> usageCache = new HashMap<>();
+  /** Cache for usage of a credential. The function may be invoked from several threads. */
+  private final Map<String, String> usageCache = new ConcurrentHashMap<>();
 
   /** {@inheritDoc} */
   @Override
@@ -87,7 +92,7 @@ public class DefaultCredentialTestFunction implements Function<ReloadablePkiCred
           this.usageCache.put(credential.getName(), PkiCredential.Metadata.USAGE_SIGNING);
         }
         catch (final Exception err) {
-          if (err.getMessage().contains("CKR_KEY_TYPE_INCONSISTENT")) {
+          if (err.getMessage() != null && err.getMessage().contains("CKR_KEY_TYPE_INCONSISTENT")) {
             this.usageCache.put(credential.getName(), PkiCredential.Metadata.USAGE_ENCRYPTION);
             this.testDecrypt(credential);
           }
@@ -154,7 +159,7 @@ public class DefaultCredentialTestFunction implements Function<ReloadablePkiCred
   }
 
   /**
-   * Tests raw decryption of an RSA key.
+   * Tests raw decryption of an RSA key, or an ECDH key agreement for an EC key.
    * <p>
    * Note: The SunPKCS11 crypto provider does not support OAEPPadding.
    * </p>
@@ -164,10 +169,15 @@ public class DefaultCredentialTestFunction implements Function<ReloadablePkiCred
    */
   private void testDecrypt(final ReloadablePkiCredential credential) throws Exception {
     final PrivateKey privateKey = credential.getPrivateKey();
-    if (!"RSA".equals(privateKey.getAlgorithm())) {
-      log.debug("Test of credential '{}' not performed - No support for decryption for key algorithm {}",
-          credential.getName(), privateKey.getAlgorithm());
+    if ("EC".equals(privateKey.getAlgorithm())) {
+      this.testKeyAgreement(credential);
       return;
+    }
+    if (!"RSA".equals(privateKey.getAlgorithm())) {
+      final String msg = String.format("Unknown private key algorithm (%s) - Cannot perform test of credential '%s'",
+          privateKey.getAlgorithm(), credential.getName());
+      log.warn("{}", msg);
+      throw new NoSuchAlgorithmException(msg);
     }
 
     final RSAPublicKey pub = (RSAPublicKey) credential.getPublicKey();
@@ -201,6 +211,36 @@ public class DefaultCredentialTestFunction implements Function<ReloadablePkiCred
     // 4) compare
     if (!m.equals(mRecovered)) {
       throw new SecurityException("RSA raw decrypt test failed");
+    }
+  }
+
+  /**
+   * Tests an EC key by performing an ECDH key agreement with an ephemeral key, and checks that the result matches the
+   * key agreement calculated using the ephemeral private key and the credential public key.
+   *
+   * @param credential the credential
+   * @throws Exception for errors
+   */
+  private void testKeyAgreement(final ReloadablePkiCredential credential) throws Exception {
+    final ECPublicKey publicKey = (ECPublicKey) credential.getPublicKey();
+
+    final KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
+    generator.initialize(publicKey.getParams());
+    final KeyPair ephemeral = generator.generateKeyPair();
+
+    final KeyAgreement agreement = this.provider != null
+        ? KeyAgreement.getInstance("ECDH", this.provider)
+        : KeyAgreement.getInstance("ECDH");
+    agreement.init(credential.getPrivateKey());
+    agreement.doPhase(ephemeral.getPublic(), true);
+    final byte[] secret = agreement.generateSecret();
+
+    final KeyAgreement expectedAgreement = KeyAgreement.getInstance("ECDH");
+    expectedAgreement.init(ephemeral.getPrivate());
+    expectedAgreement.doPhase(publicKey, true);
+
+    if (!Arrays.equals(secret, expectedAgreement.generateSecret())) {
+      throw new SecurityException("ECDH key agreement test failed");
     }
   }
 
