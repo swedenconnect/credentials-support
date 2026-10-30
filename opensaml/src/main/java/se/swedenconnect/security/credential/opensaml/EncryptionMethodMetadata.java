@@ -158,7 +158,7 @@ public class EncryptionMethodMetadata {
   public static EncryptionMethodMetadata parseMethod(@Nonnull final String method) throws IllegalArgumentException {
     final String[] parts = Objects.requireNonNull(method, "methods must not be null").trim().split(";");
     final EncryptionMethodMetadata emm = new EncryptionMethodMetadata();
-    emm.setAlgorithm(parts[0]);
+    emm.setAlgorithm(parts[0].trim());
     for (int i = 1; i < parts.length; i++) {
       final String val = parts[i].trim();
       if (val.startsWith(KEY_SIZE_PREFIX)) {

@@ -239,4 +239,12 @@ public class KeyDescriptorTransformerFunctionTest {
         Base64.getDecoder().decode(keyDescriptor.getKeyInfo().getDEREncodedKeyValues().get(0).getValue()));
   }
 
+  @Test
+  void testParseMethodTrimsAlgorithm() {
+    final EncryptionMethodMetadata method =
+        EncryptionMethodMetadata.parseMethod("http://www.w3.org/2009/xmlenc11#aes256-gcm ; key-size=256");
+    Assertions.assertEquals("http://www.w3.org/2009/xmlenc11#aes256-gcm", method.getAlgorithm());
+    Assertions.assertEquals(256, method.getKeySize());
+  }
+
 }
