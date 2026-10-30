@@ -21,7 +21,7 @@
 
   <groupId>se.swedenconnect.security</groupId>
   <artifactId>credentials-support-parent</artifactId>
-  <version>2.3.0-SNAPSHOT</version>
+  <version>2.3.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Sweden Connect :: Credentials Support :: Parent</name>
@@ -361,7 +361,8 @@
               <doctitle>Sweden Connect - PKI Credentials Support - ${project.version}</doctitle>
               <windowtitle>Sweden Connect - PKI Credentials Support - ${project.version}</windowtitle>
               <links>
-                <link>https://javadoc.io/doc/com.nimbusds/nimbus-jose-jwt/${nimbus.version}/</link>
+                <!-- javadoc.io often lags behind new Nimbus releases, so the latest generated version is used -->
+                <link>https://javadoc.io/doc/com.nimbusds/nimbus-jose-jwt/latest/</link>
                 <link>https://shibboleth.net/api/java-opensaml/${opensaml.version}/</link>
                 <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
                 <link>https://docs.spring.io/spring-boot/api/java/</link>

@@ -8,9 +8,15 @@
 
 ## Release Notes
 
-### 2.3.0
+### 2.3.1
 
 **Date:** _not yet released_
+
+-
+
+### 2.3.0
+
+**Date:** 2026-10-30
 
 - Lombok is no longer used.
 
