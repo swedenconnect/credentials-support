@@ -86,6 +86,12 @@ public abstract class AbstractKeyStorePkiCredentialContainer extends AbstractPki
   private final Map<String, ManagedPkiCredential> credentials = new ConcurrentHashMap<>();
 
   /**
+   * The expiry time of each generated key. Kept separately since the certificate of a credential may be replaced by
+   * one with a different validity.
+   */
+  private final Map<String, Instant> expiryTimes = new ConcurrentHashMap<>();
+
+  /**
    * Constructor for the multi credential key store.
    *
    * @param provider the provider that is used to create and manage keys
@@ -147,8 +153,17 @@ public abstract class AbstractKeyStorePkiCredentialContainer extends AbstractPki
         }
       };
 
-      final ManagedPkiCredential newCredential = new ManagedPkiCredential(
-          this.getCredentialFromAlias(aliasString), destroyCallback, updateCertificatesCallback);
+      final ManagedPkiCredential newCredential;
+      try {
+        newCredential = new ManagedPkiCredential(
+            this.getCredentialFromAlias(aliasString), destroyCallback, updateCertificatesCallback);
+      }
+      catch (final PkiCredentialContainerException e) {
+        // Don't leave a key entry behind that the container does not know about ...
+        this.removeKeyEntry(aliasString);
+        throw e;
+      }
+      this.expiryTimes.put(aliasString, certificate.getNotAfter().toInstant());
       this.credentials.put(aliasString, newCredential);
     }
     catch (final KeyStoreException | PkiCredentialContainerException e) {
@@ -183,15 +198,33 @@ public abstract class AbstractKeyStorePkiCredentialContainer extends AbstractPki
   protected abstract PkiCredential getCredentialFromAlias(@Nonnull final String alias)
       throws PkiCredentialContainerException;
 
-  /** {@inheritDoc} */
+  /**
+   * Deletes the key store entry and then forgets the credential. If the key store entry can not be deleted, the
+   * credential is kept so that a later call (for example from {@link #cleanup()}) can try again.
+   */
   @Override
   public void deleteCredential(@Nonnull final String alias) throws PkiCredentialContainerException {
     try {
-      this.credentials.remove(alias);
       this.keyStore.deleteEntry(alias);
+      this.credentials.remove(alias);
+      this.expiryTimes.remove(alias);
     }
     catch (final KeyStoreException e) {
       throw new PkiCredentialContainerException("Failed to delete " + alias, e);
+    }
+  }
+
+  /**
+   * Removes a key store entry, logging (but not throwing) any errors.
+   *
+   * @param alias the alias of the entry
+   */
+  private void removeKeyEntry(@Nonnull final String alias) {
+    try {
+      this.keyStore.deleteEntry(alias);
+    }
+    catch (final KeyStoreException e) {
+      log.warn("Failed to remove key entry for alias '{}'", alias, e);
     }
   }
 
@@ -199,11 +232,11 @@ public abstract class AbstractKeyStorePkiCredentialContainer extends AbstractPki
   @Override
   @Nullable
   public Instant getExpiryTime(@Nonnull final String alias) throws PkiCredentialContainerException {
-    final ManagedPkiCredential credential = this.credentials.get(alias);
-    if (credential == null) {
+    final Instant expiryTime = this.expiryTimes.get(alias);
+    if (expiryTime == null) {
       throw new PkiCredentialContainerException("Requested alias is not present");
     }
-    return Instant.ofEpochMilli(credential.getCertificate().getNotAfter().getTime());
+    return expiryTime;
   }
 
   /** {@inheritDoc} */

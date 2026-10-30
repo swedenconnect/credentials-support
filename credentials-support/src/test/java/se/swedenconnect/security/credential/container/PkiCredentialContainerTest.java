@@ -376,6 +376,23 @@ public class PkiCredentialContainerTest {
     }
   }
 
+  @Test
+  void testExpiryNotChangedBySetCertificate() throws Exception {
+    final AbstractKeyStorePkiCredentialContainer container = new SoftPkiCredentialContainer("BC", "Test1234");
+    container.setKeyValidity(Duration.ofMinutes(15));
+    final String alias = container.generateCredential(KeyGenType.EC_P256);
+    final Instant expiryTime = container.getExpiryTime(alias);
+
+    // A certificate with a much longer validity ...
+    final AbstractKeyStorePkiCredentialContainer otherContainer = new SoftPkiCredentialContainer("BC", "Test1234");
+    otherContainer.setKeyValidity(Duration.ofDays(365));
+    final X509Certificate longLivedCert =
+        otherContainer.getCredential(otherContainer.generateCredential(KeyGenType.EC_P256)).getCertificate();
+
+    container.getCredential(alias).setCertificate(longLivedCert);
+    assertEquals(expiryTime, container.getExpiryTime(alias));
+  }
+
   private void registerBrainPoolNamedCurveSpecs() {
     // Registering Brainpool curves based on named parameter specs rather than explicit specs in order to test keys
     // generated in software

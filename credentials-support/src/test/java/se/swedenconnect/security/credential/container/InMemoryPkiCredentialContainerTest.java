@@ -24,6 +24,7 @@ import se.swedenconnect.security.credential.PkiCredential;
 import se.swedenconnect.security.credential.container.keytype.KeyGenType;
 
 import java.security.Security;
+import java.security.cert.X509Certificate;
 import java.time.Instant;
 
 /**
@@ -83,6 +84,19 @@ public class InMemoryPkiCredentialContainerTest {
     container.setKeyValidity(null);
     final String alias1 = container.generateCredential(KeyGenType.EC_P256);
     Assertions.assertNull(container.getExpiryTime(alias1));
+  }
+
+  @Test
+  public void testCertificateKeptBetweenCalls() throws Exception {
+    final InMemoryPkiCredentialContainer container = new InMemoryPkiCredentialContainer("BC");
+    final String alias = container.generateCredential(KeyGenType.EC_P256);
+
+    final SoftPkiCredentialContainer softContainer = new SoftPkiCredentialContainer("BC", "Test1234");
+    final X509Certificate cert = softContainer.getCredential(
+        softContainer.generateCredential(KeyGenType.EC_P256)).getCertificate();
+
+    container.getCredential(alias).setCertificate(cert);
+    Assertions.assertEquals(cert, container.getCredential(alias).getCertificate());
   }
 
   @Test
