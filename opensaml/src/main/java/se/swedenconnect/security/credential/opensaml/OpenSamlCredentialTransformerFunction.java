@@ -98,20 +98,6 @@ public class OpenSamlCredentialTransformerFunction implements Function<PkiCreden
   }
 
   /**
-   * Assigns the function that gets the SAML entity ID to add to the OpenSAML credential.
-   * <p>
-   * The default implementation is the {@link #defaultEntityIdFunction}.
-   * </p>
-   *
-   * @param entityIdFunction the function
-   * @deprecated use {@link #withEntityIdFunction(Function)} instead
-   */
-  @Deprecated(since = "2.1.0", forRemoval = true)
-  public void setEntityIdFunction(@Nonnull final Function<PkiCredential, String> entityIdFunction) {
-    this.entityIdFunction = Objects.requireNonNull(entityIdFunction, "entityIdFunction must not be null");
-  }
-
-  /**
    * Customizes this function with a function the gets the credential usage type.
    * <p>
    * The default implementation is the {@link #defaultUsageTypeFunction}.

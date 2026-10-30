@@ -17,10 +17,10 @@ package se.swedenconnect.security.credential.spring.autoconfigure;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import se.swedenconnect.security.credential.config.properties.CredentialBundlesConfigurationProperties;
 import se.swedenconnect.security.credential.config.properties.PkiCredentialCollectionConfigurationProperties;
 
 import java.time.Duration;
@@ -32,7 +32,6 @@ import java.util.Collections;
  * @author Martin Lindström
  */
 @ConfigurationProperties("credential")
-@Slf4j
 public class SpringCredentialConfigurationProperties implements InitializingBean {
 
   /**
@@ -40,8 +39,7 @@ public class SpringCredentialConfigurationProperties implements InitializingBean
    */
   @Getter
   @NestedConfigurationProperty
-  private final SpringCredentialBundlesConfigurationProperties bundles
-      = new SpringCredentialBundlesConfigurationProperties();
+  private final CredentialBundlesConfigurationProperties bundles = new CredentialBundlesConfigurationProperties();
 
   /**
    * Configuration for setting up a PkiCredentialCollection bean.
@@ -60,27 +58,13 @@ public class SpringCredentialConfigurationProperties implements InitializingBean
   private MonitoringProperties monitoring;
 
   /** {@inheritDoc} */
-  @SuppressWarnings("deprecation")
   @Override
   public void afterPropertiesSet() {
     if (this.collection.credentials().isEmpty()) {
       this.collection.setCredentials(Collections.emptyList());
     }
     if (this.monitoring == null) {
-      if (this.bundles.getMonitoring() != null) {
-        log.warn("credential.bundles.monitoring.* is assigned - use credential.monitoring.* instead");
-        this.monitoring = this.bundles.getMonitoring();
-        this.bundles.setMonitoring(null);
-      }
-      else {
-        this.monitoring = new MonitoringProperties();
-      }
-    }
-    else if (this.monitoring != null) {
-      if (this.bundles.getMonitoring() != null) {
-        throw new IllegalArgumentException(
-            "Both credential.monitoring.* and credential.bundles.monitoring.* are assigned");
-      }
+      this.monitoring = new MonitoringProperties();
     }
   }
 

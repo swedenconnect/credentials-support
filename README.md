@@ -949,7 +949,7 @@ By including the **credentials-support-spring** artifact, the Credential Support
 
 The **credentials-support-spring**, offers the [se.swedenconnect.security.credential.spring.factory.PkiCredentialFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring/src/main/java/se/swedenconnect/security/credential/spring/factory/PkiCredentialFactoryBean.java). This is a Spring-style factory that accepts different credential configuration objects (see [5.3](#configuration-support)).
 
-> The [se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring/src/main/java/se/swedenconnect/security/credential/factory/PkiCredentialFactoryBean.java) previously used in earlier versions of the **credentials-support** library has been deprecated and will be removed in future versions.
+> The `se.swedenconnect.security.credential.factory.PkiCredentialFactoryBean` class used in earlier versions of the **credentials-support** library was removed in version 2.3.0. Use the class above instead.
 
 The library also offers the following factory beans:
 

@@ -20,8 +20,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.health.contributor.HealthIndicator;
@@ -155,9 +155,7 @@ public class SpringCredentialBundlesAutoConfiguration {
    * @return a {@link DefaultCredentialMonitorBean}
    */
   @ConditionalOnMissingBean(CredentialMonitorBean.class)
-  @ConditionalOnExpression(
-      "T(java.lang.Boolean).parseBoolean('${credential.bundles.monitoring.enabled:false}') " +
-          "or T(java.lang.Boolean).parseBoolean('${credential.monitoring.enabled:false}')")
+  @ConditionalOnBooleanProperty("credential.monitoring.enabled")
   @Bean
   DefaultCredentialMonitorBean credentialMonitorBean(final CredentialBundles credentialBundles,
       @Qualifier("credential-collection") final PkiCredentialCollection collection,
@@ -209,9 +207,7 @@ public class SpringCredentialBundlesAutoConfiguration {
    */
   @Configuration
   @ConditionalOnClass(HealthIndicator.class)
-  @ConditionalOnExpression(
-      "T(java.lang.Boolean).parseBoolean('${credential.bundles.monitoring.health-endpoint-enabled:false}') " +
-          "or T(java.lang.Boolean).parseBoolean('${credential.monitoring.health-endpoint-enabled:false}')")
+  @ConditionalOnBooleanProperty("credential.monitoring.health-endpoint-enabled")
   public static class ActuatorHealthConfiguration {
 
     private final SpringCredentialConfigurationProperties properties;

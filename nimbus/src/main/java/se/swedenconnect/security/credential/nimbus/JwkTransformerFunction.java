@@ -241,20 +241,6 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   }
 
   /**
-   * Customizes the function to remove the {@link java.security.KeyStore KeyStore} of any created
-   * {@link com.nimbusds.jose.jwk.JWK} which makes keys unserializable.
-   *
-   * @return this instance
-   * @deprecated the {@link java.security.KeyStore KeyStore} is no longer used in the function, and therefore does
-   *     nothing
-   */
-  @Nonnull
-  @Deprecated(since = "2.1.1", forRemoval = true)
-  public JwkTransformerFunction serializable() {
-    return this.withRsaCustomizer(b -> b.keyStore(null)).withEcKeyCustomizer(b -> b.keyStore(null));
-  }
-
-  /**
    * Customizes the function with a custom function for calculating the key ID property (JWK {@code kid} property).
    * <p>
    * The default implementation is {@link DefaultKeyIdFunction}.
@@ -267,20 +253,6 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   public JwkTransformerFunction withKeyIdFunction(@Nonnull final Function<PkiCredential, String> keyIdFunction) {
     this.keyIdFunction = Objects.requireNonNull(keyIdFunction, "keyIdFunction must not be null");
     return this;
-  }
-
-  /**
-   * Assigns the function that returns the key ID property (JWK {@code kid} property).
-   * <p>
-   * The default implementation is {@link DefaultKeyIdFunction}.
-   * </p>
-   *
-   * @param keyIdFunction the function
-   * @deprecated use {@link #withKeyIdFunction(Function)} instead
-   */
-  @Deprecated(since = "2.1.0", forRemoval = true)
-  public void setKeyIdFunction(@Nonnull final Function<PkiCredential, String> keyIdFunction) {
-    this.withKeyIdFunction(keyIdFunction);
   }
 
   /**
@@ -299,21 +271,6 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
   }
 
   /**
-   * Assigns the function that returns the key use property (JWK {@code use} property).
-   * <p>
-   * The default implementation is {@link #defaultKeyUseFunction}.
-   * </p>
-   *
-   * @param keyUseFunction the function
-   * @deprecated use {@link #withKeyUseFunction(Function)} instead
-   */
-  @Deprecated(since = "2.1.0", forRemoval = true)
-  public void setKeyUseFunction(
-      @Nonnull final Function<PkiCredential, KeyUse> keyUseFunction) {
-    this.keyUseFunction = Objects.requireNonNull(keyUseFunction, "keyUseFunction must not be null");
-  }
-
-  /**
    * Customizes this function with a function that returns a set of {@link KeyOperation}s.
    * <p>
    * The default implementation is {@link #defaultKeyOpsFunction}.
@@ -326,20 +283,6 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
       @Nonnull final Function<PkiCredential, Set<KeyOperation>> keyOpsFunction) {
     this.keyOpsFunction = Objects.requireNonNull(keyOpsFunction, "keyOpsFunction must not be null");
     return this;
-  }
-
-  /**
-   * Assigns the function that returns a set of {@link KeyOperation}s.
-   * <p>
-   * The default implementation is {@link #defaultKeyOpsFunction}.
-   * </p>
-   *
-   * @param keyOpsFunction the function
-   * @deprecated use {@link #withKeyOpsFunction(Function)} instead
-   */
-  @Deprecated(since = "2.1.0", forRemoval = true)
-  public void setKeyOpsFunction(@Nonnull final Function<PkiCredential, Set<KeyOperation>> keyOpsFunction) {
-    this.withKeyOpsFunction(keyOpsFunction);
   }
 
   /**
@@ -356,20 +299,6 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
       @Nonnull final Function<PkiCredential, Algorithm> algorithmFunction) {
     this.algorithmFunction = Objects.requireNonNull(algorithmFunction, "algorithmFunction must not be null");
     return this;
-  }
-
-  /**
-   * Assigns the function that returns the JOSE algorithm.
-   * <p>
-   * The default implementation is {@link #defaultAlgorithmFunction}.
-   * </p>
-   *
-   * @param algorithmFunction the function
-   * @deprecated use {@link #withAlgorithmFunction(Function)} instead
-   */
-  @Deprecated(since = "2.1.0", forRemoval = true)
-  public void setAlgorithmFunction(@Nonnull final Function<PkiCredential, Algorithm> algorithmFunction) {
-    this.withAlgorithmFunction(algorithmFunction);
   }
 
   /**

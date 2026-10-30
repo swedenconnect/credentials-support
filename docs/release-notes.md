@@ -8,6 +8,16 @@
 
 ## Release Notes
 
+### 2.3.0
+
+**Date:** _not yet released_
+
+- Removed deprecated code:
+  - The `PkiCredentialFactoryBean` and `PkiCredentialConfigurationProperties` classes in the `se.swedenconnect.security.credential.factory` package. Use the classes in `se.swedenconnect.security.credential.spring.factory` and `se.swedenconnect.security.credential.config.properties`.
+  - The `set...Function` methods of `JwkTransformerFunction` and `OpenSamlCredentialTransformerFunction`. Use the corresponding `with...Function` methods.
+  - `JwkTransformerFunction.serializable()`. Created JWKs are always serializable.
+  - The `credential.bundles.monitoring.*` properties. Use `credential.monitoring.*`.
+
 ### 2.2.1
 
 **Date:** 2026-04-24
