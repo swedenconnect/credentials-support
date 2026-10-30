@@ -129,7 +129,15 @@ public class CredentialMonitorHealthIndicator implements HealthIndicator {
   @EventListener
   public void onSuccessfulCredentialTestEvent(final SuccessfulCredentialTestEvent event) {
     Optional.ofNullable(this.status.get(event.getCredentialName()))
-        .ifPresentOrElse(s -> s.setTestResult(MonitorStatus.OK),
+        .ifPresentOrElse(s -> {
+              // The credential works again, so details from an earlier failure are cleared ...
+              s.setTestResult(MonitorStatus.OK);
+              s.setTestError(null);
+              s.setTestException(null);
+              s.setReloadResult(null);
+              s.setReloadError(null);
+              s.setReloadException(null);
+            },
             () -> this.status.put(event.getCredentialName(), MonitorStatus.builder()
                 .credentialName(event.getCredentialName())
                 .testResult(MonitorStatus.OK)
@@ -140,9 +148,13 @@ public class CredentialMonitorHealthIndicator implements HealthIndicator {
   public void onFailedCredentialTestEvent(final FailedCredentialTestEvent event) {
     Optional.ofNullable(this.status.get(event.getCredentialName()))
         .ifPresentOrElse(s -> {
+              // A new failure, so the result of an earlier reload is cleared ...
               s.setTestResult(MonitorStatus.ERROR);
               s.setTestError(event.getError());
               s.setTestException(event.getException());
+              s.setReloadResult(null);
+              s.setReloadError(null);
+              s.setReloadException(null);
             },
             () -> this.status.put(event.getCredentialName(), MonitorStatus.builder()
                 .credentialName(event.getCredentialName())
@@ -156,7 +168,11 @@ public class CredentialMonitorHealthIndicator implements HealthIndicator {
   @EventListener
   public void onSuccessfulCredentialReloadEvent(final SuccessfulCredentialReloadEvent event) {
     Optional.ofNullable(this.status.get(event.getCredentialName()))
-        .ifPresentOrElse(s -> s.setReloadResult(MonitorStatus.OK),
+        .ifPresentOrElse(s -> {
+              s.setReloadResult(MonitorStatus.OK);
+              s.setReloadError(null);
+              s.setReloadException(null);
+            },
             () -> this.status.put(event.getCredentialName(), MonitorStatus.builder()
                 .credentialName(event.getCredentialName())
                 .testResult(MonitorStatus.ERROR)
