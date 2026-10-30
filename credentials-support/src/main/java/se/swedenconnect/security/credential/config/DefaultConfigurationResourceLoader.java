@@ -22,6 +22,7 @@ import org.cryptacular.io.Resource;
 import org.cryptacular.io.URLResource;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -78,6 +79,11 @@ public class DefaultConfigurationResourceLoader implements ConfigurationResource
       resource = new ClassPathResource(location);
     }
 
-    return resource.getInputStream();
+    // A ClassPathResource returns null instead of throwing if the resource does not exist ...
+    final InputStream stream = resource.getInputStream();
+    if (stream == null) {
+      throw new FileNotFoundException("Resource '%s' does not exist".formatted(location));
+    }
+    return stream;
   }
 }

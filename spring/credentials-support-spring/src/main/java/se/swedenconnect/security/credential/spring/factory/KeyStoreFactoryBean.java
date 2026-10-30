@@ -108,7 +108,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
   @Nonnull
   protected KeyStore createInstance() throws Exception {
     try {
-      if (KeyStoreFactory.PKCS11_KEYSTORE_TYPE.equals(this.getType())) {
+      if (KeyStoreFactory.PKCS11_KEYSTORE_TYPE.equalsIgnoreCase(this.getType())) {
         if (this.provider == null) {
           log.debug("PKCS#11 configuration is assigned - assuming SunPKCS11 provider");
           this.provider = "SunPKCS11";

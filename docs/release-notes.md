@@ -22,6 +22,16 @@
 
 - Fixed a thread-safety bug in [JwkTransformerFunction](https://github.com/swedenconnect/credentials-support/blob/main/nimbus/src/main/java/se/swedenconnect/security/credential/nimbus/JwkTransformerFunction.java). A single SHA-256 digest instance was shared between all threads, so JWKs created concurrently could get an incorrect `x5t#S256` thumbprint (or the call could fail).
 
+- A missing classpath resource (for example a mistyped key store location) resulted in an empty key store, or a `NullPointerException` for PEM files, instead of an error. [DefaultConfigurationResourceLoader](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/DefaultConfigurationResourceLoader.java) now throws a `FileNotFoundException`.
+
+- [KeyStoreFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/KeyStoreFactory.java) did not close the input stream after loading a key store from a configured location, which leaked a file handle (or HTTP connection) for each loaded key store.
+
+- The credential cache of [PkiCredentialFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/PkiCredentialFactory.java) was keyed by the hash code of the configuration only, so two different configurations with the same hash code could return the wrong credential. The cache is now keyed by the configuration itself.
+
+- [StoreConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/StoreConfigurationProperties.java) lacked `equals` and `hashCode`, so identical key store configurations were never found in the credential cache, and a PKCS#11 key store could be loaded twice.
+
+- The key store type `pkcs11` (lower case) was rejected by [KeyStoreFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/KeyStoreFactory.java) when no location was given, and not recognized by [KeyStoreFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring/src/main/java/se/swedenconnect/security/credential/spring/factory/KeyStoreFactoryBean.java). The type is now case-insensitive everywhere.
+
 - [EncryptionMethodMetadata](https://github.com/swedenconnect/credentials-support/blob/main/opensaml/src/main/java/se/swedenconnect/security/credential/opensaml/EncryptionMethodMetadata.java) did not trim the algorithm, so a space before `;` in an encryption method configuration ended up in the SAML metadata.
 
 ### 2.2.1
