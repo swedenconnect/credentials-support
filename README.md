@@ -987,7 +987,7 @@ The **credentials-support-spring-boot-starter** gives a number of useful feature
 
 - Automatic registration of the converters documented in [Section 8.2, Spring Converters](#spring-converters).
 
-- The creation and injection of a scheduled [CredentialMonitorBean](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/monitoring/CredentialMonitorBean.java) bean.
+- The creation and injection of a scheduled [CredentialMonitorBean](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/monitoring/CredentialMonitorBean.java) bean. The monitor runs at the interval given by `credential.monitoring.test-interval`. If the application has a `TaskScheduler` bean (for example by using `@EnableScheduling`), this scheduler is used. Otherwise, a dedicated scheduler is created, so the application does not need to enable scheduling.
 
 - As part of the monitoring of credentials a number of application events are published. These events may be used for alarms or audit logging. The events are:
 
