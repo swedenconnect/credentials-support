@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+#
+# Copyright 2020-2026 Sweden Connect
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+#
+# Git commit-msg hook that checks that the commit message follows the rules in CONTRIBUTING.md.
+#
+# Enable it once per clone with:
+#
+#   git config core.hooksPath .githooks
+#
+
+TYPES="feat|fix|refactor|perf|style|test|docs|build|ops|chore"
+
+# Remove comment lines and everything below the scissors line, as Git does with the default cleanup mode.
+MESSAGE="$(sed -e '/^# -* >8 -*$/,$d' -e '/^#/d' "$1")"
+
+HEADER="$(printf '%s\n' "${MESSAGE}" | sed -n '1p')"
+SECOND_LINE="$(printf '%s\n' "${MESSAGE}" | sed -n '2p')"
+
+ERRORS=()
+
+# Merge and revert commits created by Git, and fixup/squash commits for "git rebase --autosquash", are accepted
+# as they are.
+if printf '%s\n' "${HEADER}" | grep -Eq '^(Merge |Revert "|(fixup|squash|amend)! )'; then
+  exit 0
+fi
+
+if ! printf '%s\n' "${HEADER}" | grep -Eq "^(${TYPES})!?: "; then
+  if printf '%s\n' "${HEADER}" | grep -Eq "^(${TYPES})!?\("; then
+    ERRORS+=("Scopes are not used in this project, write \"<type>: <description>\".")
+  elif printf '%s\n' "${HEADER}" | grep -Eq "^(${TYPES})!?:"; then
+    ERRORS+=("Use exactly one space after the colon.")
+  elif printf '%s\n' "${HEADER}" | grep -Eq '^[a-z]+!?(\([^)]*\))?:'; then
+    ERRORS+=("Unknown type \"$(printf '%s\n' "${HEADER}" | sed -E 's/^([a-z]+).*/\1/')\". Valid types are: ${TYPES//|/, }.")
+  else
+    ERRORS+=("The first line must have the format \"<type>: <description>\", or \"<type>!: <description>\" for a breaking change.")
+  fi
+else
+  DESCRIPTION="$(printf '%s\n' "${HEADER}" | sed -E "s/^(${TYPES})!?: //")"
+  if [ -z "${DESCRIPTION// /}" ]; then
+    ERRORS+=("The description must not be empty.")
+  else
+    if printf '%s\n' "${DESCRIPTION}" | grep -Eq '^ '; then
+      ERRORS+=("Use exactly one space after the colon.")
+    fi
+    if printf '%s\n' "${DESCRIPTION}" | grep -Eq '^[A-Z][a-z]'; then
+      ERRORS+=("Do not capitalize the first letter of the description.")
+    fi
+    if printf '%s\n' "${DESCRIPTION}" | grep -Eq '\.$'; then
+      ERRORS+=("Do not end the description with a period.")
+    fi
+  fi
+fi
+
+if [ -n "${SECOND_LINE}" ]; then
+  ERRORS+=("The first line must be followed by an empty line before the body.")
+fi
+
+if printf '%s\n' "${MESSAGE}" | grep -Eq '^BREAKING[ -]CHANGE: ' \
+    && ! printf '%s\n' "${HEADER}" | grep -Eq "^(${TYPES})!: "; then
+  ERRORS+=("A message with a \"BREAKING CHANGE:\" footer must mark the type with \"!\", for example \"feat!: ...\".")
+fi
+
+if [ ${#ERRORS[@]} -gt 0 ]; then
+  {
+    echo "Commit message rejected:"
+    echo ""
+    echo "  ${HEADER}"
+    echo ""
+    for e in "${ERRORS[@]}"; do
+      echo "  - ${e}"
+    done
+    echo ""
+    echo "See \"Commit messages\" in CONTRIBUTING.md."
+  } >&2
+  exit 1
+fi
+
+exit 0
