@@ -21,6 +21,7 @@ import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -73,6 +74,12 @@ public class DefaultConfigurationResourceLoaderTest {
     try (final InputStream is = this.loader.getStream("./src/test/resources/resource.txt")) {
       Assertions.assertEquals(CONTENTS, getContents(is));
     }
+  }
+
+  @Test
+  void testMissingClasspathResource() {
+    Assertions.assertThrows(FileNotFoundException.class, () -> this.loader.getStream("not-there.jks"));
+    Assertions.assertThrows(FileNotFoundException.class, () -> this.loader.getStream("classpath:not-there.jks"));
   }
 
   private static String getContents(final InputStream inputStream) {

@@ -15,47 +15,50 @@
  */
 package se.swedenconnect.security.credential.spring.autoconfigure;
 
-import jakarta.annotation.Nonnull;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import se.swedenconnect.security.credential.monitoring.CredentialMonitorBean;
-import se.swedenconnect.security.credential.monitoring.CredentialMonitorTask;
 
 import java.time.Duration;
 import java.util.Optional;
 
 /**
  * For configuring scheduling of credential monitors.
+ * <p>
+ * If the application has a {@link TaskScheduler} bean (for example since it uses {@code @EnableScheduling}), that
+ * scheduler is used. Otherwise, a dedicated scheduler is created, so scheduling does not have to be enabled by the
+ * application.
+ * </p>
  *
  * @author Martin Lindström
  */
-@ConditionalOnBean({ CredentialMonitorBean.class, TaskScheduler.class })
-@AutoConfiguration
-@AutoConfigureAfter({ SpringCredentialBundlesAutoConfiguration.class })
-public class MonitorSchedulerAutoConfiguration implements SchedulingConfigurer {
+@ConditionalOnBean(CredentialMonitorBean.class)
+@AutoConfiguration(after = SpringCredentialBundlesAutoConfiguration.class,
+    afterName = "org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration")
+public class MonitorSchedulerAutoConfiguration {
 
-  private final TaskScheduler taskScheduler;
-  private final CredentialMonitorBean monitorBean;
-  private final SpringCredentialConfigurationProperties properties;
+  /** The default interval between credential tests. */
+  private static final Duration DEFAULT_TEST_INTERVAL = Duration.ofMinutes(10);
 
-  public MonitorSchedulerAutoConfiguration(final TaskScheduler taskScheduler, final CredentialMonitorBean monitorBean,
-      final SpringCredentialConfigurationProperties properties) {
-    this.taskScheduler = taskScheduler;
-    this.monitorBean = monitorBean;
-    this.properties = properties;
-  }
-
-  @Override
-  public void configureTasks(@Nonnull final ScheduledTaskRegistrar taskRegistrar) {
-    taskRegistrar.setScheduler(this.taskScheduler);
-    taskRegistrar.addFixedDelayTask(new CredentialMonitorTask(this.monitorBean),
-        Optional.ofNullable(this.properties.getMonitoring().getTestInterval())
-            .orElseGet(() -> Duration.ofMinutes(10)));
+  /**
+   * Creates a {@link CredentialMonitorScheduler} that runs the monitor bean periodically.
+   *
+   * @param monitorBean the monitor bean
+   * @param properties the configuration properties (holding the test interval)
+   * @param taskScheduler the application's task scheduler, if there is exactly one
+   * @return a {@link CredentialMonitorScheduler}
+   */
+  @ConditionalOnMissingBean(CredentialMonitorScheduler.class)
+  @Bean
+  CredentialMonitorScheduler credentialMonitorScheduler(final CredentialMonitorBean monitorBean,
+      final SpringCredentialConfigurationProperties properties, final ObjectProvider<TaskScheduler> taskScheduler) {
+    return new CredentialMonitorScheduler(monitorBean,
+        Optional.ofNullable(properties.getMonitoring().getTestInterval()).orElse(DEFAULT_TEST_INTERVAL),
+        taskScheduler.getIfUnique());
   }
 
 }

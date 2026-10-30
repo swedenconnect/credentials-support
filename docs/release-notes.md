@@ -8,6 +8,60 @@
 
 ## Release Notes
 
+### 2.3.0
+
+**Date:** _not yet released_
+
+- Lombok is no longer used.
+
+- Removed deprecated code:
+  - The `PkiCredentialFactoryBean` and `PkiCredentialConfigurationProperties` classes in the `se.swedenconnect.security.credential.factory` package. Use the classes in `se.swedenconnect.security.credential.spring.factory` and `se.swedenconnect.security.credential.config.properties`.
+  - The `set...Function` methods of `JwkTransformerFunction` and `OpenSamlCredentialTransformerFunction`. Use the corresponding `with...Function` methods.
+  - `JwkTransformerFunction.serializable()`. Created JWKs are always serializable.
+  - The `credential.bundles.monitoring.*` properties. Use `credential.monitoring.*`.
+
+- Fixed a thread-safety bug in [JwkTransformerFunction](https://github.com/swedenconnect/credentials-support/blob/main/nimbus/src/main/java/se/swedenconnect/security/credential/nimbus/JwkTransformerFunction.java). A single SHA-256 digest instance was shared between all threads, so JWKs created concurrently could get an incorrect `x5t#S256` thumbprint (or the call could fail).
+
+- Fixed the testing of EC keys used for encryption in [DefaultCredentialTestFunction](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/monitoring/DefaultCredentialTestFunction.java). Such keys were never actually tested, so a lost HSM connection was reported as healthy and the credential was not reloaded. The key is now tested using an ECDH key agreement. Keys of an unsupported algorithm now fail the test instead of being reported as working.
+
+- Credential monitoring (`credential.monitoring.enabled`) did nothing unless the application used `@EnableScheduling`. [MonitorSchedulerAutoConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring-boot-starter/src/main/java/se/swedenconnect/security/credential/spring/autoconfigure/MonitorSchedulerAutoConfiguration.java) now sets up a [CredentialMonitorScheduler](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring-boot-starter/src/main/java/se/swedenconnect/security/credential/spring/autoconfigure/CredentialMonitorScheduler.java) that uses the application's `TaskScheduler` if there is one, and otherwise a dedicated scheduler.
+
+- The `credential-monitor` health endpoint always reported UP if the application defined its own `DefaultCredentialMonitorBean`. [SpringCredentialBundlesAutoConfiguration](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring-boot-starter/src/main/java/se/swedenconnect/security/credential/spring/autoconfigure/SpringCredentialBundlesAutoConfiguration.java) now only sets up the health indicator to listen for monitoring events when the starter has created the monitor bean itself, and otherwise lets the indicator run its own tests.
+
+- The details of the `credential-monitor` health endpoint ([CredentialMonitorHealthIndicator](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring-boot-starter/src/main/java/se/swedenconnect/security/credential/spring/actuator/CredentialMonitorHealthIndicator.java)) kept old test and reload errors after a credential had recovered. Old error details are now cleared when a new test result is received.
+
+- A missing classpath resource (for example a mistyped key store location) resulted in an empty key store, or a `NullPointerException` for PEM files, instead of an error. [DefaultConfigurationResourceLoader](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/DefaultConfigurationResourceLoader.java) now throws a `FileNotFoundException`.
+
+- [KeyStoreFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/KeyStoreFactory.java) did not close the input stream after loading a key store from a configured location, which leaked a file handle (or HTTP connection) for each loaded key store.
+
+- The credential cache of [PkiCredentialFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/PkiCredentialFactory.java) was keyed by the hash code of the configuration only, so two different configurations with the same hash code could return the wrong credential. The cache is now keyed by the configuration itself.
+
+- [StoreConfigurationProperties](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/config/properties/StoreConfigurationProperties.java) lacked `equals` and `hashCode`, so identical key store configurations were never found in the credential cache, and a PKCS#11 key store could be loaded twice.
+
+- After a reload of an HSM credential, other threads could keep using the old (no longer working) private key. The private key reference in [KeyStoreCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/KeyStoreCredential.java) and [Pkcs11Credential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/pkcs11/Pkcs11Credential.java) is now safely shared between threads.
+
+- Loading certificates from a PKCS#11 device using [SunPkcs11CertificatesAccessor](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/pkcs11/SunPkcs11CertificatesAccessor.java) failed with a `NullPointerException` when the key entry had no certificate chain, and could return an array holding `null` when no certificate was found.
+
+- A [KeyStoreCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/KeyStoreCredential.java) for a PKCS#11 key store could not be created without a key password, even though the password is documented as optional. Such a credential is now created without reload support.
+
+- The PIN held by the reloader of a PKCS#11 [KeyStoreCredential](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/KeyStoreCredential.java) was not cleared from memory when the credential was destroyed.
+
+- The key store type `pkcs11` (lower case) was rejected by [KeyStoreFactory](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/factory/KeyStoreFactory.java) when no location was given, and not recognized by [KeyStoreFactoryBean](https://github.com/swedenconnect/credentials-support/blob/main/spring/credentials-support-spring/src/main/java/se/swedenconnect/security/credential/spring/factory/KeyStoreFactoryBean.java). The type is now case-insensitive everywhere.
+
+- [AbstractKeyStorePkiCredentialContainer](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/container/AbstractKeyStorePkiCredentialContainer.java) forgot about a generated key before it had been removed from the key store. If the removal failed (for example due to a lost HSM connection), the key was left in the key store and never removed later. Also, a key was left in the key store if creating its credential failed.
+
+- The expiry time of a key generated by [AbstractKeyStorePkiCredentialContainer](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/container/AbstractKeyStorePkiCredentialContainer.java) was read from the credential's current certificate. Assigning a new certificate with a longer validity therefore extended the lifetime of the key. The expiry time is now fixed when the key is generated.
+
+- A certificate assigned to a credential from [InMemoryPkiCredentialContainer](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/container/InMemoryPkiCredentialContainer.java) was lost on the next call to `getCredential`.
+
+- [DefaultCredentialMonitorBean](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/monitoring/DefaultCredentialMonitorBean.java) never reloaded credentials without a test function, even those configured to be reloaded only. Such credentials are now reloaded.
+
+- Failed reloads were logged at INFO by [DefaultCredentialMonitorBean](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/monitoring/DefaultCredentialMonitorBean.java), although the documentation says ERROR. Failures are now logged at ERROR when no callback is installed. Also, [DefaultCredentialTestFunction](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/monitoring/DefaultCredentialTestFunction.java) reported a `NullPointerException` instead of the real error when a signing error had no message.
+
+- [EncryptionMethodMetadata](https://github.com/swedenconnect/credentials-support/blob/main/opensaml/src/main/java/se/swedenconnect/security/credential/opensaml/EncryptionMethodMetadata.java) did not trim the algorithm, so a space before `;` in an encryption method configuration ended up in the SAML metadata.
+
+- [AbstractSunPkcs11Configuration](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/pkcs11/AbstractSunPkcs11Configuration.java) could configure and install the PKCS#11 provider twice if used from several threads at the same time.
+
 ### 2.2.1
 
 **Date:** 2026-04-24

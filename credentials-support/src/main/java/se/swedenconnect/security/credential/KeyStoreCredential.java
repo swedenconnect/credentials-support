@@ -18,7 +18,6 @@ package se.swedenconnect.security.credential;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PreDestroy;
-import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.swedenconnect.security.credential.factory.KeyStoreFactory;
@@ -73,8 +72,8 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
   /** For reloading the keystore. */
   private KeyStoreReloader reloader;
 
-  /** The cached private key. */
-  private PrivateKey privateKey;
+  /** The cached private key. Volatile since it is replaced when the credential is reloaded. */
+  private volatile PrivateKey privateKey;
 
   /**
    * Constructor taking a {@link KeyStore} and the key entry alias and a key password.
@@ -123,7 +122,10 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
       testFunction.setProvider(Optional.ofNullable(this.keyStore.getProvider()).map(Provider::getName).orElse(null));
       this.setTestFunction(testFunction);
 
-      this.reloader = new Pkcs11KeyStoreReloader(this.keyPassword);
+      // Without a PIN we cannot log in again, so no reloader is installed ...
+      if (this.keyPassword != null) {
+        this.reloader = new Pkcs11KeyStoreReloader(this.keyPassword);
+      }
     }
 
     // Assert that everything looks good by loading the key and certificate ...
@@ -183,10 +185,16 @@ public class KeyStoreCredential extends AbstractReloadablePkiCredential {
     return this.certificates;
   }
 
+  /**
+   * Clears the key password, and the PIN held by the installed reloader (if it is a {@link Pkcs11KeyStoreReloader}).
+   */
   @PreDestroy
   public void destroy() {
     if (this.keyPassword != null) {
       Arrays.fill(this.keyPassword, (char) 0);
+    }
+    if (this.reloader instanceof final Pkcs11KeyStoreReloader pkcs11KeyStoreReloader) {
+      pkcs11KeyStoreReloader.destroy();
     }
   }
 

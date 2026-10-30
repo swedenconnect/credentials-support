@@ -15,8 +15,7 @@
  */
 package se.swedenconnect.security.credential.config.properties;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.annotation.Nullable;
 import se.swedenconnect.security.credential.config.ConfigurationResourceLoader;
 import se.swedenconnect.security.credential.config.PkiCredentialCollectionConfiguration;
 import se.swedenconnect.security.credential.config.PkiCredentialConfiguration;
@@ -48,9 +47,26 @@ public class PkiCredentialCollectionConfigurationProperties implements PkiCreden
   /**
    * The credentials that are part of the credential collection.
    */
-  @Setter
-  @Getter
   private List<PkiCredentialConfigurationProperties> credentials;
+
+  /**
+   * Gets the credentials that are part of the credential collection.
+   *
+   * @return a list of credential configurations
+   */
+  @Nullable
+  public List<PkiCredentialConfigurationProperties> getCredentials() {
+    return this.credentials;
+  }
+
+  /**
+   * Assigns the credentials that are part of the credential collection.
+   *
+   * @param credentials a list of credential configurations
+   */
+  public void setCredentials(@Nullable final List<PkiCredentialConfigurationProperties> credentials) {
+    this.credentials = credentials;
+  }
 
   /** {@inheritDoc} */
   @Override

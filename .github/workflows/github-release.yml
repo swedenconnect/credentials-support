@@ -1,0 +1,60 @@
+# Creates a GitHub release when a version tag is pushed.
+#
+# Nothing is built and no assets are attached. Publishing to Maven Central is left to
+# maven-central-deploy.yml, which is triggered by the same tags. The release notes are generated
+# by GitHub from the pull requests merged since the previous version tag, after a link to the
+# release notes on the documentation site.
+name: Create GitHub release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Narrowed to what creating a release requires.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+
+    steps:
+      # The tags are needed to find the previous release.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # GitHub starts the generated notes at the previous GitHub release. Releases up to 2.2.1 are
+      # tagged "X.Y.Z-release" and have no GitHub release, so the previous version tag is looked up
+      # here, in both formats, and passed as the start of the notes. That gives the notes the right
+      # pull requests and a "Full Changelog" link that compares the two versions.
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          CURRENT="${TAG#v}"
+          PREVIOUS="$( { git tag -l; echo "${TAG}"; } \
+            | grep -E '^(v[0-9]+\.[0-9]+\.[0-9]+|[0-9]+\.[0-9]+\.[0-9]+-release)$' \
+            | while read -r t; do v="${t#v}"; echo "${v%-release} ${t}"; done \
+            | sort -V -k1,1 \
+            | awk -v cur="${CURRENT}" '$1 == cur { exit } { prev = $2 } END { print prev }')"
+
+          START_TAG_ARGS=()
+          if [ -n "${PREVIOUS}" ]; then
+            echo "Release notes start at ${PREVIOUS}"
+            START_TAG_ARGS=(--notes-start-tag "${PREVIOUS}")
+          else
+            echo "No previous version tag, release notes cover the whole history"
+          fi
+
+          gh release create "${TAG}" \
+            --repo "${REPO}" \
+            --title "${CURRENT}" \
+            --notes "See the [release notes](https://docs.swedenconnect.se/credentials-support/release-notes.html) for a summary of the changes." \
+            --generate-notes \
+            "${START_TAG_ARGS[@]}" \
+            --latest

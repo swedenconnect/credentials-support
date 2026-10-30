@@ -26,6 +26,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
+import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -86,7 +87,7 @@ public class InMemoryPkiCredentialContainer extends AbstractPkiCredentialContain
   @Override
   @Nonnull
   public ManagedPkiCredential getCredential(@Nonnull final String alias) throws PkiCredentialContainerException {
-    final PkiCredential credential = this.credentials.get(alias);
+    final ExtendedBasicCredential credential = this.credentials.get(alias);
     if (credential == null) {
       throw new PkiCredentialContainerException(String.format("Credential with alias '%s' was not found", alias));
     }
@@ -94,7 +95,7 @@ public class InMemoryPkiCredentialContainer extends AbstractPkiCredentialContain
       this.deleteCredential(alias);
       throw new PkiCredentialContainerException("Requested credential has expired - Destroying credential");
     }
-    return new ManagedPkiCredential(credential, c -> this.deleteCredential(alias), null);
+    return new ManagedPkiCredential(credential, c -> this.deleteCredential(alias), credential::setCertificates);
   }
 
   /** {@inheritDoc} */
@@ -121,7 +122,8 @@ public class InMemoryPkiCredentialContainer extends AbstractPkiCredentialContain
   }
 
   /**
-   * A wrapper of {@link BasicCredential} that also includes expiration time.
+   * A wrapper of {@link BasicCredential} that also includes expiration time and certificates assigned after the
+   * credential was created.
    *
    * @author Martin Lindström (martin@idsec.se)
    * @author Stefan Santesson (stefan@idsec.se)
@@ -130,6 +132,9 @@ public class InMemoryPkiCredentialContainer extends AbstractPkiCredentialContain
 
     /** The expiry time. */
     private final Instant validTo;
+
+    /** Certificates assigned after creation (via {@link ManagedPkiCredential#setCertificateChain(List)}). */
+    private volatile List<X509Certificate> certificates;
 
     /**
      * Constructor.
@@ -152,6 +157,24 @@ public class InMemoryPkiCredentialContainer extends AbstractPkiCredentialContain
      */
     public Instant getExpiryTime() {
       return this.validTo;
+    }
+
+    /**
+     * Assigns the certificate chain, so that it is kept between calls to {@link #getCredential(String)}.
+     *
+     * @param certificates the certificate chain (entity certificate placed first)
+     */
+    public void setCertificates(@Nonnull final X509Certificate[] certificates) {
+      this.certificates = List.of(certificates);
+    }
+
+    /**
+     * Returns the certificates assigned after creation, or the original chain if none has been assigned.
+     */
+    @Nonnull
+    @Override
+    public List<X509Certificate> getCertificateChain() {
+      return this.certificates != null ? this.certificates : super.getCertificateChain();
     }
 
     /**

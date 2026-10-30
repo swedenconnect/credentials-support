@@ -78,8 +78,11 @@ public class PkiCredentialFactory {
   /** For loading resources. */
   private final ConfigurationResourceLoader resourceLoader;
 
-  /** Cache for avoiding loading the same credential several times. */
-  private ConcurrentMap<Integer, PkiCredential> cache;
+  /**
+   * Cache for avoiding loading the same credential several times. Keyed by the configuration object, so that
+   * configurations with the same hash code but different contents never share an entry.
+   */
+  private ConcurrentMap<Object, PkiCredential> cache;
 
   /**
    * Constructor assigning the {@link CredentialBundles}, credential and keystore providers.
@@ -193,7 +196,7 @@ public class PkiCredentialFactory {
       CertificateException, KeyException, KeyStoreException, NoSuchProviderException {
 
     if (this.cache != null && configuration.bundle().isEmpty()) {
-      final PkiCredential c = this.cache.get(configuration.hashCode());
+      final PkiCredential c = this.cache.get(configuration);
       if (c != null) {
         log.debug("Returning cached credential '{}'", c.getName());
         return c;
@@ -201,7 +204,7 @@ public class PkiCredentialFactory {
     }
     final PkiCredential credential = PkiCredentialFactory.createCredential(configuration, this.resourceLoader,
         this.credentialProvider, this.keyStoreProvider, null);
-    Optional.ofNullable(this.cache).ifPresent(c -> c.put(configuration.hashCode(), credential));
+    Optional.ofNullable(this.cache).ifPresent(c -> c.put(configuration, credential));
     return credential;
   }
 
@@ -307,14 +310,14 @@ public class PkiCredentialFactory {
       throws IllegalArgumentException, IOException, CertificateException, KeyException {
 
     if (this.cache != null) {
-      final PkiCredential c = this.cache.get(configuration.hashCode());
+      final PkiCredential c = this.cache.get(configuration);
       if (c != null) {
         log.debug("Returning cached credential '{}'", c.getName());
         return c;
       }
     }
     final PkiCredential credential = PkiCredentialFactory.createCredential(configuration, this.resourceLoader);
-    Optional.ofNullable(this.cache).ifPresent(c -> c.put(configuration.hashCode(), credential));
+    Optional.ofNullable(this.cache).ifPresent(c -> c.put(configuration, credential));
     return credential;
   }
 
@@ -455,7 +458,7 @@ public class PkiCredentialFactory {
       CertificateException {
 
     if (this.cache != null) {
-      final PkiCredential c = this.cache.get(configuration.hashCode());
+      final PkiCredential c = this.cache.get(configuration);
       if (c != null) {
         log.debug("Returning cached credential '{}'", c.getName());
         return c;
@@ -463,7 +466,7 @@ public class PkiCredentialFactory {
     }
     final PkiCredential credential = PkiCredentialFactory.createCredential(configuration, this.resourceLoader,
         this.keyStoreProvider, null);
-    Optional.ofNullable(this.cache).ifPresent(c -> c.put(configuration.hashCode(), credential));
+    Optional.ofNullable(this.cache).ifPresent(c -> c.put(configuration, credential));
     return credential;
   }
 

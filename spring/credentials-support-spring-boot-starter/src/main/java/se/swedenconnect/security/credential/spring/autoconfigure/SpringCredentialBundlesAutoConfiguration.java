@@ -20,8 +20,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.health.contributor.HealthIndicator;
@@ -68,6 +68,16 @@ public class SpringCredentialBundlesAutoConfiguration {
 
   /** If we set up a {@link DefaultCredentialMonitorBean}, this property is assigned. */
   private boolean createdMonitorWithEvents = false;
+
+  /**
+   * Tells whether this configuration created the {@link DefaultCredentialMonitorBean}, which publishes events for
+   * monitoring results.
+   *
+   * @return {@code true} if the monitor bean was created by this configuration
+   */
+  boolean isCreatedMonitorWithEvents() {
+    return this.createdMonitorWithEvents;
+  }
 
   /**
    * Constructor.
@@ -155,9 +165,7 @@ public class SpringCredentialBundlesAutoConfiguration {
    * @return a {@link DefaultCredentialMonitorBean}
    */
   @ConditionalOnMissingBean(CredentialMonitorBean.class)
-  @ConditionalOnExpression(
-      "T(java.lang.Boolean).parseBoolean('${credential.bundles.monitoring.enabled:false}') " +
-          "or T(java.lang.Boolean).parseBoolean('${credential.monitoring.enabled:false}')")
+  @ConditionalOnBooleanProperty("credential.monitoring.enabled")
   @Bean
   DefaultCredentialMonitorBean credentialMonitorBean(final CredentialBundles credentialBundles,
       @Qualifier("credential-collection") final PkiCredentialCollection collection,
@@ -209,9 +217,7 @@ public class SpringCredentialBundlesAutoConfiguration {
    */
   @Configuration
   @ConditionalOnClass(HealthIndicator.class)
-  @ConditionalOnExpression(
-      "T(java.lang.Boolean).parseBoolean('${credential.bundles.monitoring.health-endpoint-enabled:false}') " +
-          "or T(java.lang.Boolean).parseBoolean('${credential.monitoring.health-endpoint-enabled:false}')")
+  @ConditionalOnBooleanProperty("credential.monitoring.health-endpoint-enabled")
   public static class ActuatorHealthConfiguration {
 
     private final SpringCredentialConfigurationProperties properties;
@@ -226,22 +232,26 @@ public class SpringCredentialBundlesAutoConfiguration {
     }
 
     /**
-     * Creates a {@link CredentialMonitorHealthIndicator} component. If we have defined a
-     * {@link DefaultCredentialMonitorBean} that signals events for monitoring results, the indicator is set up in
-     * "passive" mode listening for events, and if not, it sets up its own monitor.
+     * Creates a {@link CredentialMonitorHealthIndicator} component. If {@link SpringCredentialBundlesAutoConfiguration}
+     * has created the {@link DefaultCredentialMonitorBean}, which signals events for monitoring results, the indicator
+     * is set up in "passive" mode listening for events. Otherwise, for example if the application defines its own
+     * monitor bean, the indicator sets up its own monitor.
      *
      * @param credentialBundles credential bundles (needed for active mode)
      * @param collection a collection that also holds credentials
      * @param defaultCredentialMonitorBean optional monitor bean that may be used
+     * @param autoConfiguration the auto-configuration that may have created the monitor bean
      * @return a {@link CredentialMonitorHealthIndicator} bean
      */
     @ConditionalOnMissingBean(CredentialMonitorHealthIndicator.class)
     @Bean("credential-monitor")
     CredentialMonitorHealthIndicator credentialMonitor(final CredentialBundles credentialBundles,
         @Qualifier("credential-collection") final PkiCredentialCollection collection,
-        @Autowired(required = false) @Nullable final DefaultCredentialMonitorBean defaultCredentialMonitorBean) {
+        @Autowired(required = false) @Nullable final DefaultCredentialMonitorBean defaultCredentialMonitorBean,
+        final SpringCredentialBundlesAutoConfiguration autoConfiguration) {
 
-      return defaultCredentialMonitorBean != null
+      // The monitor bean is injected above, so it has been created (and the flag set) at this point ...
+      return defaultCredentialMonitorBean != null && autoConfiguration.isCreatedMonitorWithEvents()
           ? new CredentialMonitorHealthIndicator()
           : new CredentialMonitorHealthIndicator(getCredentialsForMonitoring(
               credentialBundles, collection, this.properties));

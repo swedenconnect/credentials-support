@@ -111,14 +111,6 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean {
         .filter(a -> !a.isEmpty())
         .map(Collections::unmodifiableList)
         .orElse(null);
-    if (this.additionalForReload != null) {
-      this.additionalForReload.forEach(c -> {
-        if (c.getTestFunction() == null) {
-          log.warn("Credential '{}' was configured to be reloaded, but has not support for reloading",
-              credential.getName());
-        }
-      });
-    }
   }
 
   /**
@@ -196,38 +188,52 @@ public class DefaultCredentialMonitorBean implements CredentialMonitorBean {
   }
 
   /**
-   * Performs reloading of the supplied credential. If the reload is successful, the credential is tested again.
+   * Performs reloading of the supplied credential. If the reload is successful, and the credential has a test function,
+   * the credential is tested again.
    *
    * @param credential the credential to reload
    */
   protected void reload(final ReloadablePkiCredential credential) {
     try {
-      if (credential.getTestFunction() == null) {
-        log.warn("Credential '{}' has no test function installed - cannot reload", credential.getName());
-        return;
-      }
-
       log.debug("Reloading credential '{}' ...", credential.getName());
       credential.reload();
-      log.debug("Credential '{}' successfully reloaded, will test again ...", credential.getName());
 
       // OK, we have reloaded the credential. See if it is functional after the reload ...
       //
       final Supplier<Exception> testFunction = credential.getTestFunction();
+      if (testFunction == null) {
+        log.debug("Credential '{}' successfully reloaded (no test function installed)", credential.getName());
+        Optional.ofNullable(this.reloadSuccessCallback).ifPresent(callback -> callback.accept(credential));
+        return;
+      }
+      log.debug("Credential '{}' successfully reloaded, will test again ...", credential.getName());
       final Exception testResult = testFunction.get();
       if (testResult == null) {
         log.debug("Credential '{}' was reloaded and is now functional again ...", credential.getName());
         Optional.ofNullable(this.reloadSuccessCallback).ifPresent(callback -> callback.accept(credential));
       }
       else {
-        log.debug("Test of credential '{}' after it was reloaded failed - {}",
-            credential.getName(), testResult.getMessage(), testResult);
-        Optional.ofNullable(this.reloadFailureCallback).ifPresent(callback -> callback.accept(credential, testResult));
+        if (this.reloadFailureCallback != null) {
+          log.debug("Test of credential '{}' after it was reloaded failed - {}",
+              credential.getName(), testResult.getMessage(), testResult);
+          this.reloadFailureCallback.accept(credential, testResult);
+        }
+        else {
+          log.error("Test of credential '{}' after it was reloaded failed - {}",
+              credential.getName(), testResult.getMessage());
+          log.debug("Credential failure details", testResult);
+        }
       }
     }
     catch (final Exception e) {
-      log.info("Reloading of credential '{}' failed - {}", credential.getName(), e.getMessage(), e);
-      Optional.ofNullable(this.reloadFailureCallback).ifPresent(callback -> callback.accept(credential, e));
+      if (this.reloadFailureCallback != null) {
+        log.debug("Reloading of credential '{}' failed - {}", credential.getName(), e.getMessage(), e);
+        this.reloadFailureCallback.accept(credential, e);
+      }
+      else {
+        log.error("Reloading of credential '{}' failed - {}", credential.getName(), e.getMessage());
+        log.debug("Credential reload failure details", e);
+      }
     }
   }
 

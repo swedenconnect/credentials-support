@@ -17,7 +17,8 @@ package se.swedenconnect.security.credential.spring.factory;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -48,8 +49,10 @@ import java.util.Optional;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Slf4j
 public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
+
+  /** Logger instance. */
+  private static final Logger log = LoggerFactory.getLogger(KeyStoreFactoryBean.class);
 
   /** The resource holding the keystore. */
   private Resource resource;
@@ -105,7 +108,7 @@ public class KeyStoreFactoryBean extends AbstractFactoryBean<KeyStore> {
   @Nonnull
   protected KeyStore createInstance() throws Exception {
     try {
-      if (KeyStoreFactory.PKCS11_KEYSTORE_TYPE.equals(this.getType())) {
+      if (KeyStoreFactory.PKCS11_KEYSTORE_TYPE.equalsIgnoreCase(this.getType())) {
         if (this.provider == null) {
           log.debug("PKCS#11 configuration is assigned - assuming SunPKCS11 provider");
           this.provider = "SunPKCS11";

@@ -16,8 +16,6 @@
 package se.swedenconnect.security.credential.test;
 
 import jakarta.annotation.PostConstruct;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import se.swedenconnect.security.credential.config.properties.PkiCredentialConfigurationProperties;
@@ -37,30 +35,22 @@ public class TestConfigurationProperties {
   /**
    * Reference to the test key store.
    */
-  @Getter
-  @Setter
   private KeyStoreReference keystore;
 
   /**
    * Reference to the RSA1 credential.
    */
-  @Getter
-  @Setter
   private PkiCredentialReference rsa1;
 
   /**
    * Reference to the RSA1B credential.
    */
-  @Getter
-  @Setter
   private PkiCredentialReference rsa1b;
 
   /**
    * Configuration for the RSA2 credential. This one does not use references, but instead configures the
    * credential in-place.
    */
-  @Getter
-  @Setter
   @NestedConfigurationProperty
   private PkiCredentialConfigurationProperties rsa2;
 
@@ -75,5 +65,77 @@ public class TestConfigurationProperties {
     Optional.ofNullable(this.keystore).ifPresent(KeyStoreReference::get);
     Optional.ofNullable(this.rsa1).ifPresent(PkiCredentialReference::get);
     Optional.ofNullable(this.rsa1b).ifPresent(PkiCredentialReference::get);
+  }
+
+  /**
+   * Gets the reference to the test key store.
+   *
+   * @return the key store reference
+   */
+  public KeyStoreReference getKeystore() {
+    return this.keystore;
+  }
+
+  /**
+   * Assigns the reference to the test key store.
+   *
+   * @param keystore the key store reference
+   */
+  public void setKeystore(final KeyStoreReference keystore) {
+    this.keystore = keystore;
+  }
+
+  /**
+   * Gets the reference to the RSA1 credential.
+   *
+   * @return the credential reference
+   */
+  public PkiCredentialReference getRsa1() {
+    return this.rsa1;
+  }
+
+  /**
+   * Assigns the reference to the RSA1 credential.
+   *
+   * @param rsa1 the credential reference
+   */
+  public void setRsa1(final PkiCredentialReference rsa1) {
+    this.rsa1 = rsa1;
+  }
+
+  /**
+   * Gets the reference to the RSA1B credential.
+   *
+   * @return the credential reference
+   */
+  public PkiCredentialReference getRsa1b() {
+    return this.rsa1b;
+  }
+
+  /**
+   * Assigns the reference to the RSA1B credential.
+   *
+   * @param rsa1b the credential reference
+   */
+  public void setRsa1b(final PkiCredentialReference rsa1b) {
+    this.rsa1b = rsa1b;
+  }
+
+  /**
+   * Gets the configuration for the RSA2 credential.
+   *
+   * @return the credential configuration
+   */
+  public PkiCredentialConfigurationProperties getRsa2() {
+    return this.rsa2;
+  }
+
+  /**
+   * Assigns the configuration for the RSA2 credential.
+   *
+   * @param rsa2 the credential configuration
+   */
+  public void setRsa2(final PkiCredentialConfigurationProperties rsa2) {
+    this.rsa2 = rsa2;
   }
 }

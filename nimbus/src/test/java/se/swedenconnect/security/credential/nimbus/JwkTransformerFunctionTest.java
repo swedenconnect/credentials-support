@@ -353,13 +353,9 @@ class JwkTransformerFunctionTest {
 
     final PkiCredential credential = new KeyStoreCredential(this.keyStore, ALIAS_RSA, PW);
 
-    final JwkTransformerFunction customizedFunction = new JwkTransformerFunction()
-        .serializable();
-
     final JwkTransformerFunction defaultFunction = new JwkTransformerFunction();
 
     Assertions.assertDoesNotThrow(() -> jwkSerialize.accept(defaultFunction, credential));
-    Assertions.assertDoesNotThrow(() -> jwkSerialize.accept(customizedFunction, credential));
   }
 
   @Test
@@ -377,13 +373,9 @@ class JwkTransformerFunctionTest {
 
     final PkiCredential credential = new KeyStoreCredential(this.keyStore, ALIAS_EC, PW);
 
-    final JwkTransformerFunction customizedFunction = new JwkTransformerFunction()
-        .serializable();
-
     final JwkTransformerFunction defaultFunction = new JwkTransformerFunction();
 
     Assertions.assertDoesNotThrow(() -> jwkSerialize.accept(defaultFunction, credential));
-    Assertions.assertDoesNotThrow(() -> jwkSerialize.accept(customizedFunction, credential));
   }
 
 }

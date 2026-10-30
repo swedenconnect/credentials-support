@@ -151,7 +151,7 @@ public class KeyStoreFactory {
     if (storeConfiguration.location().isEmpty()) {
       final String type = storeConfiguration.type()
           .orElseGet(() -> storeConfiguration.pkcs11().isPresent() ? KeyStoreFactory.PKCS11_KEYSTORE_TYPE : null);
-      if (KeyStoreFactory.PKCS11_KEYSTORE_TYPE.equals(type)) {
+      if (KeyStoreFactory.PKCS11_KEYSTORE_TYPE.equalsIgnoreCase(type)) {
         return KeyStoreFactory.loadPkcs11KeyStore(buildPkcs11Configuration(storeConfiguration), pw);
       }
       else {
@@ -159,10 +159,12 @@ public class KeyStoreFactory {
       }
     }
     else {
-      return KeyStoreFactory.loadKeyStore(
-          Optional.ofNullable(resourceLoader).orElseGet(DefaultConfigurationResourceLoader::new)
-              .getStream(storeConfiguration.location().get()), pw,
-          storeConfiguration.type().orElse(null), storeConfiguration.provider().orElse(null));
+      try (final InputStream stream = Optional.ofNullable(resourceLoader)
+          .orElseGet(DefaultConfigurationResourceLoader::new)
+          .getStream(storeConfiguration.location().get())) {
+        return KeyStoreFactory.loadKeyStore(stream, pw,
+            storeConfiguration.type().orElse(null), storeConfiguration.provider().orElse(null));
+      }
     }
   }
 

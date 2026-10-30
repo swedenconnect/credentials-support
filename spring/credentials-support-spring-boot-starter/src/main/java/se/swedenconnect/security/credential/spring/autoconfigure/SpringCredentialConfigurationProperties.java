@@ -15,12 +15,10 @@
  */
 package se.swedenconnect.security.credential.spring.autoconfigure;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import se.swedenconnect.security.credential.config.properties.CredentialBundlesConfigurationProperties;
 import se.swedenconnect.security.credential.config.properties.PkiCredentialCollectionConfigurationProperties;
 
 import java.time.Duration;
@@ -32,21 +30,17 @@ import java.util.Collections;
  * @author Martin Lindström
  */
 @ConfigurationProperties("credential")
-@Slf4j
 public class SpringCredentialConfigurationProperties implements InitializingBean {
 
   /**
    * Configuration properties for bundles of credentials and key stores.
    */
-  @Getter
   @NestedConfigurationProperty
-  private final SpringCredentialBundlesConfigurationProperties bundles
-      = new SpringCredentialBundlesConfigurationProperties();
+  private final CredentialBundlesConfigurationProperties bundles = new CredentialBundlesConfigurationProperties();
 
   /**
    * Configuration for setting up a PkiCredentialCollection bean.
    */
-  @Getter
   @NestedConfigurationProperty
   private final PkiCredentialCollectionConfigurationProperties collection =
       new PkiCredentialCollectionConfigurationProperties();
@@ -54,33 +48,17 @@ public class SpringCredentialConfigurationProperties implements InitializingBean
   /**
    * Configuration for monitoring credentials.
    */
-  @Getter
-  @Setter
   @NestedConfigurationProperty
   private MonitoringProperties monitoring;
 
   /** {@inheritDoc} */
-  @SuppressWarnings("deprecation")
   @Override
   public void afterPropertiesSet() {
     if (this.collection.credentials().isEmpty()) {
       this.collection.setCredentials(Collections.emptyList());
     }
     if (this.monitoring == null) {
-      if (this.bundles.getMonitoring() != null) {
-        log.warn("credential.bundles.monitoring.* is assigned - use credential.monitoring.* instead");
-        this.monitoring = this.bundles.getMonitoring();
-        this.bundles.setMonitoring(null);
-      }
-      else {
-        this.monitoring = new MonitoringProperties();
-      }
-    }
-    else if (this.monitoring != null) {
-      if (this.bundles.getMonitoring() != null) {
-        throw new IllegalArgumentException(
-            "Both credential.monitoring.* and credential.bundles.monitoring.* are assigned");
-      }
+      this.monitoring = new MonitoringProperties();
     }
   }
 
@@ -92,24 +70,108 @@ public class SpringCredentialConfigurationProperties implements InitializingBean
     /**
      * Whether credential monitoring is enabled.
      */
-    @Getter
-    @Setter
     private boolean enabled;
 
     /**
      * The interval between tests of credentials. The default is 10 minutes.
      */
-    @Getter
-    @Setter
     private Duration testInterval = Duration.ofMinutes(10);
 
     /**
      * Whether a HealthEndpoint for monitoring should be set up.
      */
-    @Getter
-    @Setter
     private boolean healthEndpointEnabled;
 
+    /**
+     * Tells whether credential monitoring is enabled.
+     *
+     * @return whether credential monitoring is enabled
+     */
+    public boolean isEnabled() {
+      return this.enabled;
+    }
+
+    /**
+     * Assigns whether credential monitoring is enabled.
+     *
+     * @param enabled whether credential monitoring is enabled
+     */
+    public void setEnabled(final boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    /**
+     * Gets the interval between tests of credentials.
+     *
+     * @return the interval between tests of credentials
+     */
+    public Duration getTestInterval() {
+      return this.testInterval;
+    }
+
+    /**
+     * Assigns the interval between tests of credentials.
+     *
+     * @param testInterval the interval between tests of credentials
+     */
+    public void setTestInterval(final Duration testInterval) {
+      this.testInterval = testInterval;
+    }
+
+    /**
+     * Tells whether a HealthEndpoint for monitoring should be set up.
+     *
+     * @return whether a HealthEndpoint for monitoring should be set up
+     */
+    public boolean isHealthEndpointEnabled() {
+      return this.healthEndpointEnabled;
+    }
+
+    /**
+     * Assigns whether a HealthEndpoint for monitoring should be set up.
+     *
+     * @param healthEndpointEnabled whether a HealthEndpoint for monitoring should be set up
+     */
+    public void setHealthEndpointEnabled(final boolean healthEndpointEnabled) {
+      this.healthEndpointEnabled = healthEndpointEnabled;
+    }
+
+  }
+
+  /**
+   * Gets the configuration properties for bundles of credentials and key stores.
+   *
+   * @return the configuration properties for bundles of credentials and key stores
+   */
+  public CredentialBundlesConfigurationProperties getBundles() {
+    return this.bundles;
+  }
+
+  /**
+   * Gets the configuration for setting up a PkiCredentialCollection bean.
+   *
+   * @return the configuration for setting up a PkiCredentialCollection bean
+   */
+  public PkiCredentialCollectionConfigurationProperties getCollection() {
+    return this.collection;
+  }
+
+  /**
+   * Gets the configuration for monitoring credentials.
+   *
+   * @return the configuration for monitoring credentials
+   */
+  public MonitoringProperties getMonitoring() {
+    return this.monitoring;
+  }
+
+  /**
+   * Assigns the configuration for monitoring credentials.
+   *
+   * @param monitoring the configuration for monitoring credentials
+   */
+  public void setMonitoring(final MonitoringProperties monitoring) {
+    this.monitoring = monitoring;
   }
 
 }

@@ -116,6 +116,25 @@ class CredentialMonitorHealthIndicatorTest {
   }
 
   @Test
+  void testEventsRecoveryClearsErrorDetails() {
+    final CredentialMonitorHealthIndicator indicator = new CredentialMonitorHealthIndicator();
+    indicator.onFailedCredentialTestEvent(new FailedCredentialTestEvent("C1", "TEST-ERROR", Exception.class.getName()));
+    indicator.onFailedCredentialReloadEvent(
+        new FailedCredentialReloadEvent("C1", "RELOAD-ERROR", IOException.class.getName()));
+    indicator.onSuccessfulCredentialTestEvent(new SuccessfulCredentialTestEvent("C1"));
+
+    final Health health = indicator.health();
+    assertEquals(Status.UP, health.getStatus());
+    final MonitorStatus status = ((List<MonitorStatus>) health.getDetails().get("credentials")).get(0);
+    assertEquals(MonitorStatus.OK, status.getTestResult());
+    assertNull(status.getTestError());
+    assertNull(status.getTestException());
+    assertNull(status.getReloadResult());
+    assertNull(status.getReloadError());
+    assertNull(status.getReloadException());
+  }
+
+  @Test
   void testEventsNoTestEventReceivedReloadSuccess() {
     final CredentialMonitorHealthIndicator indicator = new CredentialMonitorHealthIndicator();
     indicator.onSuccessfulCredentialReloadEvent(new SuccessfulCredentialReloadEvent("C2"));

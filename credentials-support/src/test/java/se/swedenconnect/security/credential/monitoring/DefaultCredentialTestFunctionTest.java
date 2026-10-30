@@ -16,7 +16,6 @@
 package se.swedenconnect.security.credential.monitoring;
 
 import jakarta.annotation.Nonnull;
-import lombok.NonNull;
 import org.cryptacular.io.ClassPathResource;
 import org.cryptacular.io.Resource;
 import org.junit.jupiter.api.Assertions;
@@ -30,11 +29,13 @@ import se.swedenconnect.security.credential.monitoring.DefaultCredentialMonitorB
 
 import java.io.InputStream;
 import java.security.KeyException;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -95,6 +96,48 @@ public class DefaultCredentialTestFunctionTest {
 
     final Exception result = func.apply(rsa);
     assertNull(result, "Test of RSA key was not successful");
+  }
+
+  @Test
+  void testEcEncryptionKey() {
+    final Function<ReloadablePkiCredential, Exception> func = new DefaultCredentialTestFunction();
+    final ReloadablePkiCredential ec = getCredential("ec-nist");
+    ec.getMetadata().setUsage(PkiCredential.Metadata.USAGE_ENCRYPTION);
+    assertNull(func.apply(ec), "Test of EC key was not successful");
+  }
+
+  @Test
+  void testEcEncryptionKeyMismatch() throws Exception {
+    final ReloadablePkiCredential ec = getCredential("ec-nist");
+    final KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
+    generator.initialize(((ECPublicKey) ec.getPublicKey()).getParams());
+    final PublicKey otherPublicKey = generator.generateKeyPair().getPublic();
+
+    final ReloadablePkiCredential cred = Mockito.mock(ReloadablePkiCredential.class);
+    Mockito.when(cred.getPrivateKey()).thenReturn(ec.getPrivateKey());
+    Mockito.when(cred.getPublicKey()).thenReturn(otherPublicKey);
+    Mockito.when(cred.getName()).thenReturn("test");
+    Mockito.when(cred.getMetadata()).thenReturn(ec.getMetadata());
+    ec.getMetadata().setUsage(PkiCredential.Metadata.USAGE_ENCRYPTION);
+
+    final Exception result = new DefaultCredentialTestFunction().apply(cred);
+    assertNotNull(result, "Expected failed EC key agreement test");
+    assertEquals(SecurityException.class, result.getClass());
+  }
+
+  @Test
+  void testSigningErrorWithoutMessage() {
+    final ReloadablePkiCredential rsa = getCredential("rsa");
+    final ReloadablePkiCredential cred = Mockito.mock(ReloadablePkiCredential.class);
+    Mockito.when(cred.getPrivateKey())
+        .thenReturn(rsa.getPrivateKey())
+        .thenThrow(new SecurityException((String) null));
+    Mockito.when(cred.getName()).thenReturn("test");
+    Mockito.when(cred.getMetadata()).thenReturn(Map::of);
+
+    final Exception result = new DefaultCredentialTestFunction().apply(cred);
+    assertNotNull(result);
+    assertEquals(SecurityException.class, result.getClass());
   }
 
   @Test
