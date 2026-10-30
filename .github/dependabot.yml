@@ -1,0 +1,57 @@
+# Dependabot version updates for the Maven dependencies and plugins and for the GitHub Actions used
+# by the workflows.
+#
+# Security updates are enabled in the repository settings and are not affected by this file. They
+# are opened as soon as an advisory is published, whatever the schedule below says.
+#
+# OpenSAML, Spring and Bouncy Castle get a pull request of their own each. Other minor and patch
+# updates are grouped into one pull request per ecosystem, to keep the number of pull requests down.
+# Other major updates get a pull request each, since they may need code changes. A dependency goes
+# to the first group it matches.
+version: 2
+
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "build"
+    ignore:
+      - dependency-name: "org.apache.santuario:xmlsec"
+      # The strict Base64 decoding in 1.23.0 breaks OpenSAML's Base64Support.
+      - dependency-name: "commons-codec:commons-codec"
+        versions: ["1.23.0"]
+    groups:
+      # OpenSAML and the Shibboleth support library are released together and must be at matching
+      # versions, so they are always updated in one pull request, major updates included.
+      opensaml:
+        patterns:
+          - "org.opensaml:*"
+          - "net.shibboleth:*"
+      # Spring Boot is built against a specific Spring Framework version, so they are updated together.
+      spring:
+        patterns:
+          - "org.springframework:*"
+          - "org.springframework.boot:*"
+      # The Bouncy Castle artifacts share one version.
+      bouncycastle:
+        patterns:
+          - "org.bouncycastle:*"
+      maven-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
