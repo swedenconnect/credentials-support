@@ -71,10 +71,11 @@
         <scope>import</scope>
       </dependency>
 
+      <!-- Stay on 1.22.x. The strict Base64 decoding in 1.23.0 breaks OpenSAML's Base64Support. -->
       <dependency>
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
-        <version>1.21.0</version>
+        <version>1.22.1</version>
       </dependency>
 
     </dependencies>
@@ -91,6 +92,12 @@
     <dependency>
       <groupId>org.cryptacular</groupId>
       <artifactId>cryptacular</artifactId>
+    </dependency>
+
+    <!-- Declared directly so that consumers get 1.22.x instead of 1.23.0, see dependencyManagement. -->
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
     </dependency>
 
     <dependency>
@@ -130,7 +137,7 @@
     <dependency>
       <groupId>se.swedenconnect.opensaml</groupId>
       <artifactId>opensaml-security-ext</artifactId>
-      <version>4.2.1</version>
+      <version>4.2.3</version>
       <scope>test</scope>
     </dependency>
 
