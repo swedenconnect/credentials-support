@@ -20,6 +20,7 @@ import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.KeyOperation;
+import com.nimbusds.jose.jwk.KeyRevocation;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.util.Base64;
@@ -148,8 +149,9 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
           .x509CertChain(toX5c(credential.getCertificateChain()))
           .x509CertSHA256Thumbprint(toX5t256(credential.getCertificate()))
           .issueTime(Optional.ofNullable(credential.getMetadata().getIssuedAt()).map(Date::from).orElse(null))
-          .notBeforeTime(Optional.ofNullable(credential.getMetadata().getIssuedAt()).map(Date::from).orElse(null))
-          .expirationTime(Optional.ofNullable(credential.getMetadata().getExpiresAt()).map(Date::from).orElse(null));
+          .notBeforeTime(getNotBefore(credential))
+          .expirationTime(Optional.ofNullable(credential.getMetadata().getExpiresAt()).map(Date::from).orElse(null))
+          .keyRevocation(getKeyRevocation(credential));
 
       this.rsaCustomizers.forEach(customizer -> customizer.apply(builder));
       jwk = builder.build();
@@ -179,8 +181,9 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
           .x509CertChain(toX5c(credential.getCertificateChain()))
           .x509CertSHA256Thumbprint(toX5t256(credential.getCertificate()))
           .issueTime(Optional.ofNullable(credential.getMetadata().getIssuedAt()).map(Date::from).orElse(null))
-          .notBeforeTime(Optional.ofNullable(credential.getMetadata().getIssuedAt()).map(Date::from).orElse(null))
-          .expirationTime(Optional.ofNullable(credential.getMetadata().getExpiresAt()).map(Date::from).orElse(null));
+          .notBeforeTime(getNotBefore(credential))
+          .expirationTime(Optional.ofNullable(credential.getMetadata().getExpiresAt()).map(Date::from).orElse(null))
+          .keyRevocation(getKeyRevocation(credential));
 
       this.ecCustomizers.forEach(customizer -> customizer.apply(builder));
 
@@ -332,6 +335,40 @@ public class JwkTransformerFunction implements Function<PkiCredential, JWK> {
         return null;
       }
     }
+  }
+
+  /**
+   * Gets the not-before time for the JWK. This is the
+   * {@value PkiCredential.Metadata#ACTIVE_FROM_PROPERTY} property if set, otherwise the
+   * {@value PkiCredential.Metadata#ISSUED_AT_PROPERTY} property.
+   *
+   * @param credential the credential
+   * @return the not-before time, or {@code null}
+   */
+  @Nullable
+  private static Date getNotBefore(@Nonnull final PkiCredential credential) {
+    return Optional.ofNullable(credential.getMetadata().getActiveFrom())
+        .or(() -> Optional.ofNullable(credential.getMetadata().getIssuedAt()))
+        .map(Date::from)
+        .orElse(null);
+  }
+
+  /**
+   * Gets the key revocation for the JWK, based on the {@value PkiCredential.Metadata#REVOKED_AT_PROPERTY} and
+   * {@value PkiCredential.Metadata#REVOCATION_REASON_PROPERTY} properties. If no reason is set,
+   * {@link KeyRevocation.Reason#UNSPECIFIED} is used.
+   *
+   * @param credential the credential
+   * @return a {@link KeyRevocation}, or {@code null} if the credential is not revoked
+   */
+  @Nullable
+  private static KeyRevocation getKeyRevocation(@Nonnull final PkiCredential credential) {
+    return Optional.ofNullable(credential.getMetadata().getRevokedAt())
+        .map(r -> new KeyRevocation(Date.from(r),
+            Optional.ofNullable(credential.getMetadata().getRevocationReason())
+                .map(KeyRevocation.Reason::parse)
+                .orElse(KeyRevocation.Reason.UNSPECIFIED)))
+        .orElse(null);
   }
 
   /**

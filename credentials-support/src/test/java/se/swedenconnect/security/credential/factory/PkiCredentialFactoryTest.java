@@ -502,6 +502,9 @@ public class PkiCredentialFactoryTest {
     properties.setIssuedAt(issuedAt);
     properties.setExpiresAt(expiresAt);
     properties.getMetadata().put("foo", "ABC");
+    final Instant revokedAt = Instant.ofEpochMilli(1700000000L);
+    properties.setRevokedAt(revokedAt);
+    properties.setRevocationReason("compromised");
 
     final PkiCredential credential = PkiCredentialFactory.createCredential(properties, null, null, null);
     assertNotNull(credential);
@@ -512,6 +515,8 @@ public class PkiCredentialFactoryTest {
     assertEquals(issuedAt, credential.getMetadata().getIssuedAt());
     assertEquals(expiresAt, credential.getMetadata().getExpiresAt());
     assertEquals("ABC", credential.getMetadata().getProperties().get("foo"));
+    assertEquals(revokedAt, credential.getMetadata().getRevokedAt());
+    assertEquals("compromised", credential.getMetadata().getRevocationReason());
   }
 
   @Test

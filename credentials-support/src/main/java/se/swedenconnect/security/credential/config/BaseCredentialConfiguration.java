@@ -70,6 +70,24 @@ public interface BaseCredentialConfiguration {
   Optional<Instant> activeTo();
 
   /**
+   * Metadata property for revoked-at.
+   *
+   * @return property for revoked-at
+   */
+  default Optional<Instant> revokedAt() {
+    return Optional.empty();
+  }
+
+  /**
+   * Metadata property for revocation reason.
+   *
+   * @return property for revocation reason
+   */
+  default Optional<String> revocationReason() {
+    return Optional.empty();
+  }
+
+  /**
    * Metadata property for (credential) usage.
    *
    * @return property for usage

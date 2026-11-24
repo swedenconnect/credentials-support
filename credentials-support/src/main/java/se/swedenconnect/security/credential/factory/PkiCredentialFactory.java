@@ -562,6 +562,8 @@ public class PkiCredentialFactory {
     configuration.usage().ifPresent(c -> credential.getMetadata().setUsage(c));
     configuration.activeFrom().ifPresent(c -> credential.getMetadata().setActiveFrom(c));
     configuration.activeTo().ifPresent(c -> credential.getMetadata().setActiveTo(c));
+    configuration.revokedAt().ifPresent(c -> credential.getMetadata().setRevokedAt(c));
+    configuration.revocationReason().ifPresent(c -> credential.getMetadata().setRevocationReason(c));
   }
 
 }

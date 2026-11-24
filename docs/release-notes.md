@@ -8,11 +8,17 @@
 
 ## Release Notes
 
-### 2.3.1
+### 2.4.0
 
 **Date:** _not yet released_
 
--
+- Support for key rollover in [PkiCredentialCollection](https://github.com/swedenconnect/credentials-support/blob/main/credentials-support/src/main/java/se/swedenconnect/security/credential/PkiCredentialCollection.java). The collection uses a configurable clock, has methods for active, not yet active, no longer active and to-be-published credentials, and picks the signing credential with the latest `active-from` when several are active. The signing and encryption lookups accept a filter, and the collection is now thread safe. The predicates `isActive`, `noLongerActive`, `isNotYetActive` and `forFutureSigning` are deprecated. See [#124](https://github.com/swedenconnect/credentials-support/issues/124).
+
+- New metadata properties `revoked-at` and `revocation-reason`. A revoked credential is regarded as no longer active. See [#124](https://github.com/swedenconnect/credentials-support/issues/124).
+
+- New class [JwkCredentialCollection](https://github.com/swedenconnect/credentials-support/blob/main/nimbus/src/main/java/se/swedenconnect/security/credential/nimbus/JwkCredentialCollection.java) for publishing the keys of a collection as JWK Sets and signing JWTs with the collection's signing credential. The Spring Boot starter creates such a bean when the Nimbus module is on the classpath. See [#124](https://github.com/swedenconnect/credentials-support/issues/124).
+
+- The JWK `nbf` property is now set from `active-from` when this is set, and revoked credentials get the revocation in their JWK. See [#124](https://github.com/swedenconnect/credentials-support/issues/124).
 
 ### 2.3.0
 

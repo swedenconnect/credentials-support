@@ -25,8 +25,11 @@ import se.swedenconnect.security.credential.factory.KeyStoreFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Test cases for {@link PkiCredentialCollection}.
@@ -324,6 +327,157 @@ public class PkiCredentialCollectionTest {
     Assertions.assertTrue(c4.size() == 2);
     Assertions.assertEquals("ec", c4.get(0).getName());
     Assertions.assertEquals("ec2", c4.get(1).getName());
+  }
+
+  @Test
+  void testLifecycleGroups() {
+    final Instant t1 = Instant.parse("2026-01-01T00:00:00Z");
+    final Instant t2 = Instant.parse("2026-06-01T00:00:00Z");
+    final Instant t3 = Instant.parse("2026-09-01T00:00:00Z");
+
+    final PkiCredential old = this.getCredential("rsa");
+    old.getMetadata().setActiveTo(t2);
+    final PkiCredential current = this.getCredential("rsa2");
+    current.getMetadata().setActiveFrom(t1);
+    final PkiCredential next = this.getCredential("ec");
+    next.getMetadata().setActiveFrom(t3);
+    final PkiCredential revoked = this.getCredential("ec2");
+    revoked.getMetadata().setRevokedAt(t1);
+
+    final AtomicReference<Instant> now = new AtomicReference<>(t2.plusSeconds(1));
+    final PkiCredentialCollection collection =
+        new PkiCredentialCollection(List.of(old, current, next, revoked), this.clock(now));
+
+    Assertions.assertEquals(List.of(current), collection.getActiveCredentials());
+    Assertions.assertEquals(List.of(next), collection.getNotYetActiveCredentials());
+    Assertions.assertEquals(List.of(old, revoked), collection.getNoLongerActiveCredentials());
+    Assertions.assertEquals(List.of(current, next), collection.getCredentialsToPublish());
+
+    now.set(t3);
+    Assertions.assertEquals(List.of(current, next), collection.getActiveCredentials());
+    Assertions.assertTrue(collection.getNotYetActiveCredentials().isEmpty());
+
+    // Before the revocation time, the revoked credential is active
+    now.set(t1.minusSeconds(1));
+    Assertions.assertEquals(List.of(old, revoked), collection.getActiveCredentials());
+    Assertions.assertEquals(List.of(current, next), collection.getNotYetActiveCredentials());
+  }
+
+  @Test
+  void testRevokedIsNotNotYetActive() {
+    final Instant now = Instant.parse("2026-01-01T00:00:00Z");
+    final PkiCredential credential = this.getCredential("rsa");
+    credential.getMetadata().setActiveFrom(now.plusSeconds(10));
+    credential.getMetadata().setRevokedAt(now.minusSeconds(10));
+
+    Assertions.assertFalse(PkiCredentialCollection.isNotYetActiveAt(now).test(credential));
+    Assertions.assertFalse(PkiCredentialCollection.isActiveAt(now).test(credential));
+    Assertions.assertTrue(PkiCredentialCollection.isNoLongerActiveAt(now).test(credential));
+    Assertions.assertTrue(PkiCredentialCollection.isRevokedAt(now).test(credential));
+  }
+
+  @Test
+  void testSigningRuleLatestActiveFrom() {
+    final Instant t1 = Instant.parse("2026-01-01T00:00:00Z");
+    final Instant t2 = Instant.parse("2026-06-01T00:00:00Z");
+
+    final PkiCredential noTimes = this.getCredential("rsa");
+    noTimes.getMetadata().setUsage(PkiCredential.Metadata.USAGE_SIGNING);
+    final PkiCredential a = this.getCredential("rsa2");
+    a.getMetadata().setUsage(PkiCredential.Metadata.USAGE_SIGNING);
+    a.getMetadata().setActiveFrom(t1);
+    final PkiCredential b = this.getCredential("ec");
+    b.getMetadata().setUsage(PkiCredential.Metadata.USAGE_SIGNING);
+    b.getMetadata().setActiveFrom(t2);
+
+    final AtomicReference<Instant> now = new AtomicReference<>(t1.minusSeconds(1));
+    final PkiCredentialCollection collection =
+        new PkiCredentialCollection(List.of(b, noTimes, a), this.clock(now));
+
+    Assertions.assertEquals("rsa", collection.getCredentialForSigning().getName());
+    now.set(t1);
+    Assertions.assertEquals("rsa2", collection.getCredentialForSigning().getName());
+    now.set(t2);
+    Assertions.assertEquals("ec", collection.getCredentialForSigning().getName());
+
+    // Filter
+    Assertions.assertEquals("rsa2", collection.getCredentialForSigning(PkiCredentialCollection.isRsa).getName());
+    Assertions.assertNull(collection.getCredentialForSigning(c -> false));
+
+    // Equal times - list order decides
+    noTimes.getMetadata().setActiveFrom(t2);
+    Assertions.assertEquals("ec", collection.getCredentialForSigning().getName());
+  }
+
+  @Test
+  void testSigningFilterAppliesToUnspecifiedUsage() {
+    final PkiCredential signing = this.getCredential("rsa");
+    signing.getMetadata().setUsage(PkiCredential.Metadata.USAGE_SIGNING);
+    final PkiCredential unspecified = this.getCredential("ec");
+
+    final PkiCredentialCollection collection = new PkiCredentialCollection(List.of(signing, unspecified));
+    Assertions.assertEquals("rsa", collection.getCredentialForSigning().getName());
+    Assertions.assertEquals("ec", collection.getCredentialForSigning(PkiCredentialCollection.isEc).getName());
+  }
+
+  @Test
+  void testEncryptionWithFilterAndRevocation() {
+    final Instant now = Instant.parse("2026-06-01T00:00:00Z");
+    final PkiCredential rsa = this.getCredential("rsa");
+    rsa.getMetadata().setUsage(PkiCredential.Metadata.USAGE_ENCRYPTION);
+    rsa.getMetadata().setActiveFrom(now.minusSeconds(100));
+    final PkiCredential rsa2 = this.getCredential("rsa2");
+    rsa2.getMetadata().setUsage(PkiCredential.Metadata.USAGE_ENCRYPTION);
+    rsa2.getMetadata().setActiveFrom(now.minusSeconds(10));
+    final PkiCredential ec = this.getCredential("ec");
+    ec.getMetadata().setUsage(PkiCredential.Metadata.USAGE_ENCRYPTION);
+    ec.getMetadata().setActiveTo(now.minusSeconds(10));
+    final PkiCredential ec2 = this.getCredential("ec2");
+    ec2.getMetadata().setUsage(PkiCredential.Metadata.USAGE_ENCRYPTION);
+    ec2.getMetadata().setRevokedAt(now.minusSeconds(10));
+
+    final PkiCredentialCollection collection =
+        new PkiCredentialCollection(List.of(rsa, rsa2, ec, ec2), Clock.fixed(now, ZoneOffset.UTC));
+
+    final List<PkiCredential> c1 = collection.getCredentialsForEncryption();
+    Assertions.assertEquals(List.of(rsa2, rsa, ec), c1);
+
+    final List<PkiCredential> c2 = collection.getCredentialsForEncryption(PkiCredentialCollection.isEc);
+    // No active EC encryption credential, but the old one is kept for decryption
+    Assertions.assertEquals(List.of(ec), c2);
+
+    final List<PkiCredential> c3 = collection.getCredentialsForEncryption(c -> c != rsa2);
+    Assertions.assertEquals(List.of(rsa, ec), c3);
+  }
+
+  @Test
+  void testConcurrentModificationWhileReading() {
+    final PkiCredentialCollection collection = new PkiCredentialCollection(
+        List.of(this.getCredential("rsa"), this.getCredential("ec")));
+    for (final PkiCredential c : collection.getCredentials()) {
+      collection.addCredential(this.getCredential("ec2"));
+      collection.removeCredentials(x -> x == c);
+    }
+    Assertions.assertEquals(2, collection.getCredentials().size());
+  }
+
+  private Clock clock(final AtomicReference<Instant> now) {
+    return new Clock() {
+      @Override
+      public java.time.ZoneId getZone() {
+        return ZoneOffset.UTC;
+      }
+
+      @Override
+      public Clock withZone(final java.time.ZoneId zone) {
+        return this;
+      }
+
+      @Override
+      public Instant instant() {
+        return now.get();
+      }
+    };
   }
 
   private PkiCredential getCredential(final String alias) {

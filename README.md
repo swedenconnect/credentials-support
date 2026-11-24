@@ -47,6 +47,8 @@ Java libraries for PKI credentials support, including PKCS#11 and HSM:s.
     5.1. [The Bundles Concept](#the-bundles-concept)
     
     5.2. [PkiCredentialCollection](#pki-credential-collection)
+
+    5.2.1. [Key Rollover](#key-rollover)
     
     5.3. [Configuration Support](#configuration-support)
     
@@ -305,6 +307,10 @@ The following metadata properties are pre-defined:
 
 - `active-from` - Property that may be set to the instant from when the credential should be regarded as active.
 
+- `revoked-at` - Property that may be set to the instant at which the credential was revoked. A revoked credential is regarded as no longer active.
+
+- `revocation-reason` - Property holding the reason for revoking the credential, for example `compromised` or `superseded`.
+
 - `usage` - Property name for the usage property. This property holds a string that may be `signing`, `encryption`, `metadata-signing` or any other application specific usage.
 
 - `key-use` - \[Nimbus specific\] - Property name for the key use metadata property. Maps to JWK's `use` property. Prefer to use the generic `usage` setting.
@@ -497,13 +503,38 @@ The pre-defined [Predicate](https://docs.oracle.com/en/java/javase/17/docs/api/j
 
 - `unspecifiedUsage` - Predicate that checks if the credential does not have a specified usage.
 
-- `isActive` - Predicate that checks if the credential is "active", meaning that the current time is within the `active-from` and `active-to` properties. If no such properties are set, the credential is assumed to be active.
+- `isActiveAt(instant)` - Method that returns a Predicate that checks if the credential is "active" at the given time, meaning that the time is within the `active-from` and `active-to` properties, and that the credential is not revoked. If no such properties are set, the credential is assumed to be active.
 
-- `noLongerActive` - Predicate that checks if the credential is no longer active, meaning that the `active-to` metadata setting is before the current time.
+- `isNoLongerActiveAt(instant)` - Method that returns a Predicate that checks if the credential is no longer active at the given time, meaning that the `active-to` metadata setting is before the time, or that the credential is revoked.
 
-- `isNotYetActive` - Predicate that tells whether the credential is "not yet active", meaning that the `active-from` metadata setting is after the current time.
+- `isNotYetActiveAt(instant)` - Method that returns a Predicate that tells whether the credential is "not yet active" at the given time, meaning that the `active-from` metadata setting is after the time.
 
-- `forFutureSigning` - Predicate that tells if a credential is intended to be the signing credential in the future. It is a combination of `signatureUsage` and `isNotYetActive`.
+- `isRevokedAt(instant)` - Method that returns a Predicate that tells whether the credential is revoked at the given time.
+
+The predicates `isActive`, `noLongerActive`, `isNotYetActive` and `forFutureSigning`, that use the current system time, are deprecated.
+
+<a name="key-rollover"></a>
+#### 5.2.1. Key Rollover
+
+The collection evaluates the `active-from`, `active-to` and `revoked-at` properties against the time of a [Clock](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/Clock.html) that may be given to the constructor. The default is the system clock in UTC.
+
+This makes it possible to handle key rollover, where a new key is published before it is used for signing, and an old key is kept for a while after it is no longer used. The following methods return the credentials of each group:
+
+- `getActiveCredentials()` - The credentials that are active.
+
+- `getNotYetActiveCredentials()` - The credentials that are not yet active.
+
+- `getNoLongerActiveCredentials()` - The credentials that are no longer active, including revoked credentials.
+
+- `getCredentialsToPublish()` - The credentials that are active or not yet active.
+
+The method `getCredentialForSigning()` first looks among the active credentials with the usage `signing`, and if none is found, among the active credentials with no usage. If several credentials match, the one with the latest `active-from` is returned. A credential without `active-from` counts as the oldest. So, to roll over to a new signing key, add it with an `active-from` time, and it takes over at that time.
+
+The method `getCredentialsForEncryption()` returns the active encryption credentials, followed by the encryption credentials that are no longer active (but not revoked), since these may be needed for decryption.
+
+Both methods also take a Predicate that the credentials must meet, for example a check of the key type or the algorithm.
+
+The collection is safe to use from several threads, also when credentials are added or removed.
 
 <a name="configuration-support"></a>
 ### 5.3. Configuration Support
@@ -567,6 +598,11 @@ the [AbstractBaseCredentialConfigurationProperties](https://github.com/swedencon
 | `key-id` | Key identifier metadata property. | String |
 | `issued-at` | Issued-at metadata property. | [Instant](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/Instant.html) |
 | `expires-at` | Expires-at metadata property. | [Instant](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/Instant.html) |
+| `active-from` | Active-from metadata property. | [Instant](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/Instant.html) |
+| `active-to` | Active-to metadata property. | [Instant](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/Instant.html) |
+| `revoked-at` | Revoked-at metadata property. | [Instant](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/Instant.html) |
+| `revocation-reason` | Revocation reason metadata property. | String |
+| `usage` | Usage metadata property, for example `signing` or `encryption`. | String |
 | `metadata` | Additional metadata in the form of key-value:s | [Map](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Map.html) where both keys and values are Strings |
 
 <a name="pem-credential-configuration-properties"></a>
@@ -1001,6 +1037,8 @@ The **credentials-support-spring-boot-starter** gives a number of useful feature
     
 - If configured (`credential.monitoring.health-endpoint-enabled` is set), an actuator health endpoint for credential monitoring is configured and made active. See below.
 
+- If the **credentials-support-nimbus** library is on the classpath, a [JwkCredentialCollection](https://github.com/swedenconnect/credentials-support/blob/main/nimbus/src/main/java/se/swedenconnect/security/credential/nimbus/JwkCredentialCollection.java) bean named `jwk-credential-collection` is created. It wraps the `credential-collection` bean. See [Section 10](#nimbus-support).
+
 <a name="credential-monitoring-health-endpoint"></a>
 #### 8.3.1. Credential Monitoring Health Endpoint
 
@@ -1087,7 +1125,28 @@ It introduces the [JwkTransformerFunction](https://github.com/swedenconnect/cred
 
 Also check the [JwkMetadataProperties](https://github.com/swedenconnect/credentials-support/blob/main/nimbus/src/main/java/se/swedenconnect/security/credential/nimbus/JwkMetadataProperties.java) for definitions of metadata keys useful for an JWK.
 
-> Note: This library will be extended with more useful features in future versions.
+The JWK `nbf` property is set from the `active-from` metadata property, if set, otherwise from `issued-at`. If the credential is revoked, the JWK holds the revocation time and reason.
+
+The [JwkCredentialCollection](https://github.com/swedenconnect/credentials-support/blob/main/nimbus/src/main/java/se/swedenconnect/security/credential/nimbus/JwkCredentialCollection.java) class wraps a [PkiCredentialCollection](#pki-credential-collection) and offers:
+
+- `getJwkSet()` - The JWK Set to publish, holding the public JWKs of the credentials that are active or not yet active.
+
+- `getNoLongerActiveJwkSet()` - The JWK Set holding the public JWKs of the credentials that are no longer active, for applications that publish keys they used before.
+
+- `sign(claims, typ)` - Signs a JWT using the signing credential of the collection. The JWS algorithm is given by the `jose-alg` metadata property, or if not set, by the key type: `RS256` for RSA, and the `ES` algorithm of the curve for EC. The `kid` header is the key ID of the credential's JWK.
+
+- `sign(claims, typ, allowedAlgorithms)` - Signs a JWT using the signing credential that supports one of the allowed algorithms. If several of the algorithms can be used with the credential, the first one in the list is used. An RSA key without `jose-alg` supports all `RS` and `PS` algorithms.
+
+- `sign(claims, typ, allowedAlgorithms, headerCustomizer)` - As above, but the caller may also add JWS header parameters.
+
+Example:
+
+```java
+final JwkCredentialCollection jwks = new JwkCredentialCollection(collection);
+
+final SignedJWT jwt = jwks.sign(claims, new JOSEObjectType("entity-statement+jwt"),
+    List.of(JWSAlgorithm.ES256, JWSAlgorithm.RS256), null);
+```
 
 <a name="pkcs11-specifics"></a>
 ## 11. PKCS#11 Specifics
