@@ -118,7 +118,8 @@ public interface PkiCredential {
   /**
    * Metadata associated with a {@link PkiCredential}.
    * <p>
-   * Implementations may add any type of metadata to a credential. However, some XXX
+   * Implementations may add any type of metadata to a credential. However, the properties defined by this
+   * interface have a fixed meaning and value type, and should only be used as described.
    * </p>
    */
   interface Metadata {
@@ -144,6 +145,18 @@ public interface PkiCredential {
      * Property that may be set to the {@link Instant} from when the credential should be regarded as active.
      */
     String ACTIVE_FROM_PROPERTY = "active-from";
+
+    /**
+     * Property that may be set to the {@link Instant} at which the credential was revoked. A revoked credential is
+     * regarded as no longer active.
+     */
+    String REVOKED_AT_PROPERTY = "revoked-at";
+
+    /**
+     * Property name for the reason for revoking the credential. This property holds a {@link String}, for example
+     * "compromised" or "superseded". Only relevant if {@value #REVOKED_AT_PROPERTY} is set.
+     */
+    String REVOCATION_REASON_PROPERTY = "revocation-reason";
 
     /**
      * Property name for the usage property. This property holds a {@link String}, that may be {@value #USAGE_SIGNING},
@@ -243,6 +256,47 @@ public interface PkiCredential {
       return Optional.ofNullable(this.getProperties().get(ACTIVE_TO_PROPERTY))
           .map(Metadata::toInstant)
           .orElse(null);
+    }
+
+    /**
+     * Assigns the {@link Instant} for when the credential was revoked. Stored using the {@value #REVOKED_AT_PROPERTY}
+     * property.
+     *
+     * @param revokedAt the revoked-at instant, or {@code null} for resetting the property
+     */
+    default void setRevokedAt(@Nullable final Instant revokedAt) {
+      this.getProperties().put(REVOKED_AT_PROPERTY, revokedAt);
+    }
+
+    /**
+     * Gets the {@link Instant} for the {@value #REVOKED_AT_PROPERTY} property.
+     *
+     * @return an {@link Instant} or {@code null}
+     */
+    @Nullable
+    default Instant getRevokedAt() {
+      return Optional.ofNullable(this.getProperties().get(REVOKED_AT_PROPERTY))
+          .map(Metadata::toInstant)
+          .orElse(null);
+    }
+
+    /**
+     * Assigns the reason for revoking the credential. Stored using the {@value #REVOCATION_REASON_PROPERTY} property.
+     *
+     * @param reason the revocation reason, or {@code null} for resetting the property
+     */
+    default void setRevocationReason(@Nullable final String reason) {
+      this.getProperties().put(REVOCATION_REASON_PROPERTY, reason);
+    }
+
+    /**
+     * Gets the value of the {@value #REVOCATION_REASON_PROPERTY} property.
+     *
+     * @return the revocation reason, or {@code null}
+     */
+    @Nullable
+    default String getRevocationReason() {
+      return (String) this.getProperties().get(REVOCATION_REASON_PROPERTY);
     }
 
     /**

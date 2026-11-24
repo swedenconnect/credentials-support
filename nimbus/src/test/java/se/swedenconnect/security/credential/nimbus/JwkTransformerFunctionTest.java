@@ -18,6 +18,7 @@ package se.swedenconnect.security.credential.nimbus;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.KeyOperation;
+import com.nimbusds.jose.jwk.KeyRevocation;
 import com.nimbusds.jose.jwk.KeyType;
 import com.nimbusds.jose.jwk.KeyUse;
 import org.cryptacular.io.ClassPathResource;
@@ -37,6 +38,8 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -336,6 +339,29 @@ class JwkTransformerFunctionTest {
     final JWK jwk = function.apply(credential);
     assertNotNull(jwk);
     assertEquals(JWSAlgorithm.RS256, jwk.getAlgorithm());
+  }
+
+  @Test
+  void testNotBeforeAndRevocation() throws Exception {
+    final PkiCredential credential = new KeyStoreCredential(this.keyStore, ALIAS_EC, PW);
+    final Instant activeFrom = Instant.parse("2030-01-01T00:00:00Z");
+    final Instant revokedAt = Instant.parse("2026-01-01T00:00:00Z");
+
+    final JwkTransformerFunction function = JwkTransformerFunction.publicJwkFunction();
+    assertEquals(Date.from(credential.getMetadata().getIssuedAt()),
+        credential.transform(function).getNotBeforeTime());
+    assertNull(credential.transform(function).getKeyRevocation());
+
+    credential.getMetadata().setActiveFrom(activeFrom);
+    credential.getMetadata().setRevokedAt(revokedAt);
+    final JWK jwk = credential.transform(function);
+    assertEquals(Date.from(activeFrom), jwk.getNotBeforeTime());
+    assertEquals(Date.from(revokedAt), jwk.getKeyRevocation().getRevocationTime());
+    assertEquals(KeyRevocation.Reason.UNSPECIFIED, jwk.getKeyRevocation().getReason());
+
+    credential.getMetadata().setRevocationReason("superseded");
+    assertEquals(KeyRevocation.Reason.SUPERSEDED,
+        credential.transform(function).getKeyRevocation().getReason());
   }
 
   @Test

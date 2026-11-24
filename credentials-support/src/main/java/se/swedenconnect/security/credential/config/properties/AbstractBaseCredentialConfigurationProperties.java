@@ -63,6 +63,16 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
   private Instant activeTo;
 
   /**
+   * Revoked-at metadata property.
+   */
+  private Instant revokedAt;
+
+  /**
+   * Revocation reason metadata property.
+   */
+  private String revocationReason;
+
+  /**
    * The usage metadata property.
    */
   private String usage;
@@ -187,6 +197,44 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
   }
 
   /**
+   * Gets the revoked-at metadata property.
+   *
+   * @return the revoked-at instant
+   */
+  @Nullable
+  public Instant getRevokedAt() {
+    return this.revokedAt;
+  }
+
+  /**
+   * Assigns the revoked-at metadata property.
+   *
+   * @param revokedAt the revoked-at instant
+   */
+  public void setRevokedAt(@Nullable final Instant revokedAt) {
+    this.revokedAt = revokedAt;
+  }
+
+  /**
+   * Gets the revocation reason metadata property.
+   *
+   * @return the revocation reason
+   */
+  @Nullable
+  public String getRevocationReason() {
+    return this.revocationReason;
+  }
+
+  /**
+   * Assigns the revocation reason metadata property.
+   *
+   * @param revocationReason the revocation reason
+   */
+  public void setRevocationReason(@Nullable final String revocationReason) {
+    this.revocationReason = revocationReason;
+  }
+
+  /**
    * Gets the usage metadata property.
    *
    * @return the usage
@@ -253,6 +301,18 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
 
   /** {@inheritDoc} */
   @Override
+  public Optional<Instant> revokedAt() {
+    return Optional.ofNullable(this.getRevokedAt());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Optional<String> revocationReason() {
+    return Optional.ofNullable(this.getRevocationReason());
+  }
+
+  /** {@inheritDoc} */
+  @Override
   public Optional<String> usage() {
     return Optional.ofNullable(this.getUsage());
   }
@@ -276,6 +336,7 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
     return Objects.equals(this.name, that.name) && Objects.equals(this.keyId, that.keyId)
         && Objects.equals(this.issuedAt, that.issuedAt) && Objects.equals(this.expiresAt, that.expiresAt)
         && Objects.equals(this.activeFrom, that.activeFrom) && Objects.equals(this.activeTo, that.activeTo)
+        && Objects.equals(this.revokedAt, that.revokedAt) && Objects.equals(this.revocationReason, that.revocationReason)
         && Objects.equals(this.usage, that.usage) && Objects.equals(this.metadata, that.metadata);
   }
 
@@ -283,7 +344,7 @@ public class AbstractBaseCredentialConfigurationProperties implements BaseCreden
   @Override
   public int hashCode() {
     return Objects.hash(this.name, this.keyId, this.issuedAt, this.expiresAt, this.activeFrom, this.activeTo,
-        this.usage, this.metadata);
+        this.revokedAt, this.revocationReason, this.usage, this.metadata);
   }
 
 }
